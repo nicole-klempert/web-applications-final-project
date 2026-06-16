@@ -1,0 +1,112 @@
+﻿<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <title>~Our network  - replace by the name chosen~</title>
+
+    <link href="bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <main class="login-container">
+        <section class="brand-section">
+            <h1 class="brand-logo">~Add name~</h1>
+            <p class="brand-subtitle">~Add our title (somthing like connect with the world around you etc.)~</p>
+        </section>
+
+        <section class="form-section">
+            <!--when server exists change /signup to the relevant path-->
+            <form class="split-card" action="/signup" method="post">
+                <h2 style="text-align: center; margin-bottom: 24px;">Create an Account</h2>
+
+                <div class="input-group">
+                    <label for="new-username" class="input-label">Username</label>
+                    <input type="text" id="new-username" placeholder="Select your username" required>
+                </div>
+
+                <div class="input-group">
+                    <label for="email" class="input-label">Email</label>
+                    <input type="email" id="email" placeholder="Enter your email" required>
+                </div>
+
+                <div class="input-group" style="text-align: left;">
+                    <label for="birthday" class="input-label">Date of Birth</label>
+                    <input type="date" id="birthday" required">
+                </div>
+
+                <div class="input-group">
+                    <label for="new-password" class="input-label">Password</label>
+                    <input type="password" id="new-password" placeholder="Select your password" required oninput="checkPasswordsMatch()">
+                </div>
+
+                <div class="input-group">
+                    <label for="confirm-password" class="input-label">Password confirmation</label>
+                    <input type="password" id="confirm-password" placeholder="Confirm your selected password" required oninput="checkPasswordsMatch()">
+                    <span id="password-match-message"></span>
+                </div>
+
+                <div class="checkbox-group">
+                    <input type="checkbox" id="show-passwords" onclick="toggleRegPasswords()">
+                    <label for="show-passwords">Show Passwords</label>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Create an account</button>
+
+                <hr class="divider">
+                <a href="login.html" class="btn btn-secondary">Already have an account?</a>
+            </form>
+        </section>
+    </main>
+
+    <footer class="login-footer">
+        <p>&copy; 2026 Web Application Project - Shahaf Abraham, Nicole Klempert & Lior Shif</p>
+    </footer>
+
+    <script>
+        function toggleRegPasswords() {
+            var pass1 = document.getElementById("new-password");
+            var pass2 = document.getElementById("confirm-password");
+
+            if (pass1.type === "password") { 
+                // show both passwords as text
+                pass1.type = "text";
+                pass2.type = "text";
+            } else {
+                // hide both passwords 
+                pass1.type = "password";
+                pass2.type = "password";
+            }
+        }
+
+        function checkPasswordsMatch() {
+            var pass1 = document.getElementById("new-password");
+            var pass2 = document.getElementById("confirm-password");
+            var message = document.getElementById("password-match-message");
+
+            // if confirm password is empty
+            if (pass2.value === "") {
+                message.innerHTML = "";
+                pass2.classList.remove("input-error", "input-success");
+                return;
+            }
+
+            // check if passwords match
+            if (pass1.value === pass2.value) {
+                message.innerHTML = "Passwords match!";
+                message.className = "text-success"; // colors the text in green
+                pass2.classList.remove("input-error");
+                pass2.classList.add("input-success"); // colors the border in green
+            } else {
+                message.innerHTML = "Passwords do not match";
+                message.className = "text-error"; // colors the text in red
+                pass2.classList.remove("input-success");
+                pass2.classList.add("input-error"); // colors the border in red
+            }
+        }
+
+    </script>
+
+</body>
+</html>
