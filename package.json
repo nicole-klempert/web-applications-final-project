@@ -1,0 +1,13 @@
+{
+  "name": "mongodb-encryption-demo",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "A demo showcasing MongoDB connection and user field encryption (including usernames)",
+  "main": "demo.js",
+  "dependencies": {
+    "@dotenvx/dotenvx": "^1.14.0",
+    "bcryptjs": "^2.4.3",
+    "dotenv": "^16.4.5",
+    "mongoose": "^8.4.3"
+  }
+}
