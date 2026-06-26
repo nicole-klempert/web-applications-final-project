@@ -1,0 +1,345 @@
+﻿/* === 1. Variables === */
+
+:root {
+    --bg-color: #f7f5f9; /* grayish purple light for background*/
+    --card-bg: #ffffff; /* clean white */
+    --text-main: #504759; /* dark purple */
+    --text-muted: #766f7d; /* darker grayish purple */
+
+    --btn-primary: #6366f1; /* indigo */
+    --btn-primary-hover: #4f46e5; /* dark purple for hovering */
+
+    --btn-secondary: #f0ecfc; /* light purple */
+    --btn-secondary-text: #6366f1; /* darker purple forbottun text */
+    --btn-secondary-hover: #c4b5fd;
+    --border-color: #e2dae8; /* purply shade for the border */
+    --focus-ring: rgba(99, 102, 241, 0.15);
+}
+
+/* === 2. Reset & Base === */
+
+* {
+    box-sizing: border-box; /* make padding take from the box and not from the outside*/
+    margin: 0; /* without extra spacing */
+    padding: 0; /* without extra spacing */
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; /* stack of fonts so it won't look bad on different computers */
+}
+
+body {
+    background-color: var(--btn-secondary) !important; /* important so bootstrap wont change it */
+    color: var(--text-main);
+    min-height: 100vh; /* 100% of screen hight */
+    display: flex; 
+    flex-direction: column; /* layout of column (up to down) and not of a row (right to left) */
+}
+
+/* === 3. Layout === */
+
+/* --- Layout of the general application (feed, groups, profile, etc.) --- */
+
+/* main app is divided to 3 columns */
+.app-layout {
+    display: flex; 
+    flex: 1; /* take all open space */
+    width: 100%;
+}
+
+.side-nav {
+    flex: 0 0 250px; /* exectly 250px no moving */
+    padding: 40px 30px; /* internal spacing */
+    background-color: var(--card-bg);
+    border-right: 1px solid var(--border-color); 
+    display: flex;
+    flex-direction: column;
+}
+
+.main-feed {
+    flex: 1; /* every space that left in the main page */
+    padding: 40px;
+}
+
+.right-sidebar {
+    flex: 0 0 260px;
+    padding: 40px 20px;
+    background-color: var(--card-bg);
+    border-left: 1px solid var(--border-color);
+}
+
+/* --- split screen for form pages (login, signup, etc.) --- */
+
+.login-container {
+    display: flex;
+    width: 100%;
+    min-height: 100vh;
+}
+
+/* left side */
+.brand-section {
+    flex: 2; /* take 2/3 of the screen*/
+    background-color: var(--btn-secondary);
+    padding: 60px 10%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+/* right side (form) */
+.form-section {
+    flex: 1; /* other 1/3 of the screen */
+    background-color: var(--card-bg);
+    padding: 60px 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* center the form within the right half of the page */
+    align-items: center;
+    box-shadow: -10px 0 30px rgba(36, 28, 44, 0.04); /* shadow */
+}
+
+/* === Components === */
+
+/* --- Everything regarding interaction with the user --- */
+
+/* Forms and Fields */
+.split-card {
+    width: 100%;
+    max-width: 360px;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 14px 16px; /* spacing */
+    margin-bottom: 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+    .input-group input:focus { /* when user it taping the texbox for entering his details*/
+        outline: none;
+        border-color: var(--btn-primary);
+        box-shadow: 0 0 0 2px var(--focus-ring);
+    }
+
+.input-label {
+    display: block;
+    text-align: left;
+    color: var(--text-main); 
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+    margin-left: 2px; 
+}
+
+input[type="date"] {
+    color: var(--text-main);
+    font-family: inherit;
+    accent-color: var(--btn-primary) !important;
+}
+    input[type="date"]::-webkit-calendar-picker-indicator {
+        opacity: 0.5; 
+    }
+
+
+.checkbox-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 20px;
+    margin-top: 5px; 
+}
+
+    .checkbox-group input[type="checkbox"] {
+        accent-color: var(--btn-primary); 
+        width: 16px;
+        height: 16px;
+    }
+
+    .checkbox-group label {
+        color: var(--text-muted);
+        font-size: 0.9rem;
+        user-select: none; 
+    }
+
+ /* Error and success for forms */
+.input-error {
+    border-color: #ef4444 !important;
+}
+
+    .input-error:focus {
+        box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.15) !important;
+    }
+
+.input-success {
+    border-color: #22c55e !important; 
+}
+
+    .input-success:focus {
+        box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.15) !important;
+    }
+
+.text-error {
+    color: #ef4444;
+    font-weight: 600;
+}
+
+.text-success {
+    color: #22c55e;
+    font-weight: 600;
+}
+
+/* Buttons and Links */
+.btn {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    font-weight: bold;
+    color: white;
+    cursor: pointer;
+    border-radius: 6px;
+    text-align: center;
+    transition: background-color 0.2s ease; /* color is faiding for 0.2 seconds*/
+}
+
+.btn-primary {
+    background-color: var(--btn-primary);
+}
+
+    .btn-primary:hover { /* when we hover on the buttons */
+        background-color: var(--btn-primary-hover);
+    }
+
+.btn-secondary {
+    background-color: var(--btn-secondary);
+    color: var(--btn-secondary-text);
+}
+
+    .btn-secondary:hover {
+        background-color: var(--btn-secondary-hover);
+    }
+
+.logout-btn {
+    display: block; /* not inline but new line (for <a> tag) */
+    width: 100%;
+    padding: 12px;
+    border: none;
+    background-color: var(--btn-primary) !important;
+    color: white !important;
+    font-weight: bold;
+    text-decoration: none !important;
+    border-radius: 6px;
+    text-align: center; /* center of the button */
+    transition: background-color 0.2s ease;
+    margin-top: 20px;
+}
+
+    .logout-btn:hover {
+        background-color: var(--btn-primary-hover) !important;
+    }
+
+.nav-links {
+    display: flex;
+    flex-direction: column;
+    gap: 10px; /* 10px space between links without padding eatch one */
+    margin-bottom: auto;
+    flex-grow: 1;
+}
+
+.nav-item {
+    color: var(--text-muted) !important;
+    text-decoration: none !important; /* no underline */
+    font-weight: bold !important;
+    font-size: 1.05rem !important;
+    padding: 10px 0 !important;
+    transition: color 0.2s ease !important;
+}
+
+    .nav-item:hover /* pseudo class that works only when hovering the link */, .nav-item.active {
+        color: var(--btn-primary) !important;
+    }
+
+.forgot-link {
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 0.9rem;
+    display: inline-block;
+    margin-top: 10px;
+    margin-bottom: 24px;
+    transition: color 0.2s ease;
+}
+
+    .forgot-link:hover {
+        color: var(--btn-primary);
+        text-decoration: underline;
+    }
+
+.divider {
+    border: 0;
+    height: 1px;
+    background-color: var(--border-color);
+    margin: 0 0 24px 0;
+    width: 100%;
+}
+
+/* --- Logo etc.--- */
+.brand-logo {
+    font-size: 3.5rem;
+    font-weight: 800;
+    color: var(--btn-primary);
+    text-shadow: 1px 1px 2px rgba(99, 102, 241, 0.15); /* under the text light shadow */
+    margin-bottom: 16px;
+    line-height: 1;
+}
+
+.brand-subtitle {
+    font-size: 1.6rem;
+    line-height: 1.3;
+}
+
+/* headers */
+.side-nav header h1,
+.side-nav h1 {
+    font-size: 2.2rem !important; /* better then px - adjasts to users that did zoomin on the text */
+    font-weight: 800 !important;
+    color: var(--btn-primary) !important; 
+    text-shadow: 1px 1px 2px rgba(99, 102, 241, 0.15) !important; /* creates a shadow */
+    line-height: 1.2 !important; /* little bigger than the text itself */
+    margin-bottom: 40px !important;
+}
+
+h2, h3 {
+    color: var(--btn-primary) !important;
+    font-weight: bold !important;
+    margin-bottom: 20px !important;
+}
+
+/* === Footers === */
+.site-footer {
+    text-align: center;
+    padding: 20px;
+    border-top: 1px solid var(--border-color);
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    background-color: var(--card-bg); 
+}
+
+.login-footer {
+    position: absolute;
+    bottom: 20px;
+    text-align: center;
+    width: 100%;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}
+
+/* === Responsivity === */
+@media (max-width: 850px) { /* condition if the screen is smaller then 900px the website is changing*/
+    .login-container {
+        flex-direction: column;
+    }
+
+    .brand-section {
+        align-items: center;
+        text-align: center;
+        padding: 40px 20px;
+    }
+}

@@ -1,0 +1,70 @@
+﻿<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <title>~Our network  - replace by the name chosen~</title>
+
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <main class="login-container">
+        <section class="brand-section">
+            <h1 class="brand-logo">~Add name~</h1>
+            <p class="brand-subtitle">~Add our title (somthing like connect with the world around you etc.)~</p>
+        </section>
+
+        <section class="form-section">
+            <!--when server exists change /signup to the relevant path-->
+            <form class="split-card" action="/signup" method="post">
+                <h2 style="text-align: center; margin-bottom: 24px;">Create an Account</h2>
+
+                <div class="input-group">
+                    <label for="new-username" class="input-label">Username</label>
+                    <input type="text" id="new-username" name="new-username" placeholder="Select your username" required>
+                </div>
+
+                <div class="input-group">
+                    <label for="email" class="input-label">Email</label>
+                    <input type="email" id="email" name="email" placeholder="Enter your email" required>
+                </div>
+
+                <div class="input-group" style="text-align: left;">
+                    <label for="birthday" class="input-label">Date of Birth</label>
+                    <input type="date" id="birthday" name="birthday" required>
+                </div>
+
+                <div class="input-group">
+                    <label for="new-password" class="input-label">Password</label>
+                    <input type="password" id="new-password" name="new-password" placeholder="Select your password" required oninput="checkPasswordsMatch()">
+                </div>
+
+                <div class="input-group">
+                    <label for="confirm-password" class="input-label">Password confirmation</label>
+                    <input type="password" id="confirm-password" name="confirm-password" placeholder="Confirm your selected password" required oninput="checkPasswordsMatch()">
+                    <span id="password-match-message"></span>
+                </div>
+
+                <div class="checkbox-group">
+                    <input type="checkbox" id="show-passwords" onclick="toggleRegPasswords()">
+                    <label for="show-passwords">Show Passwords</label>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Create an account</button>
+
+                <hr class="divider">
+                <a href="login.html" class="btn btn-secondary">Already have an account?</a>
+            </form>
+        </section>
+    </main>
+
+    <footer class="login-footer">
+        <p>&copy; 2026 Web Application Project - Shahaf Abraham, Nicole Klempert & Lior Shif</p>
+    </footer>
+
+    <script src = "js/script.js">  </script>
+
+</body>
+</html>

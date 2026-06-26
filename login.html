@@ -1,0 +1,53 @@
+﻿<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <title>~Our network  - replace by the name chosen~</title>
+
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <main class="login-container">
+        <section class="brand-section">
+            <h1 class="brand-logo">~Add name~</h1>
+            <p class="brand-subtitle">~Add our title (somthing like connect with the world around you etc.)~</p>
+        </section>
+
+        <section class="form-section">
+            <!--when server exists change /login to the relevant path-->
+            <form class="split-card" action="/login" method="post">
+                <h2 style="text-align: center; margin-bottom: 24px;">Log in to ~placeholder~</h2>
+
+                <div class="input-group">
+                    <input type="text" id="username" name="username" placeholder="Enter username" required>
+                </div>
+
+                <div class="input-group">
+                    <input type="password" id="password" name="password" placeholder="Enter password" required>
+                </div>
+
+                <div class="checkbox-group">
+                    <input type="checkbox" id="show-pass" onclick="toggleLoginPassword()">
+                    <label for="show-pass">Show Password</label>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Login</button>
+
+                <a href="forgot-password.html" class="forgot-link">Forgot password?</a>
+
+                <hr class="divider">
+                <a href="signup.html" class="btn btn-secondary">Create New Account</a>
+            </form>
+        </section>
+    </main>
+
+    <footer class="login-footer">
+        <p>&copy; 2026 Web Application Project - Shahaf Abraham, Nicole Klempert & Lior Shif</p>
+    </footer>
+
+    <script src = "js/script.js"></script>
+</body>
+</html>
