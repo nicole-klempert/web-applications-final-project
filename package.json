@@ -1,13 +1,16 @@
 {
-  "name": "mongodb-encryption-demo",
+  "name": "mongodb-server",
   "version": "1.0.0",
   "type": "module",
-  "description": "A demo showcasing MongoDB connection and user field encryption (including usernames)",
-  "main": "demo.js",
+  "description": "starts the MongoDB server",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
   "dependencies": {
-    "@dotenvx/dotenvx": "^1.14.0",
     "bcryptjs": "^2.4.3",
-    "dotenv": "^16.4.5",
-    "mongoose": "^8.4.3"
+    "dotenv": "^17.2.3",
+    "express": "^5.2.1",
+    "mongoose": "^8.9.1"
   }
 }
