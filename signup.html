@@ -12,7 +12,7 @@
 <body>
     <main class="login-container">
         <section class="brand-section">
-            <div class="brand-content" style="margin-top: auto; margin-bottom: auto;">
+            <div class="brand-content">
                 <h1 class="brand-logo">~Add name~</h1>
                 <p class="brand-subtitle">~Add our title (somthing like connect with the world around you etc.)~</p>
             </div>
@@ -24,7 +24,7 @@
         <section class="form-section">
             <!--when server exists change /signup to the relevant path-->
             <form class="split-card" action="/signup" method="post">
-                <h2 style="text-align: center; margin-bottom: 24px;">Create an Account</h2>
+                <h2>Create an Account</h2>
 
                 <div class="input-group">
                     <label for="new-username" class="input-label">Username</label>
@@ -38,14 +38,14 @@
                     <span class="validation-warning" id="email-warning">Only lowercase English letters and email characters are allowed.</span>
                 </div>
 
-                <div class="input-group" style="text-align: left;">
+                <div class="input-group">
                     <label for="birthday" class="input-label">Date of Birth</label>
                     <input type="date" id="birthday" name="birthday" required>
                 </div>
 
-                <div class="input-group" style="text-align: left;">
+                <div class="input-group">
                     <label for="recovery-question" class="input-label">Security Question</label>
-                    <select id="recovery-question" name="recovery-question" required style="color: var(--text-main); font-family: inherit; font-size: inherit; background-color: var(--card-bg); cursor: pointer;">
+                    <select id="recovery-question" name="recovery-question" required>
                         <option value="" disabled selected>Select a security question</option>
                         <option value="What was the name of your first pet?">What was the name of your first pet?</option>
                         <option value="What is your mother's maiden name?">What is your mother's maiden name?</option>
