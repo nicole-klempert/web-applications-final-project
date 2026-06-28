@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml">
 <head>
@@ -12,17 +12,23 @@
 <body>
     <main class="login-container">
         <section class="brand-section">
-            <h1 class="brand-logo">~Add name~</h1>
-            <p class="brand-subtitle">~Add our title (somthing like connect with the world around you etc.)~</p>
+            <div class="brand-content">
+                <h1 class="brand-logo">~Add name~</h1>
+                <p class="brand-subtitle">~Add our title (somthing like connect with the world around you etc.)~</p>
+            </div>
+            <footer class="login-footer">
+                <p>&copy; 2026 Web Application Project - Shahaf Abraham, Nicole Klempert & Lior Shif</p>
+            </footer>
         </section>
 
         <section class="form-section">
             <!--when server exists change /login to the relevant path-->
             <form class="split-card" action="/login" method="post">
-                <h2 style="text-align: center; margin-bottom: 24px;">Log in to ~placeholder~</h2>
+                <h2>Log in to ~placeholder~</h2>
 
                 <div class="input-group">
                     <input type="text" id="username" name="username" placeholder="Enter username" required>
+                    <span class="validation-warning" id="username-warning">Only lowercase English letters and numbers are allowed.</span>
                 </div>
 
                 <div class="input-group">
@@ -44,10 +50,6 @@
         </section>
     </main>
 
-    <footer class="login-footer">
-        <p>&copy; 2026 Web Application Project - Shahaf Abraham, Nicole Klempert & Lior Shif</p>
-    </footer>
-
-    <script src = "js/script.js"></script>
+    <script src="js/script.js"></script>
 </body>
 </html>

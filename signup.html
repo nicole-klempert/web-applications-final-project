@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml">
 <head>
@@ -12,39 +12,65 @@
 <body>
     <main class="login-container">
         <section class="brand-section">
-            <h1 class="brand-logo">~Add name~</h1>
-            <p class="brand-subtitle">~Add our title (somthing like connect with the world around you etc.)~</p>
+            <div class="brand-content">
+                <h1 class="brand-logo">~Add name~</h1>
+                <p class="brand-subtitle">~Add our title (somthing like connect with the world around you etc.)~</p>
+            </div>
+            <footer class="login-footer">
+                <p>&copy; 2026 Web Application Project - Shahaf Abraham, Nicole Klempert & Lior Shif</p>
+            </footer>
         </section>
 
         <section class="form-section">
             <!--when server exists change /signup to the relevant path-->
             <form class="split-card" action="/signup" method="post">
-                <h2 style="text-align: center; margin-bottom: 24px;">Create an Account</h2>
+                <h2>Create an Account</h2>
 
                 <div class="input-group">
                     <label for="new-username" class="input-label">Username</label>
                     <input type="text" id="new-username" name="new-username" placeholder="Select your username" required>
+                    <span class="validation-warning" id="username-warning">Only lowercase English letters and numbers are allowed.</span>
                 </div>
 
                 <div class="input-group">
                     <label for="email" class="input-label">Email</label>
                     <input type="email" id="email" name="email" placeholder="Enter your email" required>
+                    <span class="validation-warning" id="email-warning">Only lowercase English letters and email characters are allowed.</span>
                 </div>
 
-                <div class="input-group" style="text-align: left;">
+                <div class="input-group">
                     <label for="birthday" class="input-label">Date of Birth</label>
                     <input type="date" id="birthday" name="birthday" required>
                 </div>
 
                 <div class="input-group">
+                    <label for="recovery-question" class="input-label">Security Question</label>
+                    <select id="recovery-question" name="recovery-question" required>
+                        <option value="" disabled selected>Select a security question</option>
+                        <option value="What was the name of your first pet?">What was the name of your first pet?</option>
+                        <option value="What is your mother's maiden name?">What is your mother's maiden name?</option>
+                        <option value="What was the name of your first school?">What was the name of your first school?</option>
+                        <option value="In what city were you born?">In what city were you born?</option>
+                    </select>
+                </div>
+
+                <div class="input-group">
+                    <label for="recovery-answer" class="input-label">Security Answer</label>
+                    <input type="text" id="recovery-answer" name="recovery-answer" placeholder="Enter your answer" required>
+                    <span class="validation-warning" id="recovery-answer-warning">Only lowercase English letters, numbers, and spaces are allowed.</span>
+                </div>
+
+                <div class="input-group">
                     <label for="new-password" class="input-label">Password</label>
                     <input type="password" id="new-password" name="new-password" placeholder="Select your password" required oninput="checkPasswordsMatch()">
+                    <span class="validation-warning" id="new-password-warning">Only English letters, numbers, and standard symbols are allowed.</span>
                 </div>
 
                 <div class="input-group">
                     <label for="confirm-password" class="input-label">Password confirmation</label>
                     <input type="password" id="confirm-password" name="confirm-password" placeholder="Confirm your selected password" required oninput="checkPasswordsMatch()">
                     <span id="password-match-message"></span>
+                    <span class="validation-warning" id="confirm-password-warning">Only English letters, numbers, and standard symbols are allowed.</span>
                 </div>
 
                 <div class="checkbox-group">
@@ -60,11 +86,6 @@
         </section>
     </main>
 
-    <footer class="login-footer">
-        <p>&copy; 2026 Web Application Project - Shahaf Abraham, Nicole Klempert & Lior Shif</p>
-    </footer>
-
-    <script src = "js/script.js">  </script>
-
+    <script src="js/script.js"></script>
 </body>
 </html>

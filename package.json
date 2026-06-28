@@ -1,0 +1,16 @@
+{
+  "name": "mongodb-server",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "starts the MongoDB server",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "dotenv": "^17.2.3",
+    "express": "^5.2.1",
+    "mongoose": "^8.9.1"
+  }
+}
