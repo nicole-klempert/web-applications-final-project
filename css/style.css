@@ -1,28 +1,37 @@
-/* === 1. Variables === */
+/* === 1. Variables & Themes === */
 
 :root {
-    --bg-color: #f7f5f9;
-    /* grayish purple light for background*/
-    --card-bg: #ffffff;
-    /* clean white */
-    --text-main: #504759;
-    /* dark purple */
-    --text-muted: #766f7d;
-    /* darker grayish purple */
+    --bg-color: #f0ecfc; /* restored back to the original purplish light background */
+    --card-bg: #ffffff; /* clean white */
+    --text-main: #504759; /* dark purple */
+    --text-muted: #766f7d; /* darker grayish purple */
 
-    --btn-primary: #6366f1;
-    /* indigo */
-    --btn-primary-hover: #4f46e5;
-    /* dark purple for hovering */
+    --btn-primary: #6366f1; /* indigo */
+    --btn-primary-hover: #4f46e5; /* dark purple for hovering */
 
-    --btn-secondary: #f0ecfc;
-    /* light purple */
-    --btn-secondary-text: #6366f1;
-    /* darker purple forbottun text */
+    --btn-secondary: #f0ecfc; /* light purple */
+    --btn-secondary-text: #6366f1; /* darker purple forbottun text */
     --btn-secondary-hover: #c4b5fd;
-    --border-color: #e2dae8;
-    /* purply shade for the border */
+    --border-color: #e2dae8; /* purply shade for the border */
     --focus-ring: rgba(99, 102, 241, 0.15);
+    --bg-hover-light: #e8e2f8; /* for hover transitions */
+}
+
+/* === Dark Mode in dark purple tones === */
+body.dark-mode {
+    --bg-color: #1a1625; /* deep purple general background, almost black */
+    --card-bg: #241e30; /* slightly lighter cards to create depth */
+    --text-main: #e2dae8; /* light text */
+    --text-muted: #958d9e; /* secondary text */
+
+    --btn-primary: #818cf8; /* lighter primary button for contrast */
+    --btn-primary-hover: #6366f1;
+    --btn-secondary: #322942; /* secondary button adjusted for the dark background */
+    --btn-secondary-text: #c4b5fd;
+    --btn-secondary-hover: #423657;
+    --border-color: #3a304c;
+    --bg-hover-light: #2d253b;
+    --focus-ring: rgba(129, 140, 248, 0.2);
 }
 
 /* === 2. Reset & Base === */
@@ -39,7 +48,7 @@
 }
 
 body {
-    background-color: var(--btn-secondary) !important;
+    background-color: var(--bg-color) !important; 
     /* important so bootstrap wont change it */
     color: var(--text-main);
     min-height: 100vh;
@@ -47,13 +56,11 @@ body {
     display: flex;
     flex-direction: column;
     /* layout of column (up to down) and not of a row (right to left) */
+    transition: background-color 0.3s ease, color 0.3s ease; 
 }
 
 /* === 3. Layout === */
 
-/* --- Layout of the general application (feed, groups, profile, etc.) --- */
-
-/* main app is divided to 3 columns */
 .app-layout {
     display: flex;
     flex: 1;
@@ -64,12 +71,16 @@ body {
 .side-nav {
     flex: 0 0 250px;
     /* exectly 250px no moving */
-    padding: 40px 30px;
+    padding: 40px 30px 20px; 
     /* internal spacing */
     background-color: var(--card-bg);
     border-right: 1px solid var(--border-color);
     display: flex;
     flex-direction: column;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 .main-feed {
@@ -79,13 +90,15 @@ body {
 }
 
 .right-sidebar {
-    flex: 0 0 260px;
+    flex: 0 0 360px;
     padding: 40px 20px;
     background-color: var(--card-bg);
     border-left: 1px solid var(--border-color);
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
 }
-
-/* --- split screen for form pages (login, signup, etc.) --- */
 
 .login-container {
     display: flex;
@@ -102,6 +115,7 @@ body {
     display: flex;
     flex-direction: column;
     justify-content: center;
+    transition: background-color 0.3s ease;
 }
 
 /* right side (form) */
@@ -117,6 +131,7 @@ body {
     align-items: center;
     box-shadow: -10px 0 30px rgba(36, 28, 44, 0.04);
     /* shadow */
+    transition: background-color 0.3s ease;
 }
 
 /* === Components === */
@@ -129,23 +144,35 @@ body {
     max-width: 360px;
 }
 
+    .split-card h2 {
+        text-align: center;
+        margin-bottom: 24px;
+    }
+
 .input-group input,
 .input-group select {
     width: 100%;
     padding: 14px 16px;
-    /* spacing */
     margin-bottom: 12px;
     border: 1px solid var(--border-color);
     border-radius: 6px;
     transition: all 0.2s ease;
+    background-color: var(--card-bg);
+    color: var(--text-main);
 }
 
-.input-group input:focus,
-.input-group select:focus {
-    /* when user is typing details */
-    outline: none;
-    border-color: var(--btn-primary);
-    box-shadow: 0 0 0 2px var(--focus-ring);
+    .input-group input:focus,
+    .input-group select:focus {
+        /* when user is typing details */
+        outline: none;
+        border-color: var(--btn-primary);
+        box-shadow: 0 0 0 2px var(--focus-ring);
+    }
+
+.input-group select {
+    font-family: inherit;
+    font-size: inherit;
+    cursor: pointer;
 }
 
 .input-label {
@@ -164,9 +191,9 @@ input[type="date"] {
     accent-color: var(--btn-primary) !important;
 }
 
-input[type="date"]::-webkit-calendar-picker-indicator {
-    opacity: 0.5;
-}
+    input[type="date"]::-webkit-calendar-picker-indicator {
+        opacity: 0.5;
+    }
 
 
 .checkbox-group {
@@ -177,34 +204,34 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     margin-top: 5px;
 }
 
-.checkbox-group input[type="checkbox"] {
-    accent-color: var(--btn-primary);
-    width: 16px;
-    height: 16px;
-}
+    .checkbox-group input[type="checkbox"] {
+        accent-color: var(--btn-primary);
+        width: 16px;
+        height: 16px;
+    }
 
-.checkbox-group label {
-    color: var(--text-muted);
-    font-size: 0.9rem;
-    user-select: none;
-}
+    .checkbox-group label {
+        color: var(--text-muted);
+        font-size: 0.9rem;
+        user-select: none;
+    }
 
 /* Error and success for forms */
 .input-error {
     border-color: #ef4444 !important;
 }
 
-.input-error:focus {
-    box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.15) !important;
-}
+    .input-error:focus {
+        box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2) !important;
+    }
 
 .input-success {
     border-color: #22c55e !important;
 }
 
-.input-success:focus {
-    box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.15) !important;
-}
+    .input-success:focus {
+        box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.15) !important;
+    }
 
 .text-error {
     color: #ef4444;
@@ -214,6 +241,17 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 .text-success {
     color: #22c55e;
     font-weight: 600;
+}
+
+.validation-warning {
+    color: #ef4444;
+    font-size: 0.8rem;
+    margin-top: -8px;
+    margin-bottom: 12px;
+    display: none;
+    text-align: left;
+    font-weight: 500;
+    width: 100%;
 }
 
 /* Buttons and Links */
@@ -234,23 +272,22 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     background-color: var(--btn-primary);
 }
 
-.btn-primary:hover {
-    /* when we hover on the buttons */
-    background-color: var(--btn-primary-hover);
-}
+    .btn-primary:hover {
+        /* when we hover on the buttons */
+        background-color: var(--btn-primary-hover);
+    }
 
 .btn-secondary {
     background-color: var(--btn-secondary);
     color: var(--btn-secondary-text);
 }
 
-.btn-secondary:hover {
-    background-color: var(--btn-secondary-hover);
-}
+    .btn-secondary:hover {
+        background-color: var(--btn-secondary-hover);
+    }
 
 .logout-btn {
     display: block;
-    /* not inline but new line (for <a> tag) */
     width: 100%;
     padding: 12px;
     border: none;
@@ -260,14 +297,16 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     text-decoration: none !important;
     border-radius: 6px;
     text-align: center;
-    /* center of the button */
     transition: background-color 0.2s ease;
     margin-top: 20px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 1rem;
 }
 
-.logout-btn:hover {
-    background-color: var(--btn-primary-hover) !important;
-}
+    .logout-btn:hover {
+        background-color: var(--btn-primary-hover) !important;
+    }
 
 .nav-links {
     display: flex;
@@ -288,13 +327,12 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     transition: color 0.2s ease !important;
 }
 
-.nav-item:hover
-
-/* pseudo class that works only when hovering the link */
-,
-.nav-item.active {
-    color: var(--btn-primary) !important;
-}
+    .nav-item:hover
+    /* pseudo class that works only when hovering the link */
+    ,
+    .nav-item.active {
+        color: var(--btn-primary) !important;
+    }
 
 .forgot-link {
     color: var(--text-muted);
@@ -306,10 +344,10 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     transition: color 0.2s ease;
 }
 
-.forgot-link:hover {
-    color: var(--btn-primary);
-    text-decoration: underline;
-}
+    .forgot-link:hover {
+        color: var(--btn-primary);
+        text-decoration: underline;
+    }
 
 .divider {
     border: 0;
@@ -335,11 +373,15 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     line-height: 1.3;
 }
 
+.brand-content {
+    margin-top: auto;
+    margin-bottom: auto;
+}
+
 /* headers */
 .side-nav header h1,
 .side-nav h1 {
     font-size: 2.2rem !important;
-    /* better then px - adjasts to users that did zoomin on the text */
     font-weight: 800 !important;
     color: var(--btn-primary) !important;
     text-shadow: 1px 1px 2px rgba(99, 102, 241, 0.15) !important;
@@ -364,6 +406,7 @@ h3 {
     color: var(--text-muted);
     font-size: 0.85rem;
     background-color: var(--card-bg);
+    transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 .login-footer {
@@ -394,44 +437,152 @@ h3 {
     }
 }
 
-.input-error {
-    border-color: #ef4444 !important;
+/* avatar styles */
+.avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--border-color);
+    color: #ffffff;
+    display: grid;
+    place-items: center;
+    font-weight: 800;
+    font-size: 0.85rem;
+    flex-shrink: 0;
 }
 
-.input-error:focus {
-    box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2) !important;
+.avatar-muted {
+    background: linear-gradient(#8dc9a4 50%, #349158 50%);
 }
 
-.text-error {
-    color: #ef4444;
+.avatar-purple {
+    background: linear-gradient(135deg, #a78bfa, #6366f1);
 }
 
-.validation-warning {
-    color: #ef4444;
-    font-size: 0.8rem;
-    margin-top: -8px;
-    margin-bottom: 12px;
-    display: none;
-    text-align: left;
-    font-weight: 500;
+.avatar-blue {
+    background: linear-gradient(135deg, #60a5fa, #1d4ed8);
+}
+
+/* --- Back to Top Button --- */
+.back-to-top-btn {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background-color: var(--btn-primary);
+    color: #ffffff;
+    border: none;
+    font-size: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(20px);
+    transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.3s ease, background-color 0.2s;
+    z-index: 1000;
+}
+
+    .back-to-top-btn:hover {
+        background-color: var(--btn-primary-hover);
+    }
+
+/* User Account Card in Nav */
+.account-card {
+    margin-top: auto;
+    display: grid;
+    grid-template-columns: 40px 1fr auto;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background 0.15s;
     width: 100%;
 }
 
-/* --- Reusable Class Cleanups (Replacing inline HTML styles) --- */
-.brand-content {
-    margin-top: auto;
-    margin-bottom: auto;
-}
+    .account-card:hover {
+        background: var(--bg-hover-light);
+    }
 
-.split-card h2 {
-    text-align: center;
-    margin-bottom: 24px;
-}
+    .account-card .name {
+        font-weight: 700;
+        font-size: 0.95rem;
+        display: block;
+        color: var(--text-main);
+    }
 
-.input-group select {
+    .account-card .handle {
+        color: var(--text-muted);
+        font-size: 0.85rem;
+    }
+
+.account-menu {
     color: var(--text-main);
-    font-family: inherit;
-    font-size: inherit;
-    background-color: var(--card-bg);
+    font-weight: 900;
+}
+
+/* === Delete & Logout Confirm Modal Styles === */
+.confirm-modal-content {
+    background: var(--card-bg);
+    width: 100%;
+    max-width: 320px;
+    border-radius: 16px;
+    padding: 32px 24px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    text-align: center;
+    border: 1px solid var(--border-color);
+}
+
+    .confirm-modal-content h3 {
+        margin-bottom: 8px !important;
+        font-weight: 800;
+        font-size: 1.25rem;
+        color: var(--text-main) !important;
+    }
+
+    .confirm-modal-content p {
+        color: var(--text-muted);
+        font-size: 0.95rem;
+        margin-bottom: 24px;
+        line-height: 1.4;
+    }
+
+.danger-btn {
+    width: 100%;
+    background: #ef4444;
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 1rem;
     cursor: pointer;
-}
+    margin-bottom: 12px;
+    transition: background 0.2s;
+}
+
+    .danger-btn:hover {
+        background: #dc2626;
+    }
+
+.cancel-btn {
+    width: 100%;
+    background: transparent;
+    color: var(--text-main);
+    border: 1px solid var(--border-color);
+    padding: 12px;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+    .cancel-btn:hover {
+        background: var(--bg-hover-light);
+    }
