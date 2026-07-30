@@ -12,8 +12,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const videoPreview = document.getElementById("modal-video-preview");
     const clearMediaBtn = document.getElementById("modal-clear-media");
     const postFeed = document.querySelector(".post-feed");
+    const fbToggleBtn = document.getElementById("share-facebook-btn");
 
-    // functions to open and close the new post popup
+    // --- Create Post Modal Logic ---
     const openModal = (e) => {
         if (e) e.preventDefault();
         if (modalOverlay) {
@@ -26,6 +27,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (modalOverlay) {
             modalOverlay.classList.remove("active");
             if (modalTextarea) modalTextarea.value = "";
+            if (fbToggleBtn) fbToggleBtn.classList.remove("active");
             resetMediaPreview();
             validatePublishButton();
         }
@@ -49,6 +51,14 @@ document.addEventListener("DOMContentLoaded", () => {
     if (triggerBar) triggerBar.addEventListener("click", openModal);
     if (closeModalBtn) closeModalBtn.addEventListener("click", closeModal);
     if (modalTextarea) modalTextarea.addEventListener("input", validatePublishButton);
+
+    // handle facebook toggle switch
+    if (fbToggleBtn) {
+        fbToggleBtn.addEventListener("click", (e) => {
+            e.preventDefault();
+            fbToggleBtn.classList.toggle("active");
+        });
+    }
 
     if (mediaTriggerBtn && mediaInput) {
         mediaTriggerBtn.addEventListener("click", (e) => {
@@ -86,13 +96,16 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // --- create post ---
+    // --- submit new post (CREATE) ---
     if (modalPublishBtn) {
         modalPublishBtn.addEventListener("click", () => {
             const textContent = modalTextarea.value.trim();
             const mediaFile = (mediaInput && mediaInput.files) ? mediaInput.files[0] : null;
             const currentUser = localStorage.getItem("loggedInUser") || "User";
             const userInitials = currentUser.substring(0, 2).toUpperCase();
+
+            // get today's date in format YYYY-MM-DD for accurate search filtering later
+            const today = new Date().toISOString().split('T')[0];
 
             let mediaHTML = "";
             let postType = "text";
@@ -108,9 +121,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             }
 
-            // added new-item-highlight to the new post
             const postHTML = `
-                <article class="post-card new-item-highlight" data-post-type="${postType}">
+                <article class="post-card new-item-highlight" data-post-type="${postType}" data-post-date="${today}">
                     <div class="post-card-header">
                         <div style="display: flex; align-items: center; gap: 10px;">
                             <div class="avatar avatar-purple">${userInitials}</div>
@@ -119,7 +131,10 @@ document.addEventListener("DOMContentLoaded", () => {
                                 <span class="post-meta">@${currentUser.toLowerCase().replace(/\s/g, '')} · Just now</span>
                             </div>
                         </div>
-                        <button class="delete-post-btn" title="Delete"><i class="bi bi-trash3"></i></button>
+                        <div class="post-actions-right">
+                            <button class="edit-post-btn" title="Edit"><i class="bi bi-pencil"></i></button>
+                            <button class="delete-post-btn" title="Delete"><i class="bi bi-trash3"></i></button>
+                        </div>
                     </div>
                     <div class="post-text">${textContent}</div>
                     ${mediaHTML}
@@ -152,9 +167,24 @@ document.addEventListener("DOMContentLoaded", () => {
             `;
 
             if (postFeed) {
+                // Reset all filters when posting to ensure the new post is visible
+                const searchInput = document.getElementById("feed-search-input");
+                const dateStartInput = document.getElementById("filter-date-start");
+                const dateEndInput = document.getElementById("filter-date-end");
+                const allPostsOption = document.querySelector('.filter-option[data-value="all"]');
+
+                if (searchInput) searchInput.value = "";
+                if (dateStartInput) dateStartInput.value = "";
+                if (dateEndInput) dateEndInput.value = "";
+                document.querySelectorAll('.filter-option').forEach(opt => opt.classList.remove('selected'));
+                if (allPostsOption) allPostsOption.classList.add('selected');
+
+                // inject post
                 postFeed.insertAdjacentHTML("afterbegin", postHTML);
 
-                // remove the highlight class after the animation ends (2.5 seconds)
+                // force filter update
+                if (typeof window.forceFilterUpdate === 'function') window.forceFilterUpdate();
+
                 const newPost = postFeed.firstElementChild;
                 setTimeout(() => {
                     if (newPost) newPost.classList.remove("new-item-highlight");
@@ -165,7 +195,108 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // --- deletion system with popup (Restricted to owner) ---
+    // --- Edit Post Modal Logic (UPDATE) ---
+    const editModalOverlay = document.getElementById("edit-modal-overlay");
+    const closeEditModalBtn = document.getElementById("close-edit-modal-btn");
+    const editModalTextarea = document.getElementById("edit-modal-textarea");
+    const editModalPublishBtn = document.getElementById("edit-modal-publish-btn");
+    const editMediaInput = document.getElementById("edit-modal-media-upload");
+    const editMediaTriggerBtn = document.getElementById("edit-modal-image-btn");
+    const editPreviewContainer = document.getElementById("edit-modal-media-preview-container");
+    const editImgPreview = document.getElementById("edit-modal-media-preview");
+    const editVideoPreview = document.getElementById("edit-modal-video-preview");
+    const editClearMediaBtn = document.getElementById("edit-modal-clear-media");
+
+    let currentPostBeingEdited = null;
+    let editMediaCleared = false; // tracks if user manually cleared existing media
+
+    const closeEditModal = () => {
+        if (editModalOverlay) {
+            editModalOverlay.classList.remove("active");
+            currentPostBeingEdited = null;
+            if (editMediaInput) editMediaInput.value = "";
+        }
+    };
+
+    if (closeEditModalBtn) closeEditModalBtn.addEventListener("click", closeEditModal);
+
+    if (editMediaTriggerBtn && editMediaInput) {
+        editMediaTriggerBtn.addEventListener("click", (e) => {
+            e.preventDefault();
+            editMediaInput.click();
+        });
+    }
+
+    if (editMediaInput) {
+        editMediaInput.addEventListener("change", function () {
+            const file = this.files[0];
+            if (file && editPreviewContainer && editImgPreview && editVideoPreview) {
+                const fileURL = URL.createObjectURL(file);
+                editPreviewContainer.style.display = "flex";
+                editMediaCleared = false;
+
+                if (file.type.startsWith("video/")) {
+                    editVideoPreview.src = fileURL;
+                    editVideoPreview.style.display = "block";
+                    editImgPreview.style.display = "none";
+                } else {
+                    editImgPreview.src = fileURL;
+                    editImgPreview.style.display = "block";
+                    editVideoPreview.style.display = "none";
+                }
+            }
+        });
+    }
+
+    if (editClearMediaBtn) {
+        editClearMediaBtn.addEventListener("click", (e) => {
+            e.preventDefault();
+            if (editMediaInput) editMediaInput.value = "";
+            if (editPreviewContainer) editPreviewContainer.style.display = "none";
+            editMediaCleared = true;// mark as cleared so we remove it on save
+        });
+    }
+
+    if (editModalPublishBtn) {
+        editModalPublishBtn.addEventListener("click", () => {
+            if (!currentPostBeingEdited) return;
+
+            const newText = editModalTextarea.value.trim();
+            const textDiv = currentPostBeingEdited.querySelector(".post-text");
+            if (textDiv) textDiv.innerText = newText;
+
+            const existingMedia = currentPostBeingEdited.querySelector(".post-media-content");
+            const newFile = (editMediaInput && editMediaInput.files) ? editMediaInput.files[0] : null;
+
+            if (newFile) {
+                // user uploaded new media
+                const fileURL = URL.createObjectURL(newFile);
+                if (existingMedia) existingMedia.remove();
+
+                let mediaHTML = "";
+                if (newFile.type.startsWith("video/")) {
+                    mediaHTML = `<video src="${fileURL}" controls class="post-media-content"></video>`;
+                    currentPostBeingEdited.dataset.postType = "video";
+                } else {
+                    mediaHTML = `<img src="${fileURL}" alt="Uploaded media" class="post-media-content" />`;
+                    currentPostBeingEdited.dataset.postType = "image";
+                }
+                textDiv.insertAdjacentHTML('afterend', mediaHTML);
+            } else if (editMediaCleared) {
+                // user clicked X to remove existing media
+                if (existingMedia) existingMedia.remove();
+                currentPostBeingEdited.dataset.postType = "text";
+            }
+
+            // visually indicate edit success
+            currentPostBeingEdited.classList.add("new-item-highlight");
+            setTimeout(() => currentPostBeingEdited.classList.remove("new-item-highlight"), 2000);
+
+            closeEditModal();
+        });
+    }
+
+    // --- deletion system with popup (DELETE) ---
     let elementToDelete = null;
     const confirmModal = document.getElementById("delete-confirm-modal");
     const confirmBtn = document.getElementById("confirm-delete-btn");
@@ -197,13 +328,15 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // --- dynamic events in the feed (likes, comments, deletions, shares) ---
+    // --- dynamic events in the feed (Event Delegation) ---
     if (postFeed) {
         postFeed.addEventListener("click", (e) => {
             const target = e.target;
+
+            // copy link from the menu
             const copyBtn = target.closest(".copy-link-btn");
             if (copyBtn) {
-                e.stopPropagation(); // prevent the menu from closing automatically by mistake
+                e.stopPropagation();
                 navigator.clipboard.writeText(window.location.href).then(() => {
                     const originalHTML = copyBtn.innerHTML;
                     copyBtn.innerHTML = '<i class="bi bi-check2"></i> Copied!';
@@ -211,7 +344,6 @@ document.addEventListener("DOMContentLoaded", () => {
                     setTimeout(() => {
                         copyBtn.innerHTML = originalHTML;
                         copyBtn.style.color = "";
-                        // close the menu after 2 seconds
                         const shareParent = copyBtn.closest(".stat-share");
                         if (shareParent) shareParent.classList.remove("active");
                     }, 2000);
@@ -237,7 +369,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 return;
             }
 
-            // delete button
+            // delete button (DELETE)
             const deleteBtn = target.closest(".delete-post-btn, .delete-comment-btn");
             if (deleteBtn) {
                 const item = deleteBtn.closest(".post-card, .comment-item");
@@ -252,13 +384,53 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
 
                 elementToDelete = item;
-                if (confirmModal) {
-                    confirmModal.classList.add("active");
-                }
+                if (confirmModal) confirmModal.classList.add("active");
                 return;
             }
 
-            //likes
+            // edit post button (UPDATE)
+            const editBtn = target.closest(".edit-post-btn");
+            if (editBtn) {
+                const post = editBtn.closest(".post-card");
+                const authorElement = post.querySelector(".post-author");
+                const authorName = authorElement ? authorElement.innerText.trim() : "";
+                const currentUser = localStorage.getItem("loggedInUser") || "User";
+
+                if (authorName !== currentUser) {
+                    alert("You can only edit your own content.");
+                    return;
+                }
+
+                currentPostBeingEdited = post;
+                editMediaCleared = false;
+
+                // load text
+                const textDiv = post.querySelector(".post-text");
+                if (textDiv) editModalTextarea.value = textDiv.innerText;
+
+                // load media if exists
+                const existingImg = post.querySelector("img.post-media-content");
+                const existingVid = post.querySelector("video.post-media-content");
+
+                editPreviewContainer.style.display = "none";
+                editImgPreview.style.display = "none";
+                editVideoPreview.style.display = "none";
+
+                if (existingImg) {
+                    editImgPreview.src = existingImg.src;
+                    editImgPreview.style.display = "block";
+                    editPreviewContainer.style.display = "flex";
+                } else if (existingVid) {
+                    editVideoPreview.src = existingVid.src;
+                    editVideoPreview.style.display = "block";
+                    editPreviewContainer.style.display = "flex";
+                }
+
+                editModalOverlay.classList.add("active");
+                return;
+            }
+
+            // likes
             const likeBtn = target.closest(".stat-like");
             if (likeBtn) {
                 likeBtn.classList.toggle("liked");
@@ -290,7 +462,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 return;
             }
 
-            // open the share menu itself
+            // open the share menu 
             const shareBtn = target.closest(".stat-share");
             if (shareBtn && !target.closest(".share-dropdown")) {
                 shareBtn.classList.toggle("active");
@@ -320,7 +492,6 @@ document.addEventListener("DOMContentLoaded", () => {
                     const currentUser = localStorage.getItem("loggedInUser") || "User";
                     const userInitials = currentUser.substring(0, 2).toUpperCase();
 
-                    // added new-item-highlight to the new comment
                     const commentHTML = `
                         <div class="comment-item">
                             <div class="avatar avatar-purple">${userInitials}</div>
@@ -338,7 +509,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     let count = parseInt(replyCountSpan.innerText) || 0;
                     replyCountSpan.innerText = count + 1;
 
-                    // remove the highlight class after the animation
+                    // added new-item-highlight to the new comment, and we remove it after a short delay to show the highlight effect
                     const newComment = commentsList.lastElementChild.querySelector(".comment-bubble");
                     setTimeout(() => {
                         if (newComment) newComment.classList.remove("new-item-highlight");
@@ -373,60 +544,5 @@ document.addEventListener("DOMContentLoaded", () => {
         backToTopBtn.addEventListener("click", () => {
             window.scrollTo({ top: 0, behavior: "smooth" });
         });
-    }
-
-    // --- Search & Filter Logic ---
-    const filterBox = document.getElementById("custom-filter");
-    const searchInput = document.getElementById("feed-search-input");
-
-    const filterPosts = () => {
-        const activeFilter = document.querySelector(".filter-option.selected").dataset.value;
-        const searchTerm = searchInput ? searchInput.value.toLowerCase() : "";
-        const posts = document.querySelectorAll(".post-card");
-
-        posts.forEach(post => {
-            const postType = post.dataset.postType || "text";
-            const postText = post.querySelector(".post-text")?.innerText.toLowerCase() || "";
-            const postAuthor = post.querySelector(".post-author")?.innerText.toLowerCase() || "";
-
-            const matchesFilter = (activeFilter === "all") || (activeFilter === postType);
-            const matchesSearch = postText.includes(searchTerm) || postAuthor.includes(searchTerm);
-
-            if (matchesFilter && matchesSearch) {
-                post.style.display = "flex";
-            } else {
-                post.style.display = "none";
-            }
-        });
-    };
-
-    if (filterBox) {
-        const filterSelected = filterBox.querySelector(".filter-selected");
-        const filterOptions = filterBox.querySelectorAll(".filter-option");
-        const filterText = document.getElementById("filter-selected-text");
-
-        filterSelected.addEventListener("click", () => {
-            filterBox.classList.toggle("open");
-        });
-
-        filterOptions.forEach(option => {
-            option.addEventListener("click", () => {
-                filterOptions.forEach(opt => opt.classList.remove("selected"));
-                option.classList.add("selected");
-                filterText.innerText = option.innerText;
-                filterBox.classList.remove("open");
-                filterPosts();
-            });
-        });
-
-        document.addEventListener("click", (e) => {
-            if (!filterBox.contains(e.target)) {
-                filterBox.classList.remove("open");
-            }
-        });
-    }
-
-    if (searchInput) {
-        searchInput.addEventListener("input", filterPosts);
     }
 });

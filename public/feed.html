@@ -7,8 +7,10 @@
 
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/feed_style.css">
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/feedStyle.css">
 </head>
 
 <body>
@@ -38,6 +40,7 @@
                 </a>
             </div>
 
+            <!-- using a button to prevent page jumping -->
             <button type="button" class="logout-btn" id="logout-btn-trigger">Logout</button>
 
             <!-- connected user -->
@@ -83,6 +86,7 @@
                 <input type="search" id="feed-search-input" placeholder="Search posts..." />
             </label>
 
+            <!-- Filter box updated to include a full date range -->
             <div class="filter-box-custom" id="custom-filter">
                 <div class="filter-selected">
                     <i class="bi bi-funnel"></i>
@@ -94,11 +98,31 @@
                     <div class="filter-option" data-value="text">Text Only</div>
                     <div class="filter-option" data-value="image">With Image</div>
                     <div class="filter-option" data-value="video">With Video</div>
+
+                    <div class="filter-date-range">
+                        <div class="date-input-wrapper">
+                            <label>From</label>
+                            <input type="date" id="filter-date-start" />
+                        </div>
+                        <div class="date-input-wrapper">
+                            <label>To</label>
+                            <input type="date" id="filter-date-end" />
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <h3 class="mb-3 mt-4">Explore</h3>
-            <!-- Sidebar content (ads, links...) -->
+            <!-- Dynamic section fetching from TVMaze API -->
+            <section class="sidebar-card news-card">
+                <div class="card-title-row">
+                    <h2>Airing Today</h2>
+                </div>
+                <div id="dynamic-news-container">
+                    <div style="padding: 20px; text-align: center; color: var(--text-muted); font-size: 0.9rem;">
+                        <i class="bi bi-arrow-repeat" style="display:inline-block; animation: spin 2s linear infinite;"></i> Loading updates...
+                    </div>
+                </div>
+            </section>
         </aside>
     </div>
 
@@ -107,12 +131,12 @@
         <i class="bi bi-arrow-up"></i>
     </button>
 
-    <!--The fotter of the page, conatins important information/links/contact details etc. this is the same for all pages of this project.-->
+    <!--The footer of the page, contains important information/links/contact details etc.-->
     <footer class="site-footer">
         <p>&copy; 2026 Web Application Project - Shahaf Abraham, Nicole Klempert & Lior Shif</p>
     </footer>
 
-    <!-- New post Model -->
+    <!-- popup (modal) for creating a new post -->
     <div id="post-modal-overlay" class="modal-overlay">
         <div class="modal-content">
             <div class="modal-header">
@@ -120,20 +144,54 @@
                 <button id="close-modal-btn" class="close-modal-btn">&times;</button>
             </div>
             <div class="modal-body">
-                <textarea id="modal-textarea" placeholder="What's on your mind?" rows="4"></textarea>
+                <textarea id="modal-textarea" class="modal-textarea-custom" placeholder="What's on your mind?" rows="4"></textarea>
 
+                <!-- media preview area -->
                 <input type="file" id="modal-media-upload" accept="image/*,video/*" style="display: none;">
-                <div id="modal-media-preview-container" style="display: none;">
+                <div id="modal-media-preview-container" class="modal-media-preview-container" style="display: none;">
                     <img id="modal-media-preview" src="" style="max-width: 100%; max-height: 250px; border-radius: 8px; display: none;">
                     <video id="modal-video-preview" controls style="max-width: 100%; max-height: 250px; border-radius: 8px; display: none;"></video>
                     <button id="modal-clear-media" class="clear-media-btn">&times;</button>
                 </div>
             </div>
             <div class="modal-footer">
-                <button id="modal-image-btn" class="media-trigger-btn">
-                    <i class="bi bi-image"></i> Add Photo/Video
-                </button>
+                <!-- Grouping buttons together on the left -->
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <!-- Styled Facebook toggle button -->
+                    <button type="button" class="fb-toggle-btn" id="share-facebook-btn" style="margin-bottom: 0;">
+                        <i class="bi bi-facebook"></i> Share
+                    </button>
+                    <button id="modal-image-btn" class="media-trigger-btn">
+                        <i class="bi bi-image"></i> Add Media
+                    </button>
+                </div>
                 <button id="modal-publish-btn" class="publish-btn" disabled>Post</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- popup (modal) for EDITING a post -->
+    <div id="edit-modal-overlay" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Edit Post</h3>
+                <button id="close-edit-modal-btn" class="close-modal-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <textarea id="edit-modal-textarea" class="modal-textarea-custom" rows="4"></textarea>
+
+                <input type="file" id="edit-modal-media-upload" accept="image/*,video/*" style="display: none;">
+                <div id="edit-modal-media-preview-container" class="modal-media-preview-container" style="display: none;">
+                    <img id="edit-modal-media-preview" src="" style="max-width: 100%; max-height: 250px; border-radius: 8px; display: none;">
+                    <video id="edit-modal-video-preview" controls style="max-width: 100%; max-height: 250px; border-radius: 8px; display: none;"></video>
+                    <button id="edit-modal-clear-media" class="clear-media-btn">&times;</button>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="edit-modal-image-btn" class="media-trigger-btn">
+                    <i class="bi bi-image"></i> Change Media
+                </button>
+                <button id="edit-modal-publish-btn" class="publish-btn">Save Changes</button>
             </div>
         </div>
     </div>
@@ -142,7 +200,7 @@
     <div id="delete-confirm-modal" class="modal-overlay">
         <div class="confirm-modal-content">
             <h3>Delete item?</h3>
-            <p>This action can’t be undone and the item will be removed permanently</p>
+            <p>This action can’t be undone and the item will be removed permanently.</p>
             <button id="confirm-delete-btn" class="danger-btn">Delete</button>
             <button id="cancel-delete-btn" class="cancel-btn">Cancel</button>
         </div>
@@ -158,7 +216,16 @@
         </div>
     </div>
 
-    <script src="js/script.js"></script>
-    <script src="js/feed_script.js"></script>
+    <script src="js/global.js"></script>
+    <script src="js/newsApi.js"></script>
+    <script src="js/filters.js"></script>
+    <script src="js/postsManager.js"></script>
+    <style>
+        @keyframes spin {
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
 </body>
 </html>
