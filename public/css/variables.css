@@ -1,0 +1,59 @@
+﻿:root {
+    --bg-color: #f0ecfc; /* grayish purple light for background */
+    --card-bg: #ffffff; /* clean white */
+    --text-main: #504759; /* dark purple */
+    --text-muted: #766f7d; /* darker grayish purple */
+
+    --btn-primary: #6366f1; /* indigo */
+    --btn-primary-hover: #4f46e5; /* dark purple for hovering */
+
+    --btn-secondary: #f0ecfc; /* light purple */
+    --btn-secondary-text: #6366f1; /* darker purple for button text */
+    --btn-secondary-hover: #c4b5fd;
+    --border-color: #e2dae8; /* purply shade for the border */
+    --focus-ring: rgba(99, 102, 241, 0.15);
+    --bg-hover-light: #e8e2f8; /* for hover transitions */
+}
+
+/* === elegant Dark Mode in dark purple tones === */
+body.dark-mode {
+    --bg-color: #1a1625; /* deep purple general background, almost black */
+    --card-bg: #241e30; /* slightly lighter cards to create depth */
+    --text-main: #e2dae8; /* light and readable text */
+    --text-muted: #958d9e; /* secondary text */
+
+    --btn-primary: #818cf8; /* lighter primary button for contrast */
+    --btn-primary-hover: #6366f1;
+    --btn-secondary: #322942; /* secondary button adjusted for the dark background */
+    --btn-secondary-text: #c4b5fd;
+    --btn-secondary-hover: #423657;
+    --border-color: #3a304c;
+    --bg-hover-light: #2d253b;
+    --focus-ring: rgba(129, 140, 248, 0.2);
+}
+
+/* === 2. Custom Fonts & Reset === */
+
+/* importing a custom font */
+@font-face {
+    font-family: 'BrandFont';
+    src: url('https://fonts.gstatic.com/s/nunito/v25/XRXV3I6Li01BKofINeaB.woff2') format('woff2');
+    font-weight: 800;
+    font-style: normal;
+}
+
+* {
+    box-sizing: border-box; /* make padding take from the box and not from the outside */
+    margin: 0; /* without extra spacing */
+    padding: 0; /* without extra spacing */
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; /* stack of fonts so it won't look bad on different computers */
+}
+
+body {
+    background-color: var(--bg-color) !important; /* important so bootstrap wont change it */
+    color: var(--text-main);
+    min-height: 100vh; /* 100% of screen height */
+    display: flex;
+    flex-direction: column; /* layout of column (up to down) and not of a row (right to left) */
+    transition: background-color 0.3s ease, color 0.3s ease; /* smooth transition when switching to dark mode */
+}

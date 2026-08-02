@@ -6,7 +6,9 @@
     <title>~Our network  - replace by the name chosen~</title>
 
     <link href="css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/components.css">
 </head>
 
 <body>
@@ -30,6 +32,11 @@
                     <label for="new-username" class="input-label">Username</label>
                     <input type="text" id="new-username" name="new-username" placeholder="Select your username" required>
                     <span class="validation-warning" id="username-warning">Only lowercase English letters and numbers are allowed.</span>
+                </div>
+
+                <div class="input-group">
+                    <label for="profile-picture" class="input-label">Profile Picture (Optional)</label>
+                    <input type="file" id="profile-picture" name="profile-picture" accept="image/*" style="cursor: pointer; padding: 10px 16px;">
                 </div>
 
                 <div class="input-group">
@@ -86,6 +93,6 @@
         </section>
     </main>
 
-    <script src="js/script.js"></script>
+    <script src="js/auth.js"></script>
 </body>
 </html>

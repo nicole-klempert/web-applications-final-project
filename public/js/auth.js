@@ -26,7 +26,7 @@ function toggleRegPasswords() {
     }
 }
 
-// chec
+// check if passwords match
 function checkPasswordsMatch() {
     const pass1 = document.getElementById("new-password");
     const pass2 = document.getElementById("confirm-password");
@@ -63,33 +63,34 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!container) {
         container = document.querySelector(".main-feed");
     }
-    if (!container) return;
 
     if (error || success) {
-        const alertDiv = document.createElement("div");
-        alertDiv.className = "alert-message";
-        alertDiv.style.padding = "12px";
-        alertDiv.style.marginBottom = "20px";
-        alertDiv.style.borderRadius = "6px";
-        alertDiv.style.textAlign = "center";
-        alertDiv.style.fontWeight = "bold";
-        alertDiv.style.fontSize = "0.9rem";
-        alertDiv.style.width = "100%";
+        if (container) {
+            const alertDiv = document.createElement("div");
+            alertDiv.className = "alert-message";
+            alertDiv.style.padding = "12px";
+            alertDiv.style.marginBottom = "20px";
+            alertDiv.style.borderRadius = "6px";
+            alertDiv.style.textAlign = "center";
+            alertDiv.style.fontWeight = "bold";
+            alertDiv.style.fontSize = "0.9rem";
+            alertDiv.style.width = "100%";
 
-        if (error) {
-            alertDiv.style.backgroundColor = "#fee2e2";
-            alertDiv.style.color = "#ef4444";
-            alertDiv.style.border = "1px solid #fca5a5";
-            alertDiv.innerText = error;
-        } else if (success) {
-            alertDiv.style.backgroundColor = "#dcfce7";
-            alertDiv.style.color = "#22c55e";
-            alertDiv.style.border = "1px solid #86efac";
-            alertDiv.innerText = success;
+            if (error) {
+                alertDiv.style.backgroundColor = "#fee2e2";
+                alertDiv.style.color = "#ef4444";
+                alertDiv.style.border = "1px solid #fca5a5";
+                alertDiv.innerText = error;
+            } else if (success) {
+                alertDiv.style.backgroundColor = "#dcfce7";
+                alertDiv.style.color = "#22c55e";
+                alertDiv.style.border = "1px solid #86efac";
+                alertDiv.innerText = success;
+            }
+
+            // insert alert at the very top of the container
+            container.insertBefore(alertDiv, container.firstChild);
         }
-
-        // insert alert at the very top of the container
-        container.insertBefore(alertDiv, container.firstChild);
     }
 
     // real-time input validators for lowercase english patterns

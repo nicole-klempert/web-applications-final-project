@@ -1,0 +1,231 @@
+<!-- This is a template file, for use in all html files of this project.-->
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <title>~Our network - replace by the name chosen~ - Template</title>
+
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/feedStyle.css">
+</head>
+
+<body>
+    <div class="app-layout">
+        <nav class="side-nav">
+            <!-- The header of the page, which is the same for all pages of this project.-->
+            <header>
+                <h1>~Name~</h1>
+            </header>
+
+            <!-- The navigation bar of the page, which conains the links to all pages of this project.-->
+            <div class="nav-links mt-4">
+                <a href="feed.html" class="nav-item">
+                    <i class="bi bi-house-door-fill nav-icon"></i> <span>Feed</span>
+                </a>
+                <a href="profile.html" class="nav-item">
+                    <i class="bi bi-person-fill nav-icon"></i> <span>Profile</span>
+                </a>
+                <a href="groups.html" class="nav-item">
+                    <i class="bi bi-people-fill nav-icon"></i> <span>Groups</span>
+                </a>
+
+                <!-- ID settings for icon and text swap in Dark Mode -->
+                <a href="#" class="nav-item" id="dark-mode-toggle">
+                    <i class="bi bi-moon-stars nav-icon" id="dark-mode-icon"></i>
+                    <span id="dark-mode-text">Dark Mode</span>
+                </a>
+            </div>
+
+            <!-- using a button to prevent page jumping -->
+            <button type="button" class="logout-btn" id="logout-btn-trigger">Logout</button>
+
+            <!-- connected user -->
+            <div class="account-card mt-auto" role="button" tabindex="0">
+                <div class="avatar avatar-purple" id="nav-user-avatar">US</div>
+                <div>
+                    <span class="name" id="nav-user-name">User Name</span>
+                    <span class="handle" id="nav-user-handle">@username</span>
+                </div>
+                <span class="account-menu">···</span>
+            </div>
+        </nav>
+
+        <!--The main content of every specific page, different for each page of this project.-->
+        <main class="main-feed">
+            <header class="feed-tabs">
+                <button class="tab active" type="button">
+                    <i class="bi bi-house-door-fill nav-icon"></i>
+                </button>
+                <button class="tab" type="button">
+                    <i class="bi bi-people-fill nav-icon"></i>
+                </button>
+            </header>
+
+            <section class="composer-placeholder" id="trigger-modal-bar" role="button">
+                <div class="placeholder-text-box">What's on your mind?</div>
+                <div class="composer-icons-group">
+                    <i class="bi bi-image" title="Add Photo"></i>
+                    <i class="bi bi-play-btn" title="Add Video"></i>
+                    <i class="bi bi-emoji-smile" title="Add Emoji"></i>
+                </div>
+            </section>
+
+            <section class="post-feed">
+                <!--Main content goes here (posts, pictures, text...)-->
+            </section>
+        </main>
+
+        <!-- Sidebar section -->
+        <aside class="right-sidebar">
+            <label class="search-box">
+                <span><i class="bi bi-search"></i></span>
+                <input type="search" id="feed-search-input" placeholder="Search posts..." />
+            </label>
+
+            <!-- Filter box updated to include a full date range -->
+            <div class="filter-box-custom" id="custom-filter">
+                <div class="filter-selected">
+                    <i class="bi bi-funnel"></i>
+                    <span id="filter-selected-text">All Posts</span>
+                    <i class="bi bi-chevron-down filter-arrow" style="margin-left: auto;"></i>
+                </div>
+                <div class="filter-dropdown">
+                    <div class="filter-option selected" data-value="all">All Posts</div>
+                    <div class="filter-option" data-value="text">Text Only</div>
+                    <div class="filter-option" data-value="image">With Image</div>
+                    <div class="filter-option" data-value="video">With Video</div>
+
+                    <div class="filter-date-range">
+                        <div class="date-input-wrapper">
+                            <label>From</label>
+                            <input type="date" id="filter-date-start" />
+                        </div>
+                        <div class="date-input-wrapper">
+                            <label>To</label>
+                            <input type="date" id="filter-date-end" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dynamic section fetching from TVMaze API -->
+            <section class="sidebar-card news-card">
+                <div class="card-title-row">
+                    <h2>Airing Today</h2>
+                </div>
+                <div id="dynamic-news-container">
+                    <div style="padding: 20px; text-align: center; color: var(--text-muted); font-size: 0.9rem;">
+                        <i class="bi bi-arrow-repeat" style="display:inline-block; animation: spin 2s linear infinite;"></i> Loading updates...
+                    </div>
+                </div>
+            </section>
+        </aside>
+    </div>
+
+    <!-- Back to top -->
+    <button id="back-to-top" class="back-to-top-btn" title="Back to top">
+        <i class="bi bi-arrow-up"></i>
+    </button>
+
+    <!--The footer of the page, contains important information/links/contact details etc.-->
+    <footer class="site-footer">
+        <p>&copy; 2026 Web Application Project - Shahaf Abraham, Nicole Klempert & Lior Shif</p>
+    </footer>
+
+    <!-- popup (modal) for creating a new post -->
+    <div id="post-modal-overlay" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Create a Post</h3>
+                <button id="close-modal-btn" class="close-modal-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <textarea id="modal-textarea" class="modal-textarea-custom" placeholder="What's on your mind?" rows="4"></textarea>
+
+                <!-- media preview area -->
+                <input type="file" id="modal-media-upload" accept="image/*,video/*" style="display: none;">
+                <div id="modal-media-preview-container" class="modal-media-preview-container" style="display: none;">
+                    <img id="modal-media-preview" src="" style="max-width: 100%; max-height: 250px; border-radius: 8px; display: none;">
+                    <video id="modal-video-preview" controls style="max-width: 100%; max-height: 250px; border-radius: 8px; display: none;"></video>
+                    <button id="modal-clear-media" class="clear-media-btn">&times;</button>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <!-- Grouping buttons together on the left -->
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <!-- Styled Facebook toggle button -->
+                    <button type="button" class="fb-toggle-btn" id="share-facebook-btn" style="margin-bottom: 0;">
+                        <i class="bi bi-facebook"></i> Share
+                    </button>
+                    <button id="modal-image-btn" class="media-trigger-btn">
+                        <i class="bi bi-image"></i> Add Media
+                    </button>
+                </div>
+                <button id="modal-publish-btn" class="publish-btn" disabled>Post</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- popup (modal) for EDITING a post -->
+    <div id="edit-modal-overlay" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Edit Post</h3>
+                <button id="close-edit-modal-btn" class="close-modal-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <textarea id="edit-modal-textarea" class="modal-textarea-custom" rows="4"></textarea>
+
+                <input type="file" id="edit-modal-media-upload" accept="image/*,video/*" style="display: none;">
+                <div id="edit-modal-media-preview-container" class="modal-media-preview-container" style="display: none;">
+                    <img id="edit-modal-media-preview" src="" style="max-width: 100%; max-height: 250px; border-radius: 8px; display: none;">
+                    <video id="edit-modal-video-preview" controls style="max-width: 100%; max-height: 250px; border-radius: 8px; display: none;"></video>
+                    <button id="edit-modal-clear-media" class="clear-media-btn">&times;</button>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="edit-modal-image-btn" class="media-trigger-btn">
+                    <i class="bi bi-image"></i> Change Media
+                </button>
+                <button id="edit-modal-publish-btn" class="publish-btn">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="delete-confirm-modal" class="modal-overlay">
+        <div class="confirm-modal-content">
+            <h3>Delete item?</h3>
+            <p>This action can’t be undone and the item will be removed permanently.</p>
+            <button id="confirm-delete-btn" class="danger-btn">Delete</button>
+            <button id="cancel-delete-btn" class="cancel-btn">Cancel</button>
+        </div>
+    </div>
+
+    <!-- Logout Confirmation Modal -->
+    <div id="logout-confirm-modal" class="modal-overlay">
+        <div class="confirm-modal-content">
+            <h3>Log Out?</h3>
+            <p>Are you sure you want to log out of your account?</p>
+            <button id="confirm-logout-btn" class="danger-btn">Log Out</button>
+            <button id="cancel-logout-btn" class="cancel-btn">Cancel</button>
+        </div>
+    </div>
+
+    <script src="js/global.js"></script>
+    <script src="js/newsApi.js"></script>
+    <script src="js/filters.js"></script>
+    <script src="js/postsManager.js"></script>
+    <style>
+        @keyframes spin {
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</body>
+</html>
