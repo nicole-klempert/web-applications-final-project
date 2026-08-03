@@ -35,5 +35,8 @@ async function fetchNews() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-    fetchNews();
+    // Initial fetch on page load with a slight delay to ensure DOM is ready
+    setTimeout(() => {
+        fetchNews();
+    }, 600);
 });

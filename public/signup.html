@@ -6,6 +6,7 @@
     <title>~Our network  - replace by the name chosen~</title>
 
     <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="css/variables.css">
     <link rel="stylesheet" href="css/layout.css">
     <link rel="stylesheet" href="css/components.css">
@@ -28,15 +29,27 @@
             <form class="split-card" action="/signup" method="post">
                 <h2>Create an Account</h2>
 
+                <!-- Profile Photo Picker-->
+                <div class="avatar-upload-container">
+                    <div class="avatar-preview-circle" id="avatar-trigger" title="Click to upload profile photo">
+                        <div class="avatar-placeholder-content" id="avatar-placeholder">
+                            <i class="bi bi-camera-fill"></i>
+                        </div>
+                        <img id="avatar-live-preview" src="" alt="Profile Preview" style="display: none;">
+                        <div class="avatar-hover-overlay">
+                            <i class="bi bi-pencil-fill"></i>
+                        </div>
+                    </div>
+                    <span class="avatar-helper-text">Add Profile Photo (Optional)</span>
+
+                    <input type="file" id="profile-picture-input" accept="image/*" style="display: none;">
+                    <input type="hidden" id="cropped-profile-data" name="profile-picture">
+                </div>
+
                 <div class="input-group">
                     <label for="new-username" class="input-label">Username</label>
                     <input type="text" id="new-username" name="new-username" placeholder="Select your username" required>
                     <span class="validation-warning" id="username-warning">Only lowercase English letters and numbers are allowed.</span>
-                </div>
-
-                <div class="input-group">
-                    <label for="profile-picture" class="input-label">Profile Picture (Optional)</label>
-                    <input type="file" id="profile-picture" name="profile-picture" accept="image/*" style="cursor: pointer; padding: 10px 16px;">
                 </div>
 
                 <div class="input-group">
@@ -92,6 +105,29 @@
             </form>
         </section>
     </main>
+
+    <!-- crop & zoom Modal === -->
+    <div class="modal-overlay" id="crop-modal-overlay" style="display: none; z-index: 10000;">
+        <div class="crop-modal-content">
+            <h3>Adjust Profile Photo</h3>
+            <p>Position and zoom your photo to fit the circle</p>
+
+            <div class="crop-viewport-wrapper">
+                <canvas id="crop-canvas" width="220" height="220"></canvas>
+            </div>
+
+            <div class="zoom-slider-group">
+                <i class="bi bi-zoom-out"></i>
+                <input type="range" id="zoom-slider" min="1" max="3" step="0.05" value="1">
+                <i class="bi bi-zoom-in"></i>
+            </div>
+
+            <div class="crop-modal-actions">
+                <button type="button" class="btn cancel-btn" id="cancel-crop-btn">Cancel</button>
+                <button type="button" class="btn btn-primary" id="save-crop-btn">Save Avatar</button>
+            </div>
+        </div>
+    </div>
 
     <script src="js/auth.js"></script>
 </body>

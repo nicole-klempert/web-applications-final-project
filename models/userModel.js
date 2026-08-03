@@ -45,6 +45,11 @@ const userSchema = new mongoose.Schema({
     recoveryAnswerEncrypted: {
         type: String,
         required: true
+    },
+    // Profile picture URL or base64 string (optional)
+    profilePicture: {
+        type: String,
+        default: ""
     }
 }, {
     // Automatically include virtuals when converting documents to JSON or Objects

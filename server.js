@@ -5,8 +5,9 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import User from './models/userModel.js';
 
-// import authentication routes
+// import  routes
 import authRoutes from './routes/authRoutes.js';
+import postRoutes from './routes/postRoutes.js';
 
 // load environment variables
 dotenv.config();
@@ -36,8 +37,8 @@ mongoose.connect(MONGO_URI, {
     });
 
 // parses incoming http requests
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
+app.use(express.json({ limit: '50mb' }));
 
 // for security: prevents access to raw source files & keys
 app.use((req, res, next) => {
@@ -66,6 +67,9 @@ app.use(express.static(__dirname));
 
 // mount authentication routes
 app.use('/', authRoutes);
+
+// mount post routes
+app.use('/posts', postRoutes);
 
 // redirect root url to login page
 app.get('/', (req, res) => {
