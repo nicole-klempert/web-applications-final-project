@@ -1,6 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
-    // ===  AUTHENTICATION GUARD - user must be logged in to access this page ===
-    // Check if the user is logged in by looking for a "loggedInUser" in localStorage
+    // ===  AUTHENTICATION GUARD ===
     const currentUser = (localStorage.getItem("loggedInUser") || "").trim();
     if (!currentUser) {
         sessionStorage.setItem("authAlert", "You must be logged in to view this page.");
@@ -9,52 +8,47 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // === SIDEBAR USER PROFILE SYN ===
-    // Synchronize the sidebar user profile with the current user and their profile picture
     const syncSidebarUserProfile = () => {
         const myPic = localStorage.getItem("userProfilePic") || "";
         const initials = currentUser.substring(0, 2).toUpperCase();
-
         const navName = document.getElementById("nav-user-name");
         if (navName) navName.innerText = currentUser;
-
         const navHandle = document.getElementById("nav-user-handle");
         if (navHandle) navHandle.innerText = `@${currentUser.toLowerCase().replace(/\s+/g, '')}`;
 
-        const navAvatar = document.getElementById("nav-user-avatar");
-        if (navAvatar) {
-            navAvatar.innerHTML = "";
+        // update all avatar elements in the sidebar and account card
+        const avatars = [
+            document.getElementById("nav-user-avatar"),
+            document.querySelector(".account-card .avatar"),
+            document.querySelector(".composer-placeholder .avatar")
+        ];
+
+        avatars.forEach(avatarEl => {
+            if (!avatarEl) return;
+            avatarEl.innerHTML = "";
             if (myPic.trim() !== "" && myPic !== "undefined" && myPic !== "null") {
-                navAvatar.className = "avatar";
-                navAvatar.style.backgroundImage = `url('${myPic}')`;
-                navAvatar.style.backgroundSize = "cover";
-                navAvatar.style.backgroundPosition = "center";
+                avatarEl.className = "avatar";
+                avatarEl.style.backgroundImage = `url('${myPic}')`;
+                avatarEl.style.backgroundSize = "cover";
+                avatarEl.style.backgroundPosition = "center";
             } else {
-                navAvatar.className = "avatar avatar-purple";
-                navAvatar.removeAttribute("style");
-                navAvatar.innerText = initials;
+                avatarEl.className = "avatar avatar-purple";
+                avatarEl.removeAttribute("style");
+                avatarEl.innerText = initials;
             }
-        }
+        });
     };
     syncSidebarUserProfile();
 
     // === STATE AND DOM ELEMENTS ===
-    // Grab references to key DOM elements and initialize state variables
     const postFeed = document.querySelector(".post-feed");
-    const searchInput = document.getElementById("feed-search-input");
-    const filterStartDate = document.getElementById("filter-date-start");
-    const filterEndDate = document.getElementById("filter-date-end");
-    const filterOptions = document.querySelectorAll(".filter-option");
-
     let currentPage = 1;
     let hasMorePosts = false;
     let isLoading = false;
-    let activeTypeFilter = "all";
-    let searchTimeout = null;
     let currentPostBeingEdited = null;
     let editMediaCleared = false;
 
     // === HELPER FUNCTIONS ===
-    // Convert a File object to a Data URL for previewing media
     const fileToDataURL = (file) => new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onload = () => resolve(reader.result);
@@ -62,7 +56,7 @@ document.addEventListener("DOMContentLoaded", () => {
         reader.readAsDataURL(file);
     });
 
-    // Format a date string into a human-readable "time ago" format
+    // Format date to "time ago" string
     const formatTimeAgo = (dateString) => {
         if (!dateString) return "Just now";
         const diff = (new Date() - new Date(dateString)) / 1000;
@@ -74,12 +68,11 @@ document.addEventListener("DOMContentLoaded", () => {
         return new Date(dateString).toLocaleDateString("en-US", { month: "short", day: "numeric" });
     };
 
-    // Generate the HTML for a user's avatar, either from a profile picture or initials
+    // Generate avatar HTML based on profile picture or initials
     const getAvatarHTML = (dbPic, authorName, size = 40) => {
         const myPic = localStorage.getItem("userProfilePic") || "";
         const isMe = authorName && authorName.trim().toLowerCase() === currentUser.toLowerCase();
         const picToUse = (isMe && myPic.trim() !== "") ? myPic : dbPic;
-
         if (picToUse && picToUse.trim() !== "" && picToUse !== "undefined" && picToUse !== "null") {
             return `<div class="avatar" style="background-image: url('${picToUse}'); background-size: cover; background-position: center;"></div>`;
         }
@@ -87,14 +80,12 @@ document.addEventListener("DOMContentLoaded", () => {
         return `<div class="avatar avatar-purple">${initials}</div>`;
     };
 
-    // === POST CARD HTML BUILDER ===
-    // Generate the HTML structure for a post card, including media, comments, and action buttons
+    // Generate HTML for a single post card
     const createPostCardHTML = (post, isNew = false) => {
         const isOwner = post.author && (post.author.trim().toLowerCase() === currentUser.toLowerCase());
         const isLiked = Array.isArray(post.likedBy) && post.likedBy.includes(currentUser);
         const timeAgo = formatTimeAgo(post.createdAt);
 
-        // lazy load media content (image or video) if present
         let mediaHTML = "";
         if (post.mediaUrl) {
             mediaHTML = post.mediaType === "video"
@@ -126,9 +117,13 @@ document.addEventListener("DOMContentLoaded", () => {
             <article class="post-card ${isNew ? 'new-item-highlight' : ''}" data-post-id="${post._id || ''}">
                 <div class="post-card-header">
                     <div class="author-info-group">
-                        ${getAvatarHTML(post.authorProfilePic, post.author, 40)}
+                        <a href="profile.html?user=${encodeURIComponent(post.author || 'User')}" style="text-decoration:none;">
+                            ${getAvatarHTML(post.authorProfilePic, post.author, 40)}
+                        </a>
                         <div>
-                            <span class="post-author">${post.author || "User"}</span>
+                            <a href="profile.html?user=${encodeURIComponent(post.author || 'User')}" class="post-author" style="text-decoration:none; color:inherit;">
+                                ${post.author || "User"}
+                            </a>
                             <span class="post-meta view-single-post-trigger">@${(post.author || "user").toLowerCase().replace(/\s/g, '')} · ${timeAgo}</span>
                         </div>
                     </div>
@@ -158,17 +153,16 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     // === FETCH POSTS FUNCTION ===
-    // Fetch posts from the server with optional pagination, search, and filters, and render them in the post feed
     const loadPosts = async (page = 1, append = false) => {
         if (!postFeed || isLoading) return;
         isLoading = true;
 
+        // take filters from the global function if it exists, otherwise use default values
+        const filters = window.getPostFilters ? window.getPostFilters() : { search: "", startDate: "", endDate: "", type: "all" };
+
         const params = new URLSearchParams({
             page, limit: 5,
-            search: searchInput ? searchInput.value.trim() : "",
-            startDate: filterStartDate ? filterStartDate.value : "",
-            endDate: filterEndDate ? filterEndDate.value : "",
-            type: activeTypeFilter
+            ...filters
         });
 
         try {
@@ -186,17 +180,24 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (data.posts.length === 0 && !append) {
                     postFeed.innerHTML = `
                         <div class="empty-state-box">
-                            <i class="bi bi-search"></i>
+                            <div class="empty-state-icon-wrapper">
+                                <i class="bi bi-search"></i>
+                            </div>
                             <h3>No posts found</h3>
-                            <p>We couldn't find any posts matching your criteria.</p>
-                            <button id="reset-filters-btn" class="btn btn-primary">Reset Filters</button>
+                            <p>We couldn't find any posts matching your criteria. Try adjusting your search or resetting your filters.</p>
+                            <button id="reset-filters-btn" type="button">
+                                <i class="bi bi-arrow-counterclockwise" style="margin-right: 6px;"></i> Reset Filters
+                            </button>
                         </div>`;
                     document.getElementById("reset-filters-btn")?.addEventListener("click", () => {
-                        if (searchInput) searchInput.value = "";
-                        if (filterStartDate) filterStartDate.value = "";
-                        if (filterEndDate) filterEndDate.value = "";
-                        activeTypeFilter = "all";
-                        filterOptions.forEach(o => o.classList.remove("selected"));
+                        const searchEl = document.getElementById("feed-search-input");
+                        const startEl = document.getElementById("filter-date-start");
+                        const endEl = document.getElementById("filter-date-end");
+                        if (searchEl) searchEl.value = "";
+                        if (startEl) startEl.value = "";
+                        if (endEl) endEl.value = "";
+
+                        document.querySelectorAll(".filter-option").forEach(o => o.classList.remove("selected"));
                         document.querySelector('.filter-option[data-value="all"]')?.classList.add("selected");
                         loadPosts(1, false);
                     });
@@ -222,14 +223,15 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     };
 
-    // === SHOW SINGLE POST MODAL FUNCTION ===
-    // Display a modal overlay with the details of a single post, allowing users to view it in isolation
+    // === GLOBAL FUNCTION TO RELOAD POSTS FEED ===
+    window.reloadPostsFeed = () => loadPosts(1, false);
+
     const showSinglePostBlurModal = (post) => {
         document.getElementById("single-post-blur-modal")?.remove();
         document.body.insertAdjacentHTML("beforeend", `
             <div id="single-post-blur-modal" class="modal-overlay active">
-                <div class="modal-content">
-                    <button id="close-blur-modal-btn" class="close-modal-btn">&times;</button>
+                <div class="modal-content" style="position: relative; padding: 48px 24px 24px; max-width: 600px;">
+                    <button id="close-blur-modal-btn" class="close-modal-btn" style="position: absolute; top: 10px; right: 16px; font-size: 1.8rem; line-height: 1; background: none; border: none; cursor: pointer; color: var(--text-muted, #766f7d); z-index: 10;">&times;</button>
                     ${createPostCardHTML(post)}
                 </div>
             </div>`);
@@ -242,28 +244,10 @@ document.addEventListener("DOMContentLoaded", () => {
         m.addEventListener("click", (e) => { if (e.target === m) close(); });
     };
 
-    // if the page is loaded with a postId in the URL, fetch and show that post in a modal
     loadPosts(1, false);
-    window.forceFilterUpdate = () => { syncSidebarUserProfile(); loadPosts(1, false); };
+
     const urlPostId = new URLSearchParams(window.location.search).get("postId");
     if (urlPostId) fetch(`/posts/${urlPostId}`).then(r => r.json()).then(d => { if (d.success && d.post) showSinglePostBlurModal(d.post); });
-
-    // === EVENT LISTENERS FOR SEARCH AND FILTERS ===
-    if (searchInput) searchInput.addEventListener("input", () => {
-        clearTimeout(searchTimeout);
-        searchTimeout = setTimeout(() => loadPosts(1, false), 300);
-    });
-
-    if (filterStartDate) filterStartDate.addEventListener("change", () => loadPosts(1, false));
-    if (filterEndDate) filterEndDate.addEventListener("change", () => loadPosts(1, false));
-
-    filterOptions.forEach(opt => opt.addEventListener("click", (e) => {
-        e.preventDefault();
-        filterOptions.forEach(o => o.classList.remove("selected"));
-        opt.classList.add("selected");
-        activeTypeFilter = opt.dataset.value || "all";
-        loadPosts(1, false);
-    }));
 
     // === CREATE POST MODAL FUNCTIONALITY ===
     const modalOverlay = document.getElementById("post-modal-overlay");
@@ -321,6 +305,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (modalPublishBtn) {
         modalPublishBtn.addEventListener("click", async () => {
+            modalPublishBtn.disabled = true; // stop multiple clicks while processing
+
             const file = mediaInput?.files[0];
             let mediaUrl = "", mediaType = "";
             if (file) {
@@ -335,22 +321,26 @@ document.addEventListener("DOMContentLoaded", () => {
                     content: modalTextarea.value.trim(), mediaUrl, mediaType
                 })
             });
-            if (res.status === 413) return alert("File exceeds 50mb limit!");
+            if (res.status === 413) {
+                modalPublishBtn.disabled = false;
+                return alert("File exceeds 50mb limit!");
+            }
             if (res.ok) {
                 loadPosts(1, false);
                 closeModal();
+            } else {
+                modalPublishBtn.disabled = false; // let the user try again if there was an error
             }
         });
     }
 
     // === GLOBAL CLICK EVENT LISTENER FOR POST INTERACTIONS ===
-    // Handle clicks on post cards for viewing, liking, replying, editing, and deleting posts and comments
     document.addEventListener("click", async (e) => {
+        // Handle clicks on post cards and their child elements
         const target = e.target;
         const postCard = target.closest(".post-card");
         const postId = postCard?.dataset.postId;
 
-        // Handle viewing a single post in a modal
         if (target.closest(".view-single-post-trigger") && postId) {
             e.stopPropagation();
             fetch(`/posts/${postId}`).then(r => r.json()).then(d => {
@@ -359,7 +349,33 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        // Handle liking a post
+        // Share button functionality
+        const copyLinkBtn = target.closest(".copy-link-btn");
+        if (copyLinkBtn && postId) {
+            e.stopPropagation();
+            const url = `${window.location.origin}/feed.html?postId=${postId}`;
+            navigator.clipboard.writeText(url);
+            copyLinkBtn.innerHTML = `<i class="bi bi-check2"></i> Copied!`;
+            setTimeout(() => {
+                copyLinkBtn.innerHTML = `<i class="bi bi-link-45deg"></i> Copy link`;
+            }, 2000);
+            return;
+        }
+
+        const nativeShareBtn = target.closest(".native-share-btn");
+        if (nativeShareBtn && postId) {
+            e.stopPropagation();
+            const url = `${window.location.origin}/feed.html?postId=${postId}`;
+            if (navigator.share) {
+                navigator.share({ title: "Check out this post", url });
+            } else {
+                navigator.clipboard.writeText(url);
+                alert("Link copied to clipboard!");
+            }
+            return;
+        }
+
+        // Like button functionality
         const likeBtn = target.closest(".stat-like");
         if (likeBtn && postId) {
             likeBtn.classList.toggle("liked");
@@ -368,29 +384,30 @@ document.addEventListener("DOMContentLoaded", () => {
             const isLiked = likeBtn.classList.contains("liked");
             icon.className = `bi ${isLiked ? 'bi-heart-fill pop-animation' : 'bi-heart'}`;
             countSpan.innerText = isLiked ? count + 1 : Math.max(0, count - 1);
-
             fetch(`/posts/${postId}/like`, {
                 method: "POST", headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ username: currentUser })
             }).then(r => r.json()).then(d => {
-                if (d.success && typeof d.likes === "number") countSpan.innerText = d.likes;
+                if (d.success && typeof d.likes === "number") {
+                    // update all like counts for this post across the page
+                    document.querySelectorAll(`.post-card[data-post-id="${postId}"] .like-count`)
+                        .forEach(el => el.innerText = d.likes);
+                }
             });
             return;
         }
 
-        // Handle toggling the comments section for a post
+        // Toggle comments section visibility
         if (target.closest(".stat-reply")) {
             const section = postCard?.querySelector(".comments-section");
             if (section) section.style.display = section.style.display === "none" ? "block" : "none";
             return;
         }
 
-        // Handle replying to a post
         if (target.classList.contains("reply-btn") && postId) {
             const input = target.previousElementSibling;
             const text = input.value.trim();
             if (!text) return;
-
             const res = await fetch(`/posts/${postId}/comments`, {
                 method: "POST", headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -414,19 +431,17 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        // Handle deleting a post or comment with confirmation modal
+        // delete post or comment functionality
         const deleteBtn = target.closest(".delete-post-btn, .delete-comment-btn");
         if (deleteBtn) {
             const isComment = deleteBtn.classList.contains("delete-comment-btn");
             const item = deleteBtn.closest(isComment ? ".comment-item" : ".post-card");
             const modal = document.getElementById("delete-confirm-modal");
-
             if (modal) {
                 modal.classList.add("active");
                 const confirmBtn = document.getElementById("confirm-delete-btn");
                 const newConfirm = confirmBtn.cloneNode(true);
                 confirmBtn.parentNode.replaceChild(newConfirm, confirmBtn);
-
                 newConfirm.addEventListener("click", async () => {
                     modal.classList.remove("active");
                     if (isComment && postId) {
@@ -445,14 +460,13 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        // Handle editing a post by opening the edit modal and populating it with existing content and media
+        //  Edit post functionality
         if (target.closest(".edit-post-btn") && postCard) {
             currentPostBeingEdited = postCard;
             editMediaCleared = false;
             const editModal = document.getElementById("edit-modal-overlay");
             const textarea = document.getElementById("edit-modal-textarea");
             if (textarea) textarea.value = postCard.querySelector(".post-text")?.innerText || "";
-
             const existingImg = postCard.querySelector("img.post-media-content");
             const existingVid = postCard.querySelector("video.post-media-content");
             const editPreviewContainer = document.getElementById("edit-modal-media-preview-container");
@@ -473,17 +487,23 @@ document.addEventListener("DOMContentLoaded", () => {
                     editPreviewContainer.style.display = "flex";
                 }
             }
-
             editModal.classList.add("active");
         }
     });
 
     // === EDIT POST MODAL FUNCTIONALITY ===
-    // Handle media upload, preview, clearing, and publishing edits for a post
     const editMediaInput = document.getElementById("edit-modal-media-upload");
     const editPreviewContainer = document.getElementById("edit-modal-media-preview-container");
     const editImgPreview = document.getElementById("edit-modal-media-preview");
     const editVideoPreview = document.getElementById("edit-modal-video-preview");
+
+    // close edit modal and reset its state function
+    const closeEditModal = () => {
+        document.getElementById("edit-modal-overlay")?.classList.remove("active");
+        if (editMediaInput) editMediaInput.value = "";
+        if (editPreviewContainer) editPreviewContainer.style.display = "none";
+        editMediaCleared = false;
+    };
 
     document.getElementById("edit-modal-image-btn")?.addEventListener("click", () => editMediaInput?.click());
     document.getElementById("edit-modal-clear-media")?.addEventListener("click", () => {
@@ -504,7 +524,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     editVideoPreview.style.display = "block";
                     editImgPreview.style.display = "none";
                 } else {
-                    imgPreview.src = url;
+                    editImgPreview.src = url;
                     editImgPreview.style.display = "block";
                     editVideoPreview.style.display = "none";
                 }
@@ -536,19 +556,30 @@ document.addEventListener("DOMContentLoaded", () => {
             body: JSON.stringify(payload)
         });
         if (res.ok) {
-            document.getElementById("edit-modal-overlay").classList.remove("active");
+            closeEditModal(); 
             document.getElementById("single-post-blur-modal")?.remove();
             loadPosts(1, false);
         }
     });
 
-    document.getElementById("close-edit-modal-btn")?.addEventListener("click", () => {
-        document.getElementById("edit-modal-overlay")?.classList.remove("active");
-    });
+    document.getElementById("close-edit-modal-btn")?.addEventListener("click", closeEditModal);
 
     document.addEventListener("input", (e) => {
         if (e.target.classList.contains("comment-input")) {
             e.target.nextElementSibling.disabled = !e.target.value.trim();
         }
+    });
+
+    // Toggle facebook share button active state
+    document.getElementById("share-facebook-btn")?.addEventListener("click", function () {
+        this.classList.toggle("active");
+    });
+
+    // Close modals when clicking outside of them
+    ["post-modal-overlay", "edit-modal-overlay", "delete-confirm-modal"].forEach(id => {
+        const overlay = document.getElementById(id);
+        overlay?.addEventListener("click", (e) => {
+            if (e.target === overlay) overlay.classList.remove("active");
+        });
     });
 });

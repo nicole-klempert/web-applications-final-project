@@ -44,7 +44,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const loggedInUser = localStorage.getItem("loggedInUser") || "Guest User";
     const savedProfilePic = localStorage.getItem("userProfilePic");
 
-    // 1. עדכון שמות המשתמש בנאבבר ובסיידבר
+    // update the user name and handle in the navbar and account card
     const userNameDisplay = document.getElementById("nav-user-name") || document.querySelector(".account-card .name");
     const userHandleDisplay = document.getElementById("nav-user-handle") || document.querySelector(".account-card .handle");
 
@@ -55,17 +55,17 @@ document.addEventListener("DOMContentLoaded", () => {
         userHandleDisplay.textContent = "@" + loggedInUser.toLowerCase().replace(/\s/g, '');
     }
 
-    // 2. פונקציה שמייצרת ומעדכנת אווטר (תמונה או אותיות)
+    // function to update the avatar element based on saved profile picture or initials
     const updateAvatarElement = (avatarEl) => {
         if (!avatarEl) return;
 
         if (savedProfilePic && savedProfilePic.trim() !== "") {
-            // אם יש תמונה שמורה - נציג אותה וננקה רקע ומילוי ישן
+            // if there's a saved profile picture, display it
             avatarEl.innerHTML = `<img src="${savedProfilePic}" alt="Profile" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover; display: block;">`;
             avatarEl.style.background = "transparent";
             avatarEl.style.border = "1px solid var(--border-color)";
         } else {
-            // אם אין תמונה - נציג אותיות דינמיות עם צבע
+            // if no profile picture, display initials with a purple background
             const names = loggedInUser.trim().split(" ");
             let initials = names.length >= 2 ? (names[0][0] + names[1][0]).toUpperCase() : loggedInUser.substring(0, 2).toUpperCase();
             avatarEl.textContent = initials;
@@ -75,10 +75,30 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     };
 
-    // 3. עדכון כל האווטרים של המשתמש בעמוד (בסיידבר, בנאבבר ובתיבת כתיבת פוסט/תגובה)
+    // update all avatar elements in the app (navbar, account card, composer placeholder)
     updateAvatarElement(document.getElementById("nav-user-avatar"));
     updateAvatarElement(document.querySelector(".account-card .avatar"));
     updateAvatarElement(document.querySelector(".composer-placeholder .avatar"));
+
+    // --- Back to Top Button Logic ---
+    const backToTopBtn = document.getElementById("back-to-top");
+    if (backToTopBtn) {
+        window.addEventListener("scroll", () => {
+            // check the scroll position and toggle the visibility of the back-to-top button
+            const scrollPosition = window.scrollY || document.documentElement.scrollTop;
+            if (scrollPosition > 250) {
+                backToTopBtn.classList.add("show");
+            } else {
+                backToTopBtn.classList.remove("show");
+            }
+        });
+
+        backToTopBtn.addEventListener("click", (e) => {
+            e.preventDefault();
+            window.scrollTo({ top: 0, behavior: "smooth" });
+        });
+    }
+  
 
     // --- Logout Confirmation Logic (Custom Modal) ---
     const logoutBtnTrigger = document.getElementById("logout-btn-trigger");

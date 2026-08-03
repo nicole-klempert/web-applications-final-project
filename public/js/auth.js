@@ -204,11 +204,22 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         }
 
+        // save cropped avatar and display live preview
         if (saveCropBtn) {
             saveCropBtn.addEventListener("click", () => {
                 if (!cropCanvas) return;
-                const croppedBase64 = cropCanvas.toDataURL("image/jpeg", 0.85);
 
+                // create a smaller canvas to resize the cropped image to 120x120
+                const smallCanvas = document.createElement("canvas");
+                smallCanvas.width = 120;
+                smallCanvas.height = 120;
+                const smallCtx = smallCanvas.getContext("2d");
+                smallCtx.drawImage(cropCanvas, 0, 0, 120, 120);
+
+                // downscale the image to reduce file size and convert to base64
+                const croppedBase64 = smallCanvas.toDataURL("image/jpeg", 0.75);
+
+                // show inside the circular trigger button
                 if (livePreviewImg && avatarPlaceholder) {
                     livePreviewImg.src = croppedBase64;
                     livePreviewImg.style.display = "block";

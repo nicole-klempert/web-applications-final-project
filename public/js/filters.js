@@ -1,17 +1,29 @@
-// --- Search & Filter Logic (3 Parameters Requirement: Text, Type, Date Range) ---
+// --- Search & Filter Logic (Server-side integrated) ---
 document.addEventListener("DOMContentLoaded", () => {
     const filterBox = document.getElementById("custom-filter");
     const searchInput = document.getElementById("feed-search-input");
     const dateStartInput = document.getElementById("filter-date-start");
     const dateEndInput = document.getElementById("filter-date-end");
     const filterTextDisplay = document.getElementById("filter-selected-text");
+    const filterOptions = document.querySelectorAll(".filter-option");
 
+    let searchTimeout = null;
+    let activeTypeFilter = "all";
+
+    // Function to get current filter values, accessible globally
+    window.getPostFilters = () => ({
+        search: searchInput ? searchInput.value.trim() : "",
+        startDate: dateStartInput ? dateStartInput.value : "",
+        endDate: dateEndInput ? dateEndInput.value : "",
+        type: activeTypeFilter
+    });
+
+    // update the filter display text based on current selections
     const updateFilterDisplayUI = () => {
         if (!filterTextDisplay) return;
         const activeFilter = document.querySelector(".filter-option.selected");
         let displayText = activeFilter ? activeFilter.innerText : "All Posts";
 
-        // append date range to the display string if applicable
         if (dateStartInput && dateStartInput.value && dateEndInput && dateEndInput.value) {
             displayText += ` • ${dateStartInput.value} to ${dateEndInput.value}`;
         } else if (dateStartInput && dateStartInput.value) {
@@ -23,67 +35,40 @@ document.addEventListener("DOMContentLoaded", () => {
         filterTextDisplay.innerText = displayText;
     };
 
-    const filterPosts = () => {
-        const activeOption = document.querySelector(".filter-option.selected");
-        const activeFilter = activeOption ? activeOption.dataset.value : "all";
-        const searchTerm = searchInput ? searchInput.value.toLowerCase() : "";
-        const searchDateStart = dateStartInput ? dateStartInput.value : "";
-        const searchDateEnd = dateEndInput ? dateEndInput.value : "";
-
-        const posts = document.querySelectorAll(".post-card");
-
-        posts.forEach(post => {
-            const postType = post.dataset.postType || "text";
-            const postDate = post.dataset.postDate || "";
-            const postText = post.querySelector(".post-text")?.innerText.toLowerCase() || "";
-            const postAuthor = post.querySelector(".post-author")?.innerText.toLowerCase() || "";
-
-            const matchesFilter = (activeFilter === "all") || (activeFilter === postType);
-            const matchesSearch = postText.includes(searchTerm) || postAuthor.includes(searchTerm);
-
-            // simple string comparison works perfectly for standard ISO dates (YYYY-MM-DD)
-            let matchesDate = true;
-            if (searchDateStart && postDate < searchDateStart) matchesDate = false;
-            if (searchDateEnd && postDate > searchDateEnd) matchesDate = false;
-
-            if (matchesFilter && matchesSearch && matchesDate) {
-                post.style.display = "flex";
-            } else {
-                post.style.display = "none";
-            }
-        });
-
+    // apply the current filters and trigger a reload of the posts feed
+    const triggerReload = () => {
         updateFilterDisplayUI();
+        if (typeof window.reloadPostsFeed === "function") {
+            window.reloadPostsFeed();
+        }
     };
 
-    // expose the filter function to the window so it can be called upon creating a new post
-    window.forceFilterUpdate = filterPosts;
-
+    // manage filter box interactions and option selections
     if (filterBox) {
         const filterSelected = filterBox.querySelector(".filter-selected");
-        const filterOptions = filterBox.querySelectorAll(".filter-option");
 
         filterSelected.addEventListener("click", () => {
             filterBox.classList.toggle("open");
         });
 
         filterOptions.forEach(option => {
-            option.addEventListener("click", () => {
+            option.addEventListener("click", (e) => {
+                e.preventDefault();
                 filterOptions.forEach(opt => opt.classList.remove("selected"));
                 option.classList.add("selected");
                 filterBox.classList.remove("open");
-                filterPosts();
+                activeTypeFilter = option.dataset.value || "all";
+                triggerReload();
             });
         });
 
-        // ensure clicking inside date inputs doesn't close the menu
         if (dateStartInput) {
             dateStartInput.addEventListener("click", (e) => e.stopPropagation());
-            dateStartInput.addEventListener("change", filterPosts);
+            dateStartInput.addEventListener("change", triggerReload);
         }
         if (dateEndInput) {
             dateEndInput.addEventListener("click", (e) => e.stopPropagation());
-            dateEndInput.addEventListener("change", filterPosts);
+            dateEndInput.addEventListener("change", triggerReload);
         }
 
         document.addEventListener("click", (e) => {
@@ -91,9 +76,28 @@ document.addEventListener("DOMContentLoaded", () => {
                 filterBox.classList.remove("open");
             }
         });
+
+        // filter reset button logic
+        document.addEventListener("click", (e) => {
+            if (e.target.id === "reset-filters-btn") {
+                if (searchInput) searchInput.value = "";
+                if (dateStartInput) dateStartInput.value = "";
+                if (dateEndInput) dateEndInput.value = "";
+                activeTypeFilter = "all";
+                filterOptions.forEach(o => o.classList.remove("selected"));
+                document.querySelector('.filter-option[data-value="all"]')?.classList.add("selected");
+                triggerReload();
+            }
+        });
     }
 
+    // text input search logic with debounce to reduce reload frequency
     if (searchInput) {
-        searchInput.addEventListener("input", filterPosts);
+        searchInput.addEventListener("input", () => {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                triggerReload();
+            }, 300);
+        });
     }
 });

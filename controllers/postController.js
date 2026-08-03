@@ -139,9 +139,14 @@ export const toggleLike = async (req, res) => {
 
 export const updatePost = async (req, res) => {
     try {
-        const { content, mediaUrl, mediaType } = req.body;
+        const { content, mediaUrl, mediaType, username } = req.body;
         const post = await Post.findById(req.params.postId);
         if (!post) return res.status(404).json({ success: false, error: "Post not found" });
+
+        // check if the username matches the post author (case-insensitive)
+        if (username && post.author.toLowerCase() !== username.toLowerCase()) {
+            return res.status(403).json({ success: false, error: "403 Forbidden: You are not authorized to edit this post" });
+        }
 
         if (content !== undefined) post.content = content;
         if (mediaUrl !== undefined) post.mediaUrl = mediaUrl;
@@ -159,8 +164,16 @@ export const updatePost = async (req, res) => {
 
 export const deletePost = async (req, res) => {
     try {
-        const deleted = await Post.findByIdAndDelete(req.params.postId);
-        if (!deleted) return res.status(404).json({ success: false, error: "Post not found" });
+        const { username } = req.body || req.query;
+        const post = await Post.findById(req.params.postId);
+        if (!post) return res.status(404).json({ success: false, error: "Post not found" });
+
+        // check ownership on the server side - return 403 if the user is not the owner
+        if (username && post.author.toLowerCase() !== username.toLowerCase()) {
+            return res.status(403).json({ success: false, error: "403 Forbidden: You are not authorized to delete this post" });
+        }
+
+        await Post.findByIdAndDelete(req.params.postId);
         return res.status(200).json({ success: true });
     } catch (error) {
         return res.status(500).json({ success: false, error: "Failed to delete post" });
