@@ -1,5 +1,43 @@
 // --- Main App Logic (Dark Mode, User, Logout) ---
 document.addEventListener("DOMContentLoaded", () => {
+
+    // === Global Modals Injection ===
+    const injectGlobalModals = () => {
+        // logout confirmation modal (popup)
+        if (!document.getElementById("logout-confirm-modal")) {
+            document.body.insertAdjacentHTML("beforeend", `
+                <!-- Logout Confirmation Modal -->
+                <div id="logout-confirm-modal" class="modal-overlay">
+                    <div class="confirm-modal-content">
+                        <h3>Log Out?</h3>
+                        <p>Are you sure you want to log out of your account?</p>
+                        <button id="confirm-logout-btn" class="danger-btn">Log Out</button>
+                        <button id="cancel-logout-btn" class="cancel-btn">Cancel</button>
+                    </div>
+                </div>
+            `);
+        }
+
+        // delete confirmation modal (popup)
+        if (!document.getElementById("delete-confirm-modal")) {
+            document.body.insertAdjacentHTML("beforeend", `
+                <!-- Delete Confirmation Modal -->
+                <div id="delete-confirm-modal" class="modal-overlay">
+                    <div class="confirm-modal-content">
+                        <h3>Delete item?</h3>
+                        <p>This action can’t be undone and the item will be removed permanently.</p>
+                        <button id="confirm-delete-btn" class="danger-btn">Delete</button>
+                        <button id="cancel-delete-btn" class="cancel-btn">Cancel</button>
+                    </div>
+                </div>
+            `);
+        }
+    };
+
+    // use the function to inject modals into the DOM
+    injectGlobalModals();
+
+    // --- Dark Mode Toggle Logic ---
     const darkModeToggle = document.getElementById("dark-mode-toggle");
     const body = document.body;
 

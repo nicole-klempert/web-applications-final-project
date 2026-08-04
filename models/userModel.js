@@ -50,7 +50,32 @@ const userSchema = new mongoose.Schema({
     profilePicture: {
         type: String,
         default: ""
-    }
+    }, 
+    // User's bio or description (optional)
+    bio: {
+        type: String,
+        default: "",
+        maxLength: 250
+    },
+    // User's city (optional)
+    city: {
+        type: String,
+        default: ""
+    },
+    // Array of friends' usernames (optional)
+    friends: [{
+        type: String 
+    }],
+    // Array of friend request usernames (optional)
+    friendRequests: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+    }],
+    // Array of group IDs the user is a member of (optional)
+    groups: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Group'
+    }]
 }, {
     // Automatically include virtuals when converting documents to JSON or Objects
     toJSON: { virtuals: true },

@@ -8,6 +8,7 @@ import User from './models/userModel.js';
 // import  routes
 import authRoutes from './routes/authRoutes.js';
 import postRoutes from './routes/postRoutes.js';
+import userRoutes from './routes/userRoutes.js';
 
 // load environment variables
 dotenv.config();
@@ -70,6 +71,9 @@ app.use('/', authRoutes);
 
 // mount post routes
 app.use('/posts', postRoutes);
+
+// mount user profile routes
+app.use('/users', userRoutes);
 
 // redirect root url to login page
 app.get('/', (req, res) => {

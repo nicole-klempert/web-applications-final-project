@@ -66,7 +66,6 @@
     align-items: center;
     box-shadow: -10px 0 30px rgba(36, 28, 44, 0.04); /* shadow */
     transition: background-color 0.3s ease;
-
     /* === Responsivity === */
     @media (max-width: 850px) {
         /* condition if the screen is smaller than 850px the website is changing */
@@ -84,3 +83,5 @@
             text-align: center;
         }
     }
+}
+
