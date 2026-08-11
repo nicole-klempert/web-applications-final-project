@@ -1,5 +1,43 @@
 // --- Main App Logic (Dark Mode, User, Logout) ---
 document.addEventListener("DOMContentLoaded", () => {
+
+    // === Global Modals Injection ===
+    const injectGlobalModals = () => {
+        // logout confirmation modal (popup)
+        if (!document.getElementById("logout-confirm-modal")) {
+            document.body.insertAdjacentHTML("beforeend", `
+                <!-- Logout Confirmation Modal -->
+                <div id="logout-confirm-modal" class="modal-overlay">
+                    <div class="confirm-modal-content">
+                        <h3>Log Out?</h3>
+                        <p>Are you sure you want to log out of your account?</p>
+                        <button id="confirm-logout-btn" class="danger-btn">Log Out</button>
+                        <button id="cancel-logout-btn" class="cancel-btn">Cancel</button>
+                    </div>
+                </div>
+            `);
+        }
+
+        // delete confirmation modal (popup)
+        if (!document.getElementById("delete-confirm-modal")) {
+            document.body.insertAdjacentHTML("beforeend", `
+                <!-- Delete Confirmation Modal -->
+                <div id="delete-confirm-modal" class="modal-overlay">
+                    <div class="confirm-modal-content">
+                        <h3>Delete item?</h3>
+                        <p>This action can’t be undone and the item will be removed permanently.</p>
+                        <button id="confirm-delete-btn" class="danger-btn">Delete</button>
+                        <button id="cancel-delete-btn" class="cancel-btn">Cancel</button>
+                    </div>
+                </div>
+            `);
+        }
+    };
+
+    // use the function to inject modals into the DOM
+    injectGlobalModals();
+
+    // --- Dark Mode Toggle Logic ---
     const darkModeToggle = document.getElementById("dark-mode-toggle");
     const body = document.body;
 
@@ -40,18 +78,65 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // --- User Display Logic ---
-    const userNameDisplay = document.getElementById("nav-user-name");
-    const userHandleDisplay = document.getElementById("nav-user-handle");
-    const userAvatarDisplay = document.getElementById("nav-user-avatar");
+    // --- User Display Logic (Dynamic Avatar & Profile Picture Anywhere in App) ---
+    const loggedInUser = localStorage.getItem("loggedInUser") || "Guest User";
+    const savedProfilePic = localStorage.getItem("userProfilePic");
+
+    // update the user name and handle in the navbar and account card
+    const userNameDisplay = document.getElementById("nav-user-name") || document.querySelector(".account-card .name");
+    const userHandleDisplay = document.getElementById("nav-user-handle") || document.querySelector(".account-card .handle");
 
     if (userNameDisplay) {
-        // fetch user data (to be replaced later with actual fetch from the server)
-        const loggedInUser = localStorage.getItem("loggedInUser") || "User";
         userNameDisplay.textContent = loggedInUser;
-        userHandleDisplay.textContent = "@" + loggedInUser.toLowerCase().replace(/\s/g, '');
-        userAvatarDisplay.textContent = loggedInUser.substring(0, 2).toUpperCase();
     }
+    if (userHandleDisplay) {
+        userHandleDisplay.textContent = "@" + loggedInUser.toLowerCase().replace(/\s/g, '');
+    }
+
+    // function to update the avatar element based on saved profile picture or initials
+    const updateAvatarElement = (avatarEl) => {
+        if (!avatarEl) return;
+
+        if (savedProfilePic && savedProfilePic.trim() !== "") {
+            // if there's a saved profile picture, display it
+            avatarEl.innerHTML = `<img src="${savedProfilePic}" alt="Profile" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover; display: block;">`;
+            avatarEl.style.background = "transparent";
+            avatarEl.style.border = "1px solid var(--border-color)";
+        } else {
+            // if no profile picture, display initials with a purple background
+            const names = loggedInUser.trim().split(" ");
+            let initials = names.length >= 2 ? (names[0][0] + names[1][0]).toUpperCase() : loggedInUser.substring(0, 2).toUpperCase();
+            avatarEl.textContent = initials;
+
+            avatarEl.classList.remove("avatar-blue", "avatar-muted");
+            avatarEl.classList.add("avatar-purple");
+        }
+    };
+
+    // update all avatar elements in the app (navbar, account card, composer placeholder)
+    updateAvatarElement(document.getElementById("nav-user-avatar"));
+    updateAvatarElement(document.querySelector(".account-card .avatar"));
+    updateAvatarElement(document.querySelector(".composer-placeholder .avatar"));
+
+    // --- Back to Top Button Logic ---
+    const backToTopBtn = document.getElementById("back-to-top");
+    if (backToTopBtn) {
+        window.addEventListener("scroll", () => {
+            // check the scroll position and toggle the visibility of the back-to-top button
+            const scrollPosition = window.scrollY || document.documentElement.scrollTop;
+            if (scrollPosition > 250) {
+                backToTopBtn.classList.add("show");
+            } else {
+                backToTopBtn.classList.remove("show");
+            }
+        });
+
+        backToTopBtn.addEventListener("click", (e) => {
+            e.preventDefault();
+            window.scrollTo({ top: 0, behavior: "smooth" });
+        });
+    }
+  
 
     // --- Logout Confirmation Logic (Custom Modal) ---
     const logoutBtnTrigger = document.getElementById("logout-btn-trigger");
@@ -74,9 +159,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (confirmLogoutBtn) {
             confirmLogoutBtn.addEventListener("click", () => {
-                // clear the saved username
+                // clear saved username and profile picture on logout
                 localStorage.removeItem("loggedInUser");
-                // redirect back to the login screen (url can be changed if needed)
+                localStorage.removeItem("userProfilePic");
+                // redirect back to the login screen
                 window.location.href = "login.html";
             });
         }

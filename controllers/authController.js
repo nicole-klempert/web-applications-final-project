@@ -1,12 +1,12 @@
 import User from '../models/userModel.js';
 
 // for ajax requests, or redirect for fallback form posts (so that the page doesnt reload when there is an input mistake)
-const sendResponse = (req, res, status, errorMsg, redirectUrl) => {
+const sendResponse = (req, res, status, errorMsg, redirectUrl, extraData = {}) => {
     if (req.headers.accept && req.headers.accept.includes('application/json')) {
         if (status >= 400) {
             return res.status(status).json({ error: errorMsg });
         }
-        return res.json({ success: true, redirect: redirectUrl });
+        return res.json({ success: true, redirect: redirectUrl, ...extraData });
     } else {
         if (status >= 400) {
             const separator = redirectUrl.includes('?') ? '&' : '?';
@@ -26,7 +26,8 @@ export const signup = async (req, res) => {
             'new-password': password,
             'confirm-password': confirmPassword,
             'recovery-question': recoveryQuestion,
-            'recovery-answer': recoveryAnswer
+            'recovery-answer': recoveryAnswer,
+            'profile-picture': profilePicture
         } = req.body;
 
         // check if passwords match
@@ -59,7 +60,8 @@ export const signup = async (req, res) => {
             password,
             birthday,
             recoveryQuestion,
-            recoveryAnswer
+            recoveryAnswer,
+            profilePicture
         });
 
         await newUser.save();
@@ -93,8 +95,15 @@ export const login = async (req, res) => {
         }
 
         console.log(`[Login Success] Secure user logged in: "${username}"`);
-        // redirect to feed page
-        return sendResponse(req, res, 200, null, '/feed.html?success=Welcome back, ' + encodeURIComponent(username) + '!');
+        // redirect to feed page and send stored profile picture
+        return sendResponse(
+            req,
+            res,
+            200,
+            null,
+            '/feed.html?success=Welcome back, ' + encodeURIComponent(username) + '!',
+            { profilePicture: user.profilePicture || "" }
+        );
     } catch (error) {
         console.error('Error during login:', error);
         return sendResponse(req, res, 500, 'Login failed. Please try again.', '/login.html');
