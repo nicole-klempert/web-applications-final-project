@@ -1,7 +1,11 @@
 import express from 'express';
 import { getPosts, getPostById, createPost, addComment, deleteComment, toggleLike, updatePost, deletePost } from '../controllers/postController.js';
+import { isAuthenticated, isPostOwner } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
+
+// all post routes require the user to be logged in
+router.use(isAuthenticated);
 
 // routes for fetching all posts and creating a new post
 router.get('/', getPosts);
@@ -17,8 +21,8 @@ router.delete('/:postId/comments/:commentId', deleteComment);
 // route for toggling likes on a post
 router.post('/:postId/like', toggleLike);
 
-// routes for updating and deleting posts
-router.put('/:postId', updatePost);
-router.delete('/:postId', deletePost);
+// routes for updating and deleting posts (restricted to the post owner)
+router.put('/:postId', isPostOwner, updatePost);
+router.delete('/:postId', isPostOwner, deletePost);
 
 export default router;

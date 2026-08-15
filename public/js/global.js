@@ -136,7 +136,7 @@ document.addEventListener("DOMContentLoaded", () => {
             window.scrollTo({ top: 0, behavior: "smooth" });
         });
     }
-  
+
 
     // --- Logout Confirmation Logic (Custom Modal) ---
     const logoutBtnTrigger = document.getElementById("logout-btn-trigger");
@@ -162,8 +162,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 // clear saved username and profile picture on logout
                 localStorage.removeItem("loggedInUser");
                 localStorage.removeItem("userProfilePic");
-                // redirect back to the login screen
-                window.location.href = "login.html";
+                // redirect to server logout endpoint to destroy session and cookie
+                window.location.href = "/logout";
             });
         }
     }
