@@ -5,12 +5,10 @@ async function fetchNews() {
     if (!newsContainer) return;
 
     try {
-        const response = await fetch('https://api.tvmaze.com/schedule?country=US');
+        // fetch from backend proxy route instead of directly querying external api
+        const response = await fetch('/api/news');
         if (!response.ok) throw new Error("Network response was not ok");
-        const data = await response.json();
-
-        // get top 4 shows airing today
-        const shows = data.slice(0, 4);
+        const shows = await response.json();
 
         newsContainer.innerHTML = ''; // clear loading state
 

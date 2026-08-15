@@ -1,44 +1,28 @@
 import express from 'express';
-import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import User from './models/userModel.js';
 import session from 'express-session';
 
 // import  routes
 import authRoutes from './routes/authRoutes.js';
 import postRoutes from './routes/postRoutes.js';
 import userRoutes from './routes/userRoutes.js';
+import newsRoutes from './routes/newsRoutes.js';
+import connectDB from './config/db.js';
 
 // load environment variables
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-// fallback on local mongoDB if not found in .env file 
-const MONGO_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/secure_users_db';
 
 // get the path where the server files are located on the computer
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// connect to mongo atlas with SSL true, disable for local testing
-const useSSL = MONGO_URI.includes('mongodb+srv') || MONGO_URI.includes('mongodb.net');
-
-mongoose.connect(MONGO_URI, {
-    ssl: useSSL,
-    authSource: 'admin',
-    retryWrites: true
-})
-    .then(() => {
-        console.log('Successfully connected to MongoDB!');
-        console.log('--> Connected DB Name:', mongoose.connection.name, '| Host:', mongoose.connection.host);
-    })
-    .catch(err => {
-        console.error('Database connection error:', err);
-        process.exit(1);
-    });
+// connect to database
+connectDB();
 
 // parses incoming http requests
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
@@ -89,6 +73,9 @@ app.use('/posts', postRoutes);
 
 // mount user profile routes
 app.use('/users', userRoutes);
+
+// mount external news routes
+app.use('/api/news', newsRoutes);
 
 // redirect root url to login page
 app.get('/', (req, res) => {
