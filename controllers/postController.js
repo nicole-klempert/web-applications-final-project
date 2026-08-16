@@ -1,7 +1,7 @@
 import Post from '../models/postModel.js';
 
 // GET /posts 
-export const getPosts = async (req, res) => {
+export const getPosts = async (req, res, next) => {
     try {
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 5;
@@ -50,22 +50,21 @@ export const getPosts = async (req, res) => {
             hasMore: (skip + posts.length) < totalPosts
         });
     } catch (error) {
-        console.error('Error fetching posts:', error);
-        return res.status(500).json({ success: false, error: 'Failed to fetch posts' });
+        next(error);
     }
 };
 
-export const getPostById = async (req, res) => {
+export const getPostById = async (req, res, next) => {
     try {
         const post = await Post.findById(req.params.postId);
         if (!post) return res.status(404).json({ success: false, error: 'Post not found' });
         return res.status(200).json({ success: true, post });
     } catch (error) {
-        return res.status(500).json({ success: false, error: 'Failed to fetch post' });
+        next(error);
     }
 };
 
-export const createPost = async (req, res) => {
+export const createPost = async (req, res, next) => {
     try {
         const { author, authorProfilePic, content, mediaUrl, mediaType } = req.body;
         const newPost = new Post({
@@ -81,11 +80,11 @@ export const createPost = async (req, res) => {
         const savedPost = await newPost.save();
         return res.status(201).json({ success: true, post: savedPost });
     } catch (error) {
-        return res.status(500).json({ success: false, error: 'Failed to create post' });
+        next(error);
     }
 };
 
-export const addComment = async (req, res) => {
+export const addComment = async (req, res, next) => {
     try {
         const { author, authorProfilePic = "", text } = req.body;
         if (!text || !text.trim()) return res.status(400).json({ success: false, error: "Comment text is required" });
@@ -103,11 +102,11 @@ export const addComment = async (req, res) => {
         await post.save();
         return res.status(201).json({ success: true, comment: post.comments[post.comments.length - 1] });
     } catch (error) {
-        return res.status(500).json({ success: false, error: "Failed to add comment" });
+        next(error);
     }
 };
 
-export const deleteComment = async (req, res) => {
+export const deleteComment = async (req, res, next) => {
     try {
         const post = await Post.findById(req.params.postId);
         if (!post) return res.status(404).json({ success: false, error: "Post not found" });
@@ -115,11 +114,11 @@ export const deleteComment = async (req, res) => {
         await post.save();
         return res.status(200).json({ success: true });
     } catch (error) {
-        return res.status(500).json({ success: false, error: "Failed to delete comment" });
+        next(error);
     }
 };
 
-export const toggleLike = async (req, res) => {
+export const toggleLike = async (req, res, next) => {
     try {
         const { username } = req.body;
         const post = await Post.findById(req.params.postId);
@@ -133,11 +132,11 @@ export const toggleLike = async (req, res) => {
 
         return res.status(200).json({ success: true, likes: post.likes, likedBy: post.likedBy, isLiked });
     } catch (error) {
-        return res.status(500).json({ success: false, error: "Failed to update likes" });
+        next(error);
     }
 };
 
-export const updatePost = async (req, res) => {
+export const updatePost = async (req, res, next) => {
     try {
         const { content, mediaUrl, mediaType, username } = req.body;
         const post = await Post.findById(req.params.postId);
@@ -158,11 +157,11 @@ export const updatePost = async (req, res) => {
         await post.save();
         return res.status(200).json({ success: true, post });
     } catch (error) {
-        return res.status(500).json({ success: false, error: "Failed to update post" });
+        next(error);
     }
 };
 
-export const deletePost = async (req, res) => {
+export const deletePost = async (req, res, next) => {
     try {
         const { username } = req.body || req.query;
         const post = await Post.findById(req.params.postId);
@@ -176,6 +175,6 @@ export const deletePost = async (req, res) => {
         await Post.findByIdAndDelete(req.params.postId);
         return res.status(200).json({ success: true });
     } catch (error) {
-        return res.status(500).json({ success: false, error: "Failed to delete post" });
+        next(error);
     }
 };

@@ -94,6 +94,13 @@ export const login = async (req, res) => {
             return sendResponse(req, res, 400, 'Invalid username or password', '/login.html');
         }
 
+        // save user details to the server side session
+        req.session.user = {
+            id: user._id,
+            username: user.username,
+            profilePicture: user.profilePicture || ""
+        };
+
         console.log(`[Login Success] Secure user logged in: "${username}"`);
         // redirect to feed page and send stored profile picture
         return sendResponse(
@@ -101,7 +108,7 @@ export const login = async (req, res) => {
             res,
             200,
             null,
-            '/feed.html?success=Welcome back, ' + encodeURIComponent(username) + '!',
+            '/feed.html?success=Welcome back, ' + encodeURIComponent(user.username) + '!',
             { profilePicture: user.profilePicture || "" }
         );
     } catch (error) {
@@ -168,6 +175,19 @@ export const forgotPassword = async (req, res) => {
 
 // GET /logout endpoint
 export const logout = (req, res) => {
-    console.log('[Logout] User logged out.');
-    res.redirect('/login.html?success=Logged out successfully.');
+    if (req.session) {
+        // destroy session on the server
+        req.session.destroy(err => {
+            if (err) {
+                console.error('[Logout Error] Failed to destroy session:', err);
+                return res.status(500).json({ success: false, error: 'Failed to log out' });
+            }
+            // clear session cookie from browser
+            res.clearCookie('connect.sid');
+            console.log('[Logout Success] Session destroyed and cookie cleared.');
+            return res.redirect('/login.html?success=Logged out successfully.');
+        });
+    } else {
+        return res.redirect('/login.html?success=Logged out successfully.');
+    }
 };
