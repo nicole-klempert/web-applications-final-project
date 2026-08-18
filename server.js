@@ -9,6 +9,7 @@ import authRoutes from './routes/authRoutes.js';
 import postRoutes from './routes/postRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import newsRoutes from './routes/newsRoutes.js';
+import searchRoutes from './routes/searchRoutes.js';
 import connectDB from './config/db.js';
 
 // load environment variables
@@ -73,6 +74,9 @@ app.use('/posts', postRoutes);
 
 // mount user profile routes
 app.use('/users', userRoutes);
+
+// mount search routes
+app.use('/api/search', searchRoutes);
 
 // mount external news routes
 app.use('/api/news', newsRoutes);
