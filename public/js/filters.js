@@ -2,6 +2,8 @@
 document.addEventListener("DOMContentLoaded", () => {
     const filterBox = document.getElementById("custom-filter");
     const searchInput = document.getElementById("feed-search-input");
+    const authorInput = document.getElementById("feed-author-input");
+    const groupInput = document.getElementById("feed-group-input");
     const dateStartInput = document.getElementById("filter-date-start");
     const dateEndInput = document.getElementById("filter-date-end");
     const filterTextDisplay = document.getElementById("filter-selected-text");
@@ -55,6 +57,8 @@ document.addEventListener("DOMContentLoaded", () => {
     // Function to get current filter values, accessible globally
     window.getPostFilters = () => ({
         search: searchInput ? searchInput.value.trim() : "",
+        author: authorInput ? authorInput.value.trim() : "",
+        group: groupInput ? groupInput.value.trim() : "",
         startDate: dateStartInput ? dateStartInput.value : "",
         endDate: dateEndInput ? dateEndInput.value : "",
         type: activeTypeFilter,
@@ -68,6 +72,12 @@ document.addEventListener("DOMContentLoaded", () => {
         const activeFilter = document.querySelector(".filter-option.selected");
         let displayText = activeFilter ? activeFilter.innerText : "All Posts";
 
+        if (authorInput && authorInput.value.trim()) {
+            displayText += ` • Author: ${authorInput.value.trim()}`;
+        }
+        if (groupInput && groupInput.value.trim()) {
+            displayText += ` • Group: ${groupInput.value.trim()}`;
+        }
         if (dateStartInput && dateStartInput.value && dateEndInput && dateEndInput.value) {
             displayText += ` • ${dateStartInput.value} to ${dateEndInput.value}`;
         } else if (dateStartInput && dateStartInput.value) {
@@ -125,6 +135,8 @@ document.addEventListener("DOMContentLoaded", () => {
         document.addEventListener("click", (e) => {
             if (e.target.id === "reset-filters-btn") {
                 if (searchInput) searchInput.value = "";
+                if (authorInput) authorInput.value = "";
+                if (groupInput) groupInput.value = "";
                 if (dateStartInput) dateStartInput.value = "";
                 if (dateEndInput) dateEndInput.value = "";
                 activeTypeFilter = "all";
@@ -135,13 +147,21 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    const triggerDebouncedReload = () => {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            triggerReload();
+        }, 300);
+    };
+
     // text input search logic with debounce to reduce reload frequency
     if (searchInput) {
-        searchInput.addEventListener("input", () => {
-            clearTimeout(searchTimeout);
-            searchTimeout = setTimeout(() => {
-                triggerReload();
-            }, 300);
-        });
+        searchInput.addEventListener("input", triggerDebouncedReload);
+    }
+    if (authorInput) {
+        authorInput.addEventListener("input", triggerDebouncedReload);
+    }
+    if (groupInput) {
+        groupInput.addEventListener("input", triggerDebouncedReload);
     }
 });
