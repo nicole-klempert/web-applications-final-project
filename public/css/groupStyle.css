@@ -1,0 +1,614 @@
+/* === GROUP COVER === */
+.group-cover {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+    overflow: hidden;
+    margin-bottom: 24px;
+}
+.group-cover-image {
+    height: 260px;
+    background-color: var(--btn-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--btn-primary);
+    font-size: 5rem;
+}
+    .group-cover-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+.group-header-content {
+    padding: 22px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 20px;
+}
+.group-title-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+    .group-title-row h2 {
+        margin: 0 !important;
+    }
+.group-role-badge,
+.member-role {
+    display: inline-block;
+    background-color: var(--btn-secondary);
+    color: var(--btn-secondary-text);
+    padding: 4px 9px;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+.group-description {
+    color: var(--text-muted);
+    margin: 12px 0;
+}
+.group-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+    .group-meta span:empty {
+        display: none;
+    }
+.group-header-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+/* === BUTTONS === */
+.primary-group-btn,
+.secondary-group-btn,
+.danger-group-btn,
+.remove-member-btn,
+.make-admin-btn,
+.remove-admin-btn {
+    border: none;
+    border-radius: 8px;
+    padding: 9px 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+.primary-group-btn {
+    background-color: var(--btn-primary);
+    color: white;
+}
+    .primary-group-btn:hover {
+        background-color: var(--btn-primary-hover);
+    }
+.secondary-group-btn {
+    background-color: var(--btn-secondary);
+    color: var(--btn-secondary-text);
+}
+.danger-group-btn,
+.remove-member-btn {
+    background-color: #dc3545;
+    color: white;
+}
+.make-admin-btn {
+    background-color: var(--btn-secondary);
+    color: var(--btn-primary);
+}
+.remove-admin-btn {
+    background-color: #fff3cd;
+    color: #856404;
+}
+/* === PAGE GRID === */
+.group-content-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr);
+    gap: 20px;
+}
+.group-section-card {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+.section-title-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.future-posts-placeholder {
+    min-height: 220px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    gap: 10px;
+}
+    .future-posts-placeholder i {
+        font-size: 2.8rem;
+        color: var(--btn-primary);
+    }
+/* === MEMBERS === */
+.member-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border-color);
+}
+    .member-row:last-child {
+        border-bottom: none;
+    }
+.member-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--text-main);
+    text-decoration: none;
+    min-width: 0;
+}
+    .member-info strong {
+        display: block;
+        margin-bottom: 3px;
+    }
+.member-avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background-size: cover;
+    background-position: center;
+    flex-shrink: 0;
+}
+    .member-avatar.initials {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: var(--btn-primary);
+        color: white;
+        font-weight: 700;
+    }
+.member-actions {
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+    .member-actions button {
+        padding: 6px 8px;
+        font-size: 0.75rem;
+    }
+/* === ADMIN MANAGEMENT === */
+.muted-text {
+    color: var(--text-muted);
+    margin-bottom: 14px;
+}
+.admin-form {
+    display: flex;
+    gap: 8px;
+}
+    .admin-form input {
+        flex: 1;
+        min-width: 0;
+        padding: 10px;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        background-color: var(--card-bg);
+        color: var(--text-main);
+    }
+.group-error {
+    min-height: 20px;
+    margin-top: 8px;
+    color: #dc3545;
+    font-size: 0.9rem;
+}
+/* === MODALS === */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.45);
+    z-index: 1000;
+}
+    .modal-overlay.show {
+        display: flex;
+    }
+.group-modal-content,
+.delete-modal-content {
+    width: min(560px, 95vw);
+    max-height: 90vh;
+    overflow-y: auto;
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+    padding: 24px;
+}
+.delete-modal-content {
+    max-width: 440px;
+}
+.modal-title-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+.modal-close-btn {
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 1.8rem;
+    cursor: pointer;
+}
+#edit-group-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+    #edit-group-form input,
+    #edit-group-form textarea,
+    #edit-group-form select {
+        width: 100%;
+        padding: 11px;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        background-color: var(--card-bg);
+        color: var(--text-main);
+    }
+.coordinates-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+    .coordinates-row > div {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+.edit-image-preview-container {
+    display: none;
+}
+    .edit-image-preview-container.show {
+        display: block;
+    }
+#edit-group-image-preview {
+    width: 100%;
+    max-height: 200px;
+    object-fit: cover;
+    border-radius: 10px;
+}
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 16px;
+}
+/* === RESPONSIVE === */
+@media (max-width: 950px) {
+    .group-content-grid {
+        grid-template-columns: 1fr;
+    }
+    .group-header-content {
+        flex-direction: column;
+    }
+}
+@media (max-width: 600px) {
+    .group-cover-image {
+        height: 190px;
+    }
+    .coordinates-row {
+        grid-template-columns: 1fr;
+    }
+    .member-row {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+    .member-actions {
+        width: 100%;
+    }
+    .admin-form {
+        flex-direction: column;
+    }
+    .modal-actions {
+        flex-direction: column;
+    }
+}
+/* ================================================== */
+/* === GROUP POSTS === */
+/* ================================================== */
+/* === CREATE POST === */
+.group-post-composer {
+    margin-top: 16px;
+    margin-bottom: 24px;
+    padding: 16px;
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+}
+#group-post-text {
+    width: 100%;
+    min-height: 90px;
+    resize: vertical;
+    padding: 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    background-color: var(--card-bg);
+    color: var(--text-main);
+    font-family: inherit;
+    font-size: 0.95rem;
+}
+    #group-post-text:focus {
+        outline: none;
+        border-color: var(--btn-primary);
+    }
+.group-post-composer-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 12px;
+}
+.group-post-media-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+#publish-group-post-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+/* === POST MEDIA PREVIEW === */
+.group-post-media-preview {
+    margin-top: 12px;
+    overflow: hidden;
+    border-radius: 10px;
+}
+    .group-post-media-preview img,
+    .group-post-media-preview video {
+        display: block;
+        width: 100%;
+        max-height: 350px;
+        object-fit: contain;
+        border-radius: 10px;
+        background-color: var(--btn-secondary);
+    }
+/* === MEMBERS ONLY MESSAGE === */
+.group-post-members-only {
+    margin: 16px 0 24px;
+    padding: 22px;
+    text-align: center;
+    color: var(--text-muted);
+    background-color: var(--btn-secondary);
+    border-radius: 12px;
+}
+    .group-post-members-only i {
+        display: block;
+        margin-bottom: 8px;
+        font-size: 1.8rem;
+        color: var(--btn-primary);
+    }
+    .group-post-members-only p {
+        margin: 0;
+    }
+/* === POSTS CONTAINER === */
+.group-posts-container {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 18px;
+}
+/* === SINGLE POST === */
+.group-post {
+    padding: 16px;
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+}
+.group-post-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+}
+.group-post-author {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--text-main);
+    text-decoration: none;
+}
+    .group-post-author strong {
+        display: block;
+    }
+    .group-post-author small {
+        display: block;
+        margin-top: 2px;
+        color: var(--text-muted);
+        font-size: 0.78rem;
+    }
+/* === POST AUTHOR AVATAR === */
+.group-post-avatar {
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background-size: cover;
+    background-position: center;
+}
+    .group-post-avatar.initials {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: var(--btn-primary);
+        color: white;
+        font-weight: 700;
+    }
+/* === POST CONTENT === */
+.group-post-content {
+    margin: 12px 0;
+    color: var(--text-main);
+    line-height: 1.55;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+/* === POST IMAGE / VIDEO === */
+.group-post-media {
+    margin-top: 12px;
+    overflow: hidden;
+    border-radius: 10px;
+}
+    .group-post-media img,
+    .group-post-media video {
+        display: block;
+        width: 100%;
+        max-height: 500px;
+        object-fit: contain;
+        background-color: var(--btn-secondary);
+        border-radius: 10px;
+    }
+/* === POST ACTIONS === */
+.group-post-actions {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border-color);
+    color: var(--text-muted);
+}
+.group-like-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 8px;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 0.95rem;
+}
+    .group-like-btn:hover {
+        color: var(--btn-primary);
+    }
+    .group-like-btn.liked {
+        color: #dc3545;
+    }
+.group-post-actions > span {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+/* === COMMENTS === */
+.group-post-comments {
+    margin-top: 12px;
+}
+.group-comments-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.group-comment {
+    padding: 9px 11px;
+    background-color: var(--btn-secondary);
+    border-radius: 9px;
+    color: var(--text-main);
+    font-size: 0.9rem;
+}
+    .group-comment a {
+        margin-right: 5px;
+        color: var(--text-main);
+        text-decoration: none;
+    }
+        .group-comment a:hover {
+            text-decoration: underline;
+        }
+    .group-comment strong {
+        font-weight: 700;
+    }
+/* === ADD COMMENT === */
+.group-comment-form {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+}
+    .group-comment-form input {
+        flex: 1;
+        min-width: 0;
+        padding: 9px 11px;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        background-color: var(--card-bg);
+        color: var(--text-main);
+    }
+        .group-comment-form input:focus {
+            outline: none;
+            border-color: var(--btn-primary);
+        }
+    .group-comment-form button {
+        border: none;
+        border-radius: 8px;
+        padding: 8px 12px;
+        background-color: var(--btn-primary);
+        color: white;
+        font-weight: 700;
+        cursor: pointer;
+    }
+        .group-comment-form button:hover {
+            background-color: var(--btn-primary-hover);
+        }
+/* === NO POSTS === */
+.group-no-posts {
+    min-height: 150px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    color: var(--text-muted);
+    text-align: center;
+}
+    .group-no-posts i {
+        font-size: 2.2rem;
+        color: var(--btn-primary);
+    }
+    .group-no-posts p {
+        margin: 0;
+    }
+/* === LOAD MORE === */
+.group-post-load-more {
+    display: flex;
+    justify-content: center;
+    margin-top: 18px;
+}
+/* ================================================== */
+/* === GROUP POSTS RESPONSIVE === */
+/* ================================================== */
+@media (max-width: 600px) {
+    .group-post-composer-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .group-post-media-actions {
+        width: 100%;
+    }
+    #publish-group-post-btn {
+        width: 100%;
+    }
+    .group-comment-form {
+        flex-direction: column;
+    }
+        .group-comment-form button {
+            width: 100%;
+        }
+    .group-post {
+        padding: 12px;
+    }
+}

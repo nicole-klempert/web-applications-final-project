@@ -1,4 +1,4 @@
-import mongoose from 'express'; 
+import mongoose from 'express';
 import mongooseModule from 'mongoose';
 
 const { Schema, model } = mongooseModule;
@@ -41,12 +41,17 @@ const postSchema = new Schema({
         type: String,
         default: ""
     },
-    // group id or name for future group filtering (optional)
+
+    // group reference for group posts (optional)
+    // null = regular feed post
+    // ObjectId = post that belongs to a specific group
     group: {
-        type: String,
-        default: "",
-        index: true // idnex for future group filtering
+        type: Schema.Types.ObjectId,
+        ref: 'Group',
+        default: null,
+        index: true // index for group filtering
     },
+
     // post content - either text or media (image/video)
     content: {
         type: String,
@@ -99,8 +104,12 @@ postSchema.pre('validate', function (next) {
 // compound index for searching by author and content text
 // index from newest to oldest for faster retrieval of recent posts
 postSchema.index({ createdAt: -1 });
+
 // index for searching posts by author and sorting by creation date
 postSchema.index({ author: 1, createdAt: -1 });
+
+// index for searching posts by group and sorting by creation date
+postSchema.index({ group: 1, createdAt: -1 });
 
 const Post = model('Post', postSchema);
 

@@ -1,0 +1,334 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\Student\\source\\repos\\2\\web-applications-final-project\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Student\\source\\repos\\2\\web-applications-final-project\\.env.example||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:.env.example||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Student\\source\\repos\\2\\web-applications-final-project\\.gitignore||{3B902123-F8A7-4915-9F01-361F908088D0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:.gitignore||{3B902123-F8A7-4915-9F01-361F908088D0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Student\\source\\repos\\2\\web-applications-final-project\\public\\js\\groupManager.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:public\\js\\groupManager.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Student\\source\\repos\\2\\web-applications-final-project\\public\\js\\groupsManager.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:public\\js\\groupsManager.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Student\\source\\repos\\2\\web-applications-final-project\\public\\group.html||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:public\\group.html||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Student\\source\\repos\\2\\web-applications-final-project\\public\\groups.html||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:public\\groups.html||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Student\\source\\repos\\2\\web-applications-final-project\\controllers\\groupController.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:controllers\\groupController.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Student\\source\\repos\\2\\web-applications-final-project\\controllers\\postController.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:controllers\\postController.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Student\\source\\repos\\2\\web-applications-final-project\\public\\css\\groupsStyle.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:public\\css\\groupsStyle.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Student\\source\\repos\\2\\web-applications-final-project\\public\\css\\groupStyle.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:public\\css\\groupStyle.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Student\\source\\repos\\2\\web-applications-final-project\\models\\postModel.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:models\\postModel.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Student\\Source\\Repos\\2\\web-applications-final-project\\routes\\groupRoutes.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:routes\\groupRoutes.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Student\\source\\repos\\2\\web-applications-final-project\\middleware\\authMiddleware.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:middleware\\authMiddleware.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Student\\source\\repos\\2\\web-applications-final-project\\models\\groupModel.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:models\\groupModel.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Student\\source\\repos\\2\\web-applications-final-project\\server.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:server.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Student\\source\\repos\\2\\web-applications-final-project\\public\\login.html||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:public\\login.html||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Student\\source\\repos\\2\\web-applications-final-project\\public\\signup.html||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:public\\signup.html||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Student\\source\\repos\\2\\web-applications-final-project\\config\\db.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:config\\db.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 2,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{1c4feeaa-4718-4aa9-859d-94ce25d182ba}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:128:0:{75188d03-9892-4ae2-abf1-207126247ce5}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": ".env.example",
+              "DocumentMoniker": "C:\\Users\\Student\\source\\repos\\2\\web-applications-final-project\\.env.example",
+              "RelativeDocumentMoniker": ".env.example",
+              "ToolTip": "C:\\Users\\Student\\source\\repos\\2\\web-applications-final-project\\.env.example",
+              "RelativeToolTip": ".env.example",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2026-08-18T13:06:46.672Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": ".gitignore",
+              "DocumentMoniker": "C:\\Users\\Student\\source\\repos\\2\\web-applications-final-project\\.gitignore",
+              "RelativeDocumentMoniker": ".gitignore",
+              "ToolTip": "C:\\Users\\Student\\source\\repos\\2\\web-applications-final-project\\.gitignore",
+              "RelativeToolTip": ".gitignore",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2026-08-18T13:06:09.519Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "postController.js",
+              "DocumentMoniker": "C:\\Users\\Student\\source\\repos\\2\\web-applications-final-project\\controllers\\postController.js",
+              "RelativeDocumentMoniker": "controllers\\postController.js",
+              "ToolTip": "C:\\Users\\Student\\source\\repos\\2\\web-applications-final-project\\controllers\\postController.js",
+              "RelativeToolTip": "controllers\\postController.js",
+              "ViewState": "AgIAACMAAAAAAAAAAAAAwDwAAABIAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
+              "WhenOpened": "2026-08-18T11:41:51.64Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "postModel.js",
+              "DocumentMoniker": "C:\\Users\\Student\\source\\repos\\2\\web-applications-final-project\\models\\postModel.js",
+              "RelativeDocumentMoniker": "models\\postModel.js",
+              "ToolTip": "C:\\Users\\Student\\source\\repos\\2\\web-applications-final-project\\models\\postModel.js",
+              "RelativeToolTip": "models\\postModel.js",
+              "ViewState": "AgIAAFcAAAAAAAAAAAAQwHMAAAAUAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
+              "WhenOpened": "2026-08-18T11:38:00.991Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "groupStyle.css",
+              "DocumentMoniker": "C:\\Users\\Student\\source\\repos\\2\\web-applications-final-project\\public\\css\\groupStyle.css",
+              "RelativeDocumentMoniker": "public\\css\\groupStyle.css",
+              "ToolTip": "C:\\Users\\Student\\source\\repos\\2\\web-applications-final-project\\public\\css\\groupStyle.css",
+              "RelativeToolTip": "public\\css\\groupStyle.css",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAAeAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003000|",
+              "WhenOpened": "2026-08-18T11:19:36.73Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "groupManager.js",
+              "DocumentMoniker": "C:\\Users\\Student\\source\\repos\\2\\web-applications-final-project\\public\\js\\groupManager.js",
+              "RelativeDocumentMoniker": "public\\js\\groupManager.js",
+              "ToolTip": "C:\\Users\\Student\\source\\repos\\2\\web-applications-final-project\\public\\js\\groupManager.js",
+              "RelativeToolTip": "public\\js\\groupManager.js",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABAAAAAgAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
+              "WhenOpened": "2026-08-18T11:18:44.009Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "group.html",
+              "DocumentMoniker": "C:\\Users\\Student\\source\\repos\\2\\web-applications-final-project\\public\\group.html",
+              "RelativeDocumentMoniker": "public\\group.html",
+              "ToolTip": "C:\\Users\\Student\\source\\repos\\2\\web-applications-final-project\\public\\group.html",
+              "RelativeToolTip": "public\\group.html",
+              "ViewState": "AgIAAEkBAAAAAAAAAAAAAE0BAAAQAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001512|",
+              "WhenOpened": "2026-08-18T11:18:05.665Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "groupsStyle.css",
+              "DocumentMoniker": "C:\\Users\\Student\\source\\repos\\2\\web-applications-final-project\\public\\css\\groupsStyle.css",
+              "RelativeDocumentMoniker": "public\\css\\groupsStyle.css",
+              "ToolTip": "C:\\Users\\Student\\source\\repos\\2\\web-applications-final-project\\public\\css\\groupsStyle.css",
+              "RelativeToolTip": "public\\css\\groupsStyle.css",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAANIBAAAZAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003000|",
+              "WhenOpened": "2026-08-18T09:31:07.993Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "groupsManager.js",
+              "DocumentMoniker": "C:\\Users\\Student\\source\\repos\\2\\web-applications-final-project\\public\\js\\groupsManager.js",
+              "RelativeDocumentMoniker": "public\\js\\groupsManager.js",
+              "ToolTip": "C:\\Users\\Student\\source\\repos\\2\\web-applications-final-project\\public\\js\\groupsManager.js",
+              "RelativeToolTip": "public\\js\\groupsManager.js",
+              "ViewState": "AgIAAKACAAAAAAAAAAAAALoCAAAzAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
+              "WhenOpened": "2026-08-17T19:44:15.372Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "groups.html",
+              "DocumentMoniker": "C:\\Users\\Student\\source\\repos\\2\\web-applications-final-project\\public\\groups.html",
+              "RelativeDocumentMoniker": "public\\groups.html",
+              "ToolTip": "C:\\Users\\Student\\source\\repos\\2\\web-applications-final-project\\public\\groups.html",
+              "RelativeToolTip": "public\\groups.html",
+              "ViewState": "AgIAAAABAAAAAAAAAAAAAAEBAAAQAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001512|",
+              "WhenOpened": "2026-08-17T19:37:14.95Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "groupController.js",
+              "DocumentMoniker": "C:\\Users\\Student\\source\\repos\\2\\web-applications-final-project\\controllers\\groupController.js",
+              "RelativeDocumentMoniker": "controllers\\groupController.js",
+              "ToolTip": "C:\\Users\\Student\\source\\repos\\2\\web-applications-final-project\\controllers\\groupController.js",
+              "RelativeToolTip": "controllers\\groupController.js",
+              "ViewState": "AgIAAFwEAAAAAAAAAAAQwGkEAAAlAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
+              "WhenOpened": "2026-08-17T19:07:39.548Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "authMiddleware.js",
+              "DocumentMoniker": "C:\\Users\\Student\\source\\repos\\2\\web-applications-final-project\\middleware\\authMiddleware.js",
+              "RelativeDocumentMoniker": "middleware\\authMiddleware.js",
+              "ToolTip": "C:\\Users\\Student\\source\\repos\\2\\web-applications-final-project\\middleware\\authMiddleware.js",
+              "RelativeToolTip": "middleware\\authMiddleware.js",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAAWAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
+              "WhenOpened": "2026-08-18T11:00:19.638Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "groupRoutes.js",
+              "DocumentMoniker": "C:\\Users\\Student\\Source\\Repos\\2\\web-applications-final-project\\routes\\groupRoutes.js",
+              "RelativeDocumentMoniker": "routes\\groupRoutes.js",
+              "ToolTip": "C:\\Users\\Student\\Source\\Repos\\2\\web-applications-final-project\\routes\\groupRoutes.js",
+              "RelativeToolTip": "routes\\groupRoutes.js",
+              "ViewState": "AgIAAE8AAAAAAAAAAAAQwGsAAAAWAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
+              "WhenOpened": "2026-08-17T19:09:20.884Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 13,
+              "Title": "groupModel.js",
+              "DocumentMoniker": "C:\\Users\\Student\\source\\repos\\2\\web-applications-final-project\\models\\groupModel.js",
+              "RelativeDocumentMoniker": "models\\groupModel.js",
+              "ToolTip": "C:\\Users\\Student\\source\\repos\\2\\web-applications-final-project\\models\\groupModel.js",
+              "RelativeToolTip": "models\\groupModel.js",
+              "ViewState": "AgIAAIsAAAAAAAAAAAAQwKcAAAAVAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
+              "WhenOpened": "2026-08-17T19:02:35.58Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 14,
+              "Title": "server.js",
+              "DocumentMoniker": "C:\\Users\\Student\\source\\repos\\2\\web-applications-final-project\\server.js",
+              "RelativeDocumentMoniker": "server.js",
+              "ToolTip": "C:\\Users\\Student\\source\\repos\\2\\web-applications-final-project\\server.js",
+              "RelativeToolTip": "server.js",
+              "ViewState": "AgIAAEQAAAAAAAAAAAAAAFUAAAAgAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
+              "WhenOpened": "2026-08-17T17:23:46.281Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 17,
+              "Title": "db.js",
+              "DocumentMoniker": "C:\\Users\\Student\\source\\repos\\2\\web-applications-final-project\\config\\db.js",
+              "RelativeDocumentMoniker": "config\\db.js",
+              "ToolTip": "C:\\Users\\Student\\source\\repos\\2\\web-applications-final-project\\config\\db.js",
+              "RelativeToolTip": "config\\db.js",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
+              "WhenOpened": "2026-08-17T17:04:45.799Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 16,
+              "Title": "signup.html",
+              "DocumentMoniker": "C:\\Users\\Student\\source\\repos\\2\\web-applications-final-project\\public\\signup.html",
+              "RelativeDocumentMoniker": "public\\signup.html",
+              "ToolTip": "C:\\Users\\Student\\source\\repos\\2\\web-applications-final-project\\public\\signup.html",
+              "RelativeToolTip": "public\\signup.html",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001512|",
+              "WhenOpened": "2026-08-17T16:58:32.785Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 15,
+              "Title": "login.html",
+              "DocumentMoniker": "C:\\Users\\Student\\source\\repos\\2\\web-applications-final-project\\public\\login.html",
+              "RelativeDocumentMoniker": "public\\login.html",
+              "ToolTip": "C:\\Users\\Student\\source\\repos\\2\\web-applications-final-project\\public\\login.html",
+              "RelativeToolTip": "public\\login.html",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001512|",
+              "WhenOpened": "2026-08-17T16:57:38.032Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

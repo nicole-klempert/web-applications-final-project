@@ -8,6 +8,7 @@ import session from 'express-session';
 import authRoutes from './routes/authRoutes.js';
 import postRoutes from './routes/postRoutes.js';
 import userRoutes from './routes/userRoutes.js';
+import groupRoutes from './routes/groupRoutes.js';
 import newsRoutes from './routes/newsRoutes.js';
 import connectDB from './config/db.js';
 
@@ -73,6 +74,9 @@ app.use('/posts', postRoutes);
 
 // mount user profile routes
 app.use('/users', userRoutes);
+
+// mount group routes
+app.use('/groups', groupRoutes);
 
 // mount external news routes
 app.use('/api/news', newsRoutes);
