@@ -10,6 +10,7 @@ document.addEventListener("DOMContentLoaded", () => {
         reader.readAsDataURL(file);
     });
 
+    // === Time Ago Formatter ===
     window.formatTimeAgo = (dateString) => {
         if (!dateString) return "Just now";
         const diff = (new Date() - new Date(dateString)) / 1000;
@@ -21,6 +22,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return new Date(dateString).toLocaleDateString("en-US", { month: "short", day: "numeric" });
     };
 
+    // === Avatar HTML Generator ===
     window.getAvatarHTML = (dbPic, authorName, size = 40) => {
         const currentUser = window.getCurrentUser();
         const myPic = localStorage.getItem("userProfilePic") || "";
@@ -34,12 +36,14 @@ document.addEventListener("DOMContentLoaded", () => {
         return `<div class="avatar avatar-purple" style="width:${size}px; height:${size}px;">${initials}</div>`;
     };
 
+    // === Post Card HTML Generator ===
     window.createPostCardHTML = (post, isNew = false) => {
-        const currentUser = window.getCurrentUser();
-        const isOwner = post.author && (post.author.trim().toLowerCase() === currentUser.toLowerCase());
-        const isLiked = Array.isArray(post.likedBy) && post.likedBy.includes(currentUser);
+        const currentUser = window.getCurrentUser(); // get the current logged-in user from localStorage
+        const isOwner = post.author && (post.author.trim().toLowerCase() === currentUser.toLowerCase()); 
+        const isLiked = Array.isArray(post.likedBy) && post.likedBy.includes(currentUser); // check if the current user has liked the post
         const timeAgo = window.formatTimeAgo(post.createdAt);
 
+        // Media HTML (image or video)
         let mediaHTML = "";
         if (post.mediaUrl) {
             mediaHTML = post.mediaType === "video"
@@ -47,6 +51,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 : `<img src="${post.mediaUrl}" alt="media" loading="lazy" class="post-media-content" />`;
         }
 
+        // Comments HTML
         let commentsHTML = "";
         (post.comments || []).forEach(c => {
             const isCommOwner = c.author && (c.author.trim().toLowerCase() === currentUser.toLowerCase());
@@ -61,12 +66,14 @@ document.addEventListener("DOMContentLoaded", () => {
                 </div>`;
         });
 
+        // Post Actions (Edit/Delete) for Owner
         const actionsHTML = isOwner ? `
             <div class="post-actions-right">
                 <button class="edit-post-btn" title="Edit"><i class="bi bi-pencil"></i></button>
                 <button class="delete-post-btn" title="Delete"><i class="bi bi-trash3"></i></button>
             </div>` : "";
 
+        // Final Post Card HTML
         return `
             <article class="post-card ${isNew ? 'new-item-highlight' : ''}" data-post-id="${post._id || ''}">
                 <div class="post-card-header">
@@ -138,6 +145,7 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
+        // Native Share 
         const nativeShareBtn = target.closest(".native-share-btn");
         if (nativeShareBtn && postId) {
             e.stopPropagation();
@@ -187,7 +195,8 @@ document.addEventListener("DOMContentLoaded", () => {
                     authorProfilePic: localStorage.getItem("userProfilePic") || "", text
                 })
             });
-            const data = await res.json();
+            // Handle the response and update the UI
+            const data = await res.json(); 
             if (data.success) {
                 target.closest(".comments-section").querySelector(".comments-list").insertAdjacentHTML("beforeend", `
                     <div class="comment-item" data-comment-id="${data.comment._id}">
@@ -286,6 +295,7 @@ document.addEventListener("DOMContentLoaded", () => {
         editMediaCleared = true;
     });
 
+    // Handle media file selection and preview
     if (editMediaInput) {
         editMediaInput.addEventListener("change", function () {
             const file = this.files[0];
@@ -306,6 +316,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    // Handle publishing the edited post
     document.getElementById("edit-modal-publish-btn")?.addEventListener("click", async () => {
         if (!currentPostBeingEdited) return;
         const postId = currentPostBeingEdited.dataset.postId;

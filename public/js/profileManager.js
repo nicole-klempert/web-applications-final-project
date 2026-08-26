@@ -124,8 +124,6 @@ document.addEventListener("DOMContentLoaded", () => {
         usernameEl.innerText = profileData.username;
         handleEl.innerText = `@${profileData.username.toLowerCase().replace(/\s+/g, '')}`;
         bioEl.innerText = profileData.bio || "No bio provided yet.";
-
-        // Show city if available, otherwise show "No city specified" for own profile, or hide for others
         if (profileData.city) {
             cityContainerEl.style.display = "block";
             cityEl.innerText = profileData.city;
@@ -133,10 +131,9 @@ document.addEventListener("DOMContentLoaded", () => {
             cityContainerEl.style.display = "block";
             cityEl.innerText = "No city specified";
         } else {
+            // if viewing someone else's profile and they haven't set a city, hide the city container
             cityContainerEl.style.display = "none";
         }
-
-        // Update friends count and joined date
         friendsCountEl.innerText = (profileData.friends || []).length;
         joinedDateEl.innerText = new Date(profileData.createdAt).toLocaleDateString("en-US", { month: "short", year: "numeric" });
 
@@ -356,13 +353,6 @@ document.addEventListener("DOMContentLoaded", () => {
                     postsCountEl.innerText = userPosts.length;
                 }
 
-                // if the profile picture is missing, try to find a post with a valid authorProfilePic and use it as the profile picture
-                const postWithPic = userPosts.find(p => p.authorProfilePic && p.authorProfilePic.trim() !== "" && p.authorProfilePic !== "undefined");
-                if (postWithPic && (!profileData.profilePicture || profileData.profilePicture.trim() === "" || profileData.profilePicture === "undefined")) {
-                    profileData.profilePicture = postWithPic.authorProfilePic;
-                    renderProfileUI(); // update the profile UI with the new profile picture
-                }
-
                 if (userPosts.length === 0) {
                     userPostsContainer.innerHTML = `<div style="text-align: center; padding: 40px; color: var(--text-muted);">No posts found from this user.</div>`;
                     return;
@@ -372,7 +362,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 // clear existing posts and render the fetched posts
                 userPostsContainer.innerHTML = "";
                 userPosts.forEach(p => {
-                    // FIX: Using window.createPostCardHTML from shared file
                     if (typeof window.createPostCardHTML === "function") {
                         userPostsContainer.insertAdjacentHTML("beforeend", window.createPostCardHTML(p));
                     }
@@ -443,13 +432,11 @@ document.addEventListener("DOMContentLoaded", () => {
         const newBio = editBioInput.value.trim();
         const newCity = editCityInput.value.trim();
 
-        // send the updated profile data to the server
         try {
             const res = await fetch(`/users/${encodeURIComponent(currentUser)}`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ currentUser, bio: newBio, city: newCity, profilePicture: finalCroppedBase64 })
-            });
+                body: JSON.stringify({ currentUser, bio: newBio, city: newCity, profilePicture: finalCroppedBase64 }) });
             const data = await res.json();
 
             // if the update was successful, update localStorage and sidebar avatars, then reload profile data
@@ -481,11 +468,27 @@ document.addEventListener("DOMContentLoaded", () => {
     const deleteAccountBtn = document.getElementById("delete-account-btn");
 
     if (deleteAccountBtn) {
-        deleteAccountBtn.addEventListener("click", async () => {
-            //  double confirmation prompt to prevent accidental deletion
-            const confirmDelete = confirm("Are you sure you want to delete your account? This action cannot be undone and all your data will be permanently removed.");
+        deleteAccountBtn.addEventListener("click", () => {
+            // take global modal reference to avoid creating multiple modals
+            const modal = document.getElementById("delete-confirm-modal");
+            if (!modal) return;
 
-            if (confirmDelete) {
+            // texts for the modal
+            modal.querySelector("h3").innerText = "Delete Account?";
+            modal.querySelector("p").innerText = "WARNING: This action cannot be undone. All your data, including all posts, will be permanently deleted.";
+
+            // show the modal
+            modal.classList.add("active");
+
+            // double click prevention: clone the confirm button to remove previous event listeners
+            const confirmBtn = document.getElementById("confirm-delete-btn");
+            const newConfirmBtn = confirmBtn.cloneNode(true);
+            confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
+
+            // delete account logic
+            newConfirmBtn.addEventListener("click", async () => {
+                modal.classList.remove("active"); // close modal immediately to avoid double clicks
+
                 try {
                     const res = await fetch(`/users/${encodeURIComponent(currentUser)}`, {
                         method: 'DELETE',
@@ -495,8 +498,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
                     const data = await res.json();
                     if (data.success) {
-                        alert("Account deleted successfully.");
-                        // clear localStorage and redirect to logout or home page
                         localStorage.removeItem("loggedInUser");
                         localStorage.removeItem("userProfilePic");
                         window.location.href = "/logout";
@@ -507,7 +508,12 @@ document.addEventListener("DOMContentLoaded", () => {
                     console.error("Error deleting account:", err);
                     alert("Network error. Could not delete account.");
                 }
-            }
+            });
+
+            // cencel button logic
+            document.getElementById("cancel-delete-btn").onclick = () => {
+                modal.classList.remove("active");
+            };
         });
     }
 
