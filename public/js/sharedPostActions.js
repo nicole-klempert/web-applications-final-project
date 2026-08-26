@@ -1,8 +1,8 @@
-// sharedPostActions.js
 document.addEventListener("DOMContentLoaded", () => {
     // === Helper Functions ===
     window.getCurrentUser = () => (localStorage.getItem("loggedInUser") || "").trim();
 
+    // Convert a File object to a Data URL (base64)
     window.fileToDataURL = (file) => new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onload = () => resolve(reader.result);
@@ -10,7 +10,7 @@ document.addEventListener("DOMContentLoaded", () => {
         reader.readAsDataURL(file);
     });
 
-    // === Time Ago Formatter ===
+    // Format a date string into a "time ago" format
     window.formatTimeAgo = (dateString) => {
         if (!dateString) return "Just now";
         const diff = (new Date() - new Date(dateString)) / 1000;
@@ -22,40 +22,53 @@ document.addEventListener("DOMContentLoaded", () => {
         return new Date(dateString).toLocaleDateString("en-US", { month: "short", day: "numeric" });
     };
 
+    // === Global Avatar Sync ===
+    window.syncSidebarAvatars = (newPic, username) => {
+        const initials = username ? username.substring(0, 2).toUpperCase() : "US";
+        document.querySelectorAll("#nav-user-avatar, .account-card .avatar, .composer-placeholder .avatar").forEach(avatarEl => {
+            avatarEl.innerHTML = "";
+            if (newPic && newPic.trim() !== "" && newPic !== "undefined" && newPic !== "null") {
+                avatarEl.className = "avatar";
+                avatarEl.style.backgroundImage = `url('${newPic}')`;
+                avatarEl.style.backgroundSize = "cover";
+                avatarEl.style.backgroundPosition = "center";
+            } else {
+                avatarEl.className = "avatar avatar-purple";
+                avatarEl.removeAttribute("style");
+                avatarEl.innerText = initials;
+            }
+        });
+    };
+
     // === Avatar HTML Generator ===
     window.getAvatarHTML = (dbPic, authorName, size = 40) => {
         const currentUser = window.getCurrentUser();
         const myPic = localStorage.getItem("userProfilePic") || "";
         const isMe = authorName && authorName.trim().toLowerCase() === currentUser.toLowerCase();
-        const picToUse = (isMe && myPic.trim() !== "" && myPic !== "undefined" && myPic !== "null") ? myPic : dbPic;
+        const picToUse = (isMe && myPic && myPic !== "undefined" && myPic !== "null") ? myPic : dbPic;
 
-        if (picToUse && picToUse.trim() !== "" && picToUse !== "undefined" && picToUse !== "null") {
+        if (picToUse && picToUse !== "undefined" && picToUse !== "null") {
             return `<div class="avatar" style="width:${size}px; height:${size}px; background-image: url('${picToUse}'); background-size: cover; background-position: center;"></div>`;
         }
-        const initials = authorName ? authorName.substring(0, 2).toUpperCase() : "US";
-        return `<div class="avatar avatar-purple" style="width:${size}px; height:${size}px;">${initials}</div>`;
+        return `<div class="avatar avatar-purple" style="width:${size}px; height:${size}px;">${authorName ? authorName.substring(0, 2).toUpperCase() : "US"}</div>`;
     };
 
     // === Post Card HTML Generator ===
     window.createPostCardHTML = (post, isNew = false) => {
-        const currentUser = window.getCurrentUser(); // get the current logged-in user from localStorage
-        const isOwner = post.author && (post.author.trim().toLowerCase() === currentUser.toLowerCase()); 
-        const isLiked = Array.isArray(post.likedBy) && post.likedBy.includes(currentUser); // check if the current user has liked the post
+        const currentUser = window.getCurrentUser();
+        const isOwner = post.author && (post.author.trim().toLowerCase() === currentUser.toLowerCase());
+        const isLiked = Array.isArray(post.likedBy) && post.likedBy.includes(currentUser);
         const timeAgo = window.formatTimeAgo(post.createdAt);
 
         // Media HTML (image or video)
-        let mediaHTML = "";
-        if (post.mediaUrl) {
-            mediaHTML = post.mediaType === "video"
-                ? `<video src="${post.mediaUrl}" controls preload="metadata" class="post-media-content"></video>`
-                : `<img src="${post.mediaUrl}" alt="media" loading="lazy" class="post-media-content" />`;
-        }
+        const mediaHTML = post.mediaUrl ? (post.mediaType === "video"
+            ? `<video src="${post.mediaUrl}" controls preload="metadata" class="post-media-content"></video>`
+            : `<img src="${post.mediaUrl}" alt="media" loading="lazy" class="post-media-content" />`) : "";
 
-        // Comments HTML
-        let commentsHTML = "";
-        (post.comments || []).forEach(c => {
+        // Comments HTML - if the post has comments, generate the HTML for each comment
+        const commentsHTML = (post.comments || []).map(c => {
             const isCommOwner = c.author && (c.author.trim().toLowerCase() === currentUser.toLowerCase());
-            commentsHTML += `
+            return `
                 <div class="comment-item" data-comment-id="${c._id || ''}">
                     ${window.getAvatarHTML(c.authorProfilePic, c.author, 32)}
                     <div class="comment-bubble">
@@ -64,16 +77,15 @@ document.addEventListener("DOMContentLoaded", () => {
                         <div class="comment-text">${c.text || ""}</div>
                     </div>
                 </div>`;
-        });
+        }).join("");
 
-        // Post Actions (Edit/Delete) for Owner
+        // Post Actions HTML (Edit/Delete buttons for the owner)
         const actionsHTML = isOwner ? `
             <div class="post-actions-right">
                 <button class="edit-post-btn" title="Edit"><i class="bi bi-pencil"></i></button>
                 <button class="delete-post-btn" title="Delete"><i class="bi bi-trash3"></i></button>
             </div>` : "";
 
-        // Final Post Card HTML
         return `
             <article class="post-card ${isNew ? 'new-item-highlight' : ''}" data-post-id="${post._id || ''}">
                 <div class="post-card-header">
@@ -123,7 +135,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const postId = postCard?.dataset.postId;
         const currentUser = window.getCurrentUser();
 
-        // Single Post View (Blur Modal)
+        // Single Post View
         if (target.closest(".view-single-post-trigger") && postId) {
             e.stopPropagation();
             if (typeof window.showSinglePostBlurModal === "function") {
@@ -134,24 +146,21 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        // Share Link
-        const copyLinkBtn = target.closest(".copy-link-btn");
-        if (copyLinkBtn && postId) {
+        // Share actions
+        if (target.closest(".copy-link-btn") && postId) {
             e.stopPropagation();
-            const url = `${window.location.origin}/feed.html?postId=${postId}`;
-            navigator.clipboard.writeText(url);
-            copyLinkBtn.innerHTML = `<i class="bi bi-check2"></i> Copied!`;
-            setTimeout(() => { copyLinkBtn.innerHTML = `<i class="bi bi-link-45deg"></i> Copy link`; }, 2000);
+            const btn = target.closest(".copy-link-btn");
+            navigator.clipboard.writeText(`${window.location.origin}/feed.html?postId=${postId}`);
+            btn.innerHTML = `<i class="bi bi-check2"></i> Copied!`;
+            setTimeout(() => { btn.innerHTML = `<i class="bi bi-link-45deg"></i> Copy link`; }, 2000);
             return;
         }
 
-        // Native Share 
-        const nativeShareBtn = target.closest(".native-share-btn");
-        if (nativeShareBtn && postId) {
+        // Native Share API
+        if (target.closest(".native-share-btn") && postId) {
             e.stopPropagation();
             const url = `${window.location.origin}/feed.html?postId=${postId}`;
-            if (navigator.share) navigator.share({ title: "Check out this post", url });
-            else { navigator.clipboard.writeText(url); alert("Link copied!"); }
+            navigator.share ? navigator.share({ title: "Check out this post", url }) : navigator.clipboard.writeText(url);
             return;
         }
 
@@ -162,13 +171,15 @@ document.addEventListener("DOMContentLoaded", () => {
             const icon = likeBtn.querySelector("i"), countSpan = likeBtn.querySelector(".like-count");
             let count = parseInt(countSpan.innerText) || 0;
             const isLiked = likeBtn.classList.contains("liked");
+
             icon.className = `bi ${isLiked ? 'bi-heart-fill pop-animation' : 'bi-heart'}`;
             countSpan.innerText = isLiked ? count + 1 : Math.max(0, count - 1);
+
             fetch(`/posts/${postId}/like`, {
                 method: "POST", headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ username: currentUser })
             }).then(r => r.json()).then(d => {
-                if (d.success && typeof d.likes === "number") {
+                if (d.success) {
                     document.querySelectorAll(`.post-card[data-post-id="${postId}"] .like-count`)
                         .forEach(el => el.innerText = d.likes);
                 }
@@ -188,15 +199,13 @@ document.addEventListener("DOMContentLoaded", () => {
             const input = target.previousElementSibling;
             const text = input.value.trim();
             if (!text) return;
+
             const res = await fetch(`/posts/${postId}/comments`, {
                 method: "POST", headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    author: currentUser,
-                    authorProfilePic: localStorage.getItem("userProfilePic") || "", text
-                })
+                body: JSON.stringify({ author: currentUser, authorProfilePic: localStorage.getItem("userProfilePic") || "", text })
             });
-            // Handle the response and update the UI
-            const data = await res.json(); 
+            const data = await res.json();
+
             if (data.success) {
                 target.closest(".comments-section").querySelector(".comments-list").insertAdjacentHTML("beforeend", `
                     <div class="comment-item" data-comment-id="${data.comment._id}">
@@ -218,11 +227,14 @@ document.addEventListener("DOMContentLoaded", () => {
             const isComment = deleteBtn.classList.contains("delete-comment-btn");
             const item = deleteBtn.closest(isComment ? ".comment-item" : ".post-card");
             const modal = document.getElementById("delete-confirm-modal");
+
+            // Store the item and type in the modal for later reference
             if (modal) {
                 modal.classList.add("active");
                 const confirmBtn = document.getElementById("confirm-delete-btn");
                 const newConfirm = confirmBtn.cloneNode(true);
                 confirmBtn.parentNode.replaceChild(newConfirm, confirmBtn);
+
                 newConfirm.addEventListener("click", async () => {
                     modal.classList.remove("active");
                     if (isComment && postId) {
@@ -246,6 +258,7 @@ document.addEventListener("DOMContentLoaded", () => {
             currentPostBeingEdited = postCard;
             editMediaCleared = false;
 
+            // Populate the edit modal with existing post data
             const editModal = document.getElementById("edit-modal-overlay");
             const textarea = document.getElementById("edit-modal-textarea");
             if (textarea) textarea.value = postCard.querySelector(".post-text")?.innerText || "";
@@ -256,17 +269,16 @@ document.addEventListener("DOMContentLoaded", () => {
             const editImgPreview = document.getElementById("edit-modal-media-preview");
             const editVideoPreview = document.getElementById("edit-modal-video-preview");
 
+            // Reset and show existing media in the edit modal
             if (editPreviewContainer && editImgPreview && editVideoPreview) {
                 editPreviewContainer.style.display = "none";
                 editImgPreview.style.display = "none";
                 editVideoPreview.style.display = "none";
-                if (existingImg) {
-                    editImgPreview.src = existingImg.src;
-                    editImgPreview.style.display = "block";
-                    editPreviewContainer.style.display = "flex";
-                } else if (existingVid) {
-                    editVideoPreview.src = existingVid.src;
-                    editVideoPreview.style.display = "block";
+
+                if (existingImg || existingVid) {
+                    const activePreview = existingImg ? editImgPreview : editVideoPreview;
+                    activePreview.src = (existingImg || existingVid).src;
+                    activePreview.style.display = "block";
                     editPreviewContainer.style.display = "flex";
                 }
             }
@@ -280,6 +292,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const editImgPreview = document.getElementById("edit-modal-media-preview");
     const editVideoPreview = document.getElementById("edit-modal-video-preview");
 
+    // Function to close the edit post modal and reset its state
     const closeEditPostModal = () => {
         document.getElementById("edit-modal-overlay")?.classList.remove("active");
         if (editMediaInput) editMediaInput.value = "";
@@ -287,6 +300,7 @@ document.addEventListener("DOMContentLoaded", () => {
         editMediaCleared = false;
     };
 
+    // Trigger file input when the "Upload Media" button is clicked
     document.getElementById("edit-modal-image-btn")?.addEventListener("click", () => editMediaInput?.click());
 
     document.getElementById("edit-modal-clear-media")?.addEventListener("click", () => {
@@ -295,7 +309,7 @@ document.addEventListener("DOMContentLoaded", () => {
         editMediaCleared = true;
     });
 
-    // Handle media file selection and preview
+    // Handle media file selection and preview in the edit modal
     if (editMediaInput) {
         editMediaInput.addEventListener("change", function () {
             const file = this.files[0];
@@ -303,6 +317,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 const url = URL.createObjectURL(file);
                 editPreviewContainer.style.display = "flex";
                 editMediaCleared = false;
+
                 if (file.type.startsWith("video/")) {
                     editVideoPreview.src = url;
                     editVideoPreview.style.display = "block";
@@ -316,13 +331,14 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Handle publishing the edited post
+    // Handle the "Publish" button click in the edit modal
     document.getElementById("edit-modal-publish-btn")?.addEventListener("click", async () => {
         if (!currentPostBeingEdited) return;
         const postId = currentPostBeingEdited.dataset.postId;
         const newText = document.getElementById("edit-modal-textarea")?.value.trim() || "";
         const newFile = editMediaInput?.files[0];
 
+        // Determine the final media URL and type based on user actions
         let finalMediaUrl = undefined, finalMediaType = undefined;
         if (newFile) {
             finalMediaUrl = await window.fileToDataURL(newFile);
@@ -332,14 +348,18 @@ document.addEventListener("DOMContentLoaded", () => {
             finalMediaType = "";
         }
 
+        // Prepare the payload for the PUT request
         const payload = { content: newText, username: window.getCurrentUser() };
         if (finalMediaUrl !== undefined) payload.mediaUrl = finalMediaUrl;
         if (finalMediaType !== undefined) payload.mediaType = finalMediaType;
 
+        // Send the PUT request to update the post
         const res = await fetch(`/posts/${postId}`, {
             method: "PUT", headers: { "Content-Type": "application/json" },
             body: JSON.stringify(payload)
         });
+
+        // If the update is successful, close the modal and refresh the post feed
         if (res.ok) {
             closeEditPostModal();
             document.getElementById("single-post-blur-modal")?.remove();
@@ -349,7 +369,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     document.getElementById("close-edit-modal-btn")?.addEventListener("click", closeEditPostModal);
 
-    // Comment input enable/disable button
+    // Toggle disabled state on reply button based on input length
     document.addEventListener("input", (e) => {
         if (e.target.classList.contains("comment-input")) {
             e.target.nextElementSibling.disabled = !e.target.value.trim();

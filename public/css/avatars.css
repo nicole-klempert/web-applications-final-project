@@ -1,0 +1,131 @@
+﻿/* === Widgets, Avatars & UI Elements === */
+/* avatar styles */
+.avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--border-color);
+    color: #ffffff;
+    display: grid;
+    place-items: center;
+    font-weight: 800;
+    font-size: 0.85rem;
+    flex-shrink: 0;
+}
+
+.avatar-muted {
+    background: linear-gradient(#8dc9a4 50%, #349158 50%);
+}
+
+.avatar-purple {
+    background: linear-gradient(135deg, #a78bfa, #6366f1);
+}
+
+.avatar-blue {
+    background: linear-gradient(135deg, #60a5fa, #1d4ed8);
+}
+
+/* --- Profile Picture Avatar --- */
+.avatar-upload-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 20px;
+    width: 100%;
+}
+
+.avatar-preview-circle {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: 2px dashed var(--btn-primary);
+    background-color: var(--bg-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.1);
+}
+
+    .avatar-preview-circle:hover {
+        border-style: solid;
+        transform: scale(1.04);
+        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.22);
+    }
+
+.avatar-placeholder-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--btn-primary);
+    user-select: none;
+}
+
+    .avatar-placeholder-content i {
+        font-size: 1.8rem;
+    }
+
+ /* avatar live preview - make it responsive */
+#avatar-live-preview {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.avatar-helper-text {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    margin-top: 8px;
+}
+
+.avatar-hover-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.3rem;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.avatar-preview-circle:hover .avatar-hover-overlay {
+    opacity: 1;
+}
+
+/* --- avatar & username row alignment --- */
+.author-info-group {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 12px !important;
+}
+
+    .author-info-group a {
+        display: inline-flex;
+        align-items: center;
+        text-decoration: none;
+    }
+
+/* avatar size modifiers */
+.avatar-lg {
+    width: 90px !important;
+    height: 90px !important;
+    font-size: 2rem !important;
+}
+
+.avatar-sm {
+    width: 30px !important;
+    height: 30px !important;
+    font-size: 0.8rem !important;
+}

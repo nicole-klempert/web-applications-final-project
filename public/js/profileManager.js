@@ -5,6 +5,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
     }
 
+    // Get the profile username from the URL query parameter, defaulting to the current user if not provided
     const urlParams = new URLSearchParams(window.location.search);
     const profileUsername = urlParams.get("user") || currentUser;
     const isMyProfile = profileUsername.toLowerCase() === currentUser.toLowerCase();
@@ -40,20 +41,22 @@ document.addEventListener("DOMContentLoaded", () => {
     let profileData = null;
     let finalCroppedBase64 = "";
 
-    // Cropping internal states
+    // cropping internal states
     let img = new Image();
     let imgX = 0, imgY = 0, scale = 1, isDragging = false, startX = 0, startY = 0;
 
     // --- go to my profile ---
+    const navigateToMyProfile = () => window.location.href = `profile.html?user=${encodeURIComponent(currentUser)}`;
+
+    // --- sidebar avatar click navigation ---
     const accountCard = document.querySelector(".account-card");
-    const navAvatar = document.getElementById("nav-user-avatar");
-    const navigateToMyProfile = () => {
-        window.location.href = `profile.html?user=${encodeURIComponent(currentUser)}`;
-    };
     if (accountCard) {
         accountCard.style.cursor = "pointer";
         accountCard.addEventListener("click", navigateToMyProfile);
     }
+
+    // --- nav avatar click navigation ---
+    const navAvatar = document.getElementById("nav-user-avatar");
     if (navAvatar) {
         navAvatar.style.cursor = "pointer";
         navAvatar.addEventListener("click", (e) => {
@@ -62,46 +65,25 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // --- sync sidebar avatars ---
-    const syncSidebarAvatars = (newPic, username) => {
-        const initials = username ? username.substring(0, 2).toUpperCase() : "US";
-        const avatars = [
-            document.getElementById("nav-user-avatar"),
-            document.querySelector(".account-card .avatar")
-        ];
-        avatars.forEach(avatarElement => {
-            if (!avatarElement) return;
-            avatarElement.innerHTML = "";
-            if (newPic && newPic.trim() !== "" && newPic !== "undefined" && newPic !== "null") {
-                avatarElement.className = "avatar";
-                avatarElement.style.backgroundImage = `url('${newPic}')`;
-                avatarElement.style.backgroundSize = "cover";
-                avatarElement.style.backgroundPosition = "center";
-            } else {
-                avatarElement.className = "avatar avatar-purple";
-                avatarElement.removeAttribute("style");
-                avatarElement.innerText = initials;
-            }
-        });
-    };
-
     // --- load profile data ---
     const loadProfileData = async () => {
         try {
+            // Fetch the profile data from the server
             const res = await fetch(`/users/${encodeURIComponent(profileUsername)}?currentUser=${encodeURIComponent(currentUser)}`);
             const data = await res.json();
+            
             if (data.success) {
                 profileData = data.user;
 
-                // sync profile picture to localStorage if it's the current user's profile
+                // if it's my profile, sync the profile picture with localStorage and sidebar avatars
                 if (isMyProfile) {
                     const localPic = localStorage.getItem("userProfilePic") || "";
                     if (profileData.profilePicture && profileData.profilePicture.trim() !== "" && profileData.profilePicture !== "undefined" && profileData.profilePicture !== "null") {
                         localStorage.setItem("userProfilePic", profileData.profilePicture);
-                        syncSidebarAvatars(profileData.profilePicture, currentUser);
+                        window.syncSidebarAvatars(profileData.profilePicture, currentUser);
                     } else if (localPic.trim() !== "" && localPic !== "undefined" && localPic !== "null") {
                         profileData.profilePicture = localPic;
-                        syncSidebarAvatars(localPic, currentUser);
+                        window.syncSidebarAvatars(localPic, currentUser);
                     }
                 }
 
@@ -116,12 +98,15 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     };
 
+    // --- render profile UI ---
     const renderProfileUI = () => {
         if (!profileData) return;
 
         usernameEl.innerText = profileData.username;
         handleEl.innerText = `@${profileData.username.toLowerCase().replace(/\s+/g, '')}`;
         bioEl.innerText = profileData.bio || "No bio provided yet.";
+
+        // Show city if available, otherwise show "No city specified" for own profile, or hide for others
         if (profileData.city) {
             cityContainerEl.style.display = "block";
             cityEl.innerText = profileData.city;
@@ -129,32 +114,37 @@ document.addEventListener("DOMContentLoaded", () => {
             cityContainerEl.style.display = "block";
             cityEl.innerText = "No city specified";
         } else {
-            // if viewing someone else's profile and they haven't set a city, hide the city container
             cityContainerEl.style.display = "none";
         }
+
+        // Update friends count and joined date
         friendsCountEl.innerText = (profileData.friends || []).length;
         joinedDateEl.innerText = new Date(profileData.createdAt).toLocaleDateString("en-US", { month: "short", year: "numeric" });
 
+        // Determine which profile picture to use: the one from the server or the one from localStorage (if it's my profile)
         const picToUse = (profileData.profilePicture && profileData.profilePicture.trim() !== "" && profileData.profilePicture !== "undefined" && profileData.profilePicture !== "null")
             ? profileData.profilePicture
             : (isMyProfile ? (localStorage.getItem("userProfilePic") || "") : "");
 
+        // Render the avatar according to the available picture or fallback to initials
         if (picToUse && picToUse.trim() !== "" && picToUse !== "undefined" && picToUse !== "null") {
-            avatarEl.className = "avatar avatar-lg";
+            avatarEl.className = "avatar profile-avatar-lg";
             avatarEl.style.backgroundImage = `url('${picToUse}')`;
             avatarEl.style.backgroundSize = "cover";
             avatarEl.style.backgroundPosition = "center";
             avatarEl.innerText = "";
         } else {
-            avatarEl.className = "avatar avatar-purple avatar-lg";
+            avatarEl.className = "avatar avatar-purple profile-avatar-lg";
             avatarEl.removeAttribute("style");
             avatarEl.innerText = profileData.username.substring(0, 2).toUpperCase();
         }
 
+        // Render the action button based on whether it's my profile or someone else's
         actionBtn.style.display = "block";
+        // if it's my profile, show "Edit Profile"
         if (isMyProfile) {
             actionBtn.innerText = "Edit Profile";
-            actionBtn.className = "btn btn-primary btn-sm";
+            actionBtn.className = "btn btn-primary modal-action-btn";
             actionBtn.disabled = false;
             actionBtn.onclick = () => {
                 finalCroppedBase64 = picToUse || "";
@@ -170,8 +160,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
                 editModal.classList.add("active");
             };
+           // if it's someone else's, show "Add Friend" or "Remove Friend" based on friendship status
         } else {
-            // Viewing someone else's profile 
             const isFriend = profileData.friends && profileData.friends.some(f => f.username.toLowerCase() === currentUser.toLowerCase());
             const hasSentRequest = profileData.hasSentRequest;
 
@@ -196,81 +186,72 @@ document.addEventListener("DOMContentLoaded", () => {
         renderFriendsList();
     };
 
-    // --- Modal for Removing Friends ---
+    // --- remove friend modal ---
     const showRemoveFriendModal = (targetUser) => {
-        let modal = document.getElementById("remove-friend-modal");
-        if (!modal) {
-            document.body.insertAdjacentHTML("beforeend", `
-                <div id="remove-friend-modal" class="modal-overlay">
-                    <div class="confirm-modal-content">
-                        <h3>Remove Friend?</h3>
-                        <p>Are you sure you want to remove this user from your friends list?</p>
-                        <button id="confirm-remove-friend-btn" class="danger-btn">Remove</button>
-                        <button id="cancel-remove-friend-btn" class="cancel-btn">Cancel</button>
-                    </div>
-                </div>
-            `);
-            modal = document.getElementById("remove-friend-modal");
+        const modal = document.getElementById("delete-confirm-modal");
+        if (!modal) return;
 
-            // Close modal on cancel or clicking outside
-            modal.addEventListener("click", (e) => {
-                if (e.target === modal) modal.classList.remove("active");
-            });
-            document.getElementById("cancel-remove-friend-btn").addEventListener("click", () => {
-                modal.classList.remove("active");
-            });
-        }
-
+        // Update modal content for removing a friend
+        modal.querySelector("h3").innerText = "Remove Friend?";
+        modal.querySelector("p").innerText = `Are you sure you want to remove ${targetUser} from your friends list?`;
         modal.classList.add("active");
 
-        const confirmBtn = document.getElementById("confirm-remove-friend-btn");
-        // Clone button to remove previous event listeners (prevents multiple deletes)
+        const confirmBtn = document.getElementById("confirm-delete-btn");
         const newConfirmBtn = confirmBtn.cloneNode(true);
         confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
 
+        // Confirm removal of friend
         newConfirmBtn.addEventListener("click", () => {
             modal.classList.remove("active");
             toggleFriendStatus('remove', targetUser);
         });
+
+        // Cancel removal of friend
+        document.getElementById("cancel-delete-btn").onclick = () => {
+            modal.classList.remove("active");
+        };
     };
 
+    // --- toggle friend status (request, accept, reject, remove) ---
     const toggleFriendStatus = async (action, targetUser = profileUsername) => {
         try {
-            // Update the button visually before the fetch even finishes
+            // check if requesting has already been sent, if so, disable the button and return early
             if (actionBtn && action === 'request') {
                 actionBtn.innerHTML = 'Sent';
                 actionBtn.className = "btn cancel-btn btn-sm";
                 actionBtn.disabled = true;
-                actionBtn.onclick = null; // no double clicking
+                actionBtn.onclick = null;
             }
 
+            // Send the friend action request to the server
             const res = await fetch(`/users/${encodeURIComponent(currentUser)}/friends`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ targetUsername: targetUser, action })
             });
             if (res.ok) {
-                loadProfileData(); // Reload UI to update buttons and lists
+                loadProfileData();
             }
         } catch (err) { console.error("Friend action failed", err); }
     };
 
+    // --- render friends list ---
     const renderFriendsList = () => {
         const container = document.getElementById("friends-list-container");
         if (!container) return;
 
         let html = "";
 
-        // 1. Render Pending Requests (Only visible on My Profile)
+        // pending friend requests section (only for my profile)
         if (isMyProfile && profileData.friendRequests && profileData.friendRequests.length > 0) {
             html += `<div class="pending-requests-container">
-                        <h4 style="font-size: 0.95rem; color: var(--text-main); margin-bottom: 12px;"><i class="bi bi-person-exclamation"></i> Pending Requests</h4>`;
+                        <h4 class="section-header-sm"><i class="bi bi-person-exclamation"></i> Pending Requests</h4>`;
 
             html += profileData.friendRequests.map(reqUser => `
                 <div class="pending-request-item">
                     <div class="friend-info">
                         <div class="avatar avatar-purple avatar-sm">${reqUser.substring(0, 2).toUpperCase()}</div>
-                        <a href="profile.html?user=${encodeURIComponent(reqUser)}" style="color: var(--text-main); font-weight: 600; text-decoration: none;">${reqUser}</a>
+                        <a href="profile.html?user=${encodeURIComponent(reqUser)}" class="friend-name-link">${reqUser}</a>
                     </div>
                     <div class="friend-info">
                         <button class="btn btn-primary btn-sm accept-request-btn" data-user="${reqUser}" title="Accept"><i class="bi bi-check-lg"></i></button>
@@ -281,28 +262,31 @@ document.addEventListener("DOMContentLoaded", () => {
             html += `</div>`;
         }
 
-        // 2. Render Active Friends
-        html += `<h4 style="font-size: 0.95rem; color: var(--text-main); margin-bottom: 12px;"><i class="bi bi-people"></i> All Friends</h4>`;
+        // active friends section
+        html += `<h4 class="section-header-sm"><i class="bi bi-people"></i> All Friends</h4>`;
 
+        // if no friends, show empty state
         if (!profileData.friends || profileData.friends.length === 0) {
             html += `
                 <div class="empty-state-box empty-state-flat">
-                    <i class="bi bi-person-x" style="font-size: 2rem; color: var(--border-color); margin-bottom: 10px;"></i>
-                    <p style="margin:0; font-size: 0.9rem;">No friends added yet.</p>
+                    <i class="bi bi-person-x empty-friends-icon"></i>
+                    <p class="empty-friends-text">No friends added yet.</p>
                 </div>`;
         } else {
             html += profileData.friends.map(friendObj => {
                 const fName = friendObj.username;
                 const fPic = friendObj.profilePicture;
-                let avatarHtml = `<div class="avatar avatar-purple avatar-sm">${fName.substring(0, 2).toUpperCase()}</div>`;
-                if (fPic && fPic.trim() !== "") {
-                    avatarHtml = `<div class="avatar avatar-sm" style="background-image: url('${fPic}'); background-size: cover; background-position: center;"></div>`;
-                }
+
+                // use the global getAvatarHTML function if it exists, otherwise fallback to initials
+                let avatarHtml = typeof window.getAvatarHTML === "function"
+                    ? window.getAvatarHTML(fPic, fName, 32)
+                    : `<div class="avatar avatar-purple avatar-sm">${fName.substring(0, 2).toUpperCase()}</div>`;
+
                 return `
                 <div class="friend-list-item">
                     <div class="friend-info">
                         ${avatarHtml}
-                        <a href="profile.html?user=${encodeURIComponent(fName)}" style="color: var(--text-main); font-weight: 600; text-decoration: none;">${fName}</a>
+                        <a href="profile.html?user=${encodeURIComponent(fName)}" class="friend-name-link">${fName}</a>
                     </div>
                     ${isMyProfile ? `<button class="btn btn-secondary btn-sm remove-friend-btn" data-user="${fName}" title="Remove Friend"><i class="bi bi-person-dash"></i></button>` : ''}
                 </div>`;
@@ -312,32 +296,25 @@ document.addEventListener("DOMContentLoaded", () => {
         container.innerHTML = html;
     };
 
-    // listen for friend action buttons (Accept/Reject/Remove) using event delegation
+    // event delegation for friend buttons
     document.addEventListener("click", (e) => {
         const acceptBtn = e.target.closest(".accept-request-btn");
-        if (acceptBtn) {
-            toggleFriendStatus('accept', acceptBtn.dataset.user);
-            return;
-        }
+        if (acceptBtn) return toggleFriendStatus('accept', acceptBtn.dataset.user);
 
         const rejectBtn = e.target.closest(".reject-request-btn");
-        if (rejectBtn) {
-            toggleFriendStatus('reject', rejectBtn.dataset.user);
-            return;
-        }
+        if (rejectBtn) return toggleFriendStatus('reject', rejectBtn.dataset.user);
 
         const removeBtn = e.target.closest(".remove-friend-btn");
-        if (removeBtn) {
-            showRemoveFriendModal(removeBtn.dataset.user);
-            return;
-        }
+        if (removeBtn) return showRemoveFriendModal(removeBtn.dataset.user);
     });
 
     // --- load user posts ---
     const loadUserPosts = async () => {
         try {
+            // fetch posts authored by the profile user
             const res = await fetch(`/posts?search=${encodeURIComponent(profileUsername)}`);
             const data = await res.json();
+            // filter posts to only include those authored by the profile user (case-insensitive)
             if (data.success) {
                 const userPosts = (data.posts || []).filter(p => p.author && p.author.toLowerCase() === profileUsername.toLowerCase());
 
@@ -345,11 +322,20 @@ document.addEventListener("DOMContentLoaded", () => {
                     postsCountEl.innerText = userPosts.length;
                 }
 
+                // if the profile picture is missing, try to find a post with a valid authorProfilePic and use it as the profile picture
+                const postWithPic = userPosts.find(p => p.authorProfilePic && p.authorProfilePic.trim() !== "" && p.authorProfilePic !== "undefined");
+                if (postWithPic && (!profileData.profilePicture || profileData.profilePicture.trim() === "" || profileData.profilePicture === "undefined")) {
+                    profileData.profilePicture = postWithPic.authorProfilePic;
+                    renderProfileUI(); // update the profile UI with the new profile picture
+                }
+
                 if (userPosts.length === 0) {
                     userPostsContainer.innerHTML = `<div style="text-align: center; padding: 40px; color: var(--text-muted);">No posts found from this user.</div>`;
                     return;
                 }
 
+
+                // clear existing posts and render the fetched posts
                 userPostsContainer.innerHTML = "";
                 userPosts.forEach(p => {
                     if (typeof window.createPostCardHTML === "function") {
@@ -362,10 +348,9 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     };
 
-    // Connect the shared actions reload to this specific page's reload function
     window.reloadPostsFeed = loadUserPosts;
 
-    // --- draw image on canvas (crop profile picture) ---
+    // --- crop profile picture logic ---
     const drawImageOnCanvas = () => {
         if (!ctx) return;
         ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -376,16 +361,17 @@ document.addEventListener("DOMContentLoaded", () => {
         ctx.restore();
     };
 
+    // --- event listeners for cropping ---
     editAvatarTrigger?.addEventListener("click", () => editProfileFileInput?.click());
     editProfileFileInput?.addEventListener("change", function (e) {
         const file = e.target.files[0];
+
+        // reset the file input value to allow re-selecting the same file if needed
         if (file) {
             const reader = new FileReader();
             reader.onload = (event) => {
                 img.onload = () => {
-                    // originally set scale to fit the image within the canvas
                     scale = Math.max(canvas.width / img.width, canvas.height / img.height);
-                    // update zoom slider min/max based on the initial scale
                     zoomSlider.min = (scale * 0.4).toFixed(4);
                     zoomSlider.max = (scale * 3).toFixed(4);
                     zoomSlider.value = scale;
@@ -400,6 +386,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
+    // --- drag and zoom logic ---
     if (canvas) {
         canvas.addEventListener("mousedown", (e) => { isDragging = true; startX = e.clientX - imgX; startY = e.clientY - imgY; });
         window.addEventListener("mousemove", (e) => { if (!isDragging) return; imgX = e.clientX - startX; imgY = e.clientY - startY; drawImageOnCanvas(); });
@@ -407,6 +394,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     zoomSlider?.addEventListener("input", (e) => { scale = parseFloat(e.target.value); drawImageOnCanvas(); });
 
+    // --- crop modal buttons ---
     document.getElementById("cancel-crop-btn")?.addEventListener("click", () => { cropModal.classList.remove("active"); editModal.classList.add("active"); });
     document.getElementById("apply-crop-btn")?.addEventListener("click", () => {
         finalCroppedBase64 = canvas.toDataURL("image/png");
@@ -422,19 +410,23 @@ document.addEventListener("DOMContentLoaded", () => {
         const newBio = editBioInput.value.trim();
         const newCity = editCityInput.value.trim();
 
+        // send the updated profile data to the server
         try {
             const res = await fetch(`/users/${encodeURIComponent(currentUser)}`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ currentUser, bio: newBio, city: newCity, profilePicture: finalCroppedBase64 }) });
+                body: JSON.stringify({ currentUser, bio: newBio, city: newCity, profilePicture: finalCroppedBase64 })
+            });
             const data = await res.json();
+
+            // if the update was successful, update localStorage and sidebar avatars, then reload profile data
             if (data.success) {
                 if (finalCroppedBase64) {
                     localStorage.setItem("userProfilePic", finalCroppedBase64);
-                    syncSidebarAvatars(finalCroppedBase64, currentUser);
+                    window.syncSidebarAvatars(finalCroppedBase64, currentUser);
                 } else {
                     localStorage.removeItem("userProfilePic");
-                    syncSidebarAvatars("", currentUser);
+                    window.syncSidebarAvatars("", currentUser);
                 }
 
                 editModal.classList.remove("active");
@@ -447,43 +439,39 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
+    // --- close edit profile modal ---
     document.getElementById("close-edit-profile-btn")?.addEventListener("click", () => editModal.classList.remove("active"));
     document.getElementById("cancel-edit-profile-btn")?.addEventListener("click", () => editModal.classList.remove("active"));
     editModal?.addEventListener("click", (e) => { if (e.target === editModal) editModal.classList.remove("active"); });
 
-    // --- Delete Account Logic ---
+    // --- delete account logic ---
     const deleteAccountBtn = document.getElementById("delete-account-btn");
-
     if (deleteAccountBtn) {
         deleteAccountBtn.addEventListener("click", () => {
-            // take global modal reference to avoid creating multiple modals
             const modal = document.getElementById("delete-confirm-modal");
             if (!modal) return;
 
-            // texts for the modal
+            // update modal content for deleting account
             modal.querySelector("h3").innerText = "Delete Account?";
             modal.querySelector("p").innerText = "WARNING: This action cannot be undone. All your data, including all posts, will be permanently deleted.";
-
-            // show the modal
             modal.classList.add("active");
 
-            // double click prevention: clone the confirm button to remove previous event listeners
             const confirmBtn = document.getElementById("confirm-delete-btn");
             const newConfirmBtn = confirmBtn.cloneNode(true);
             confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
 
-            // delete account logic
+            // confirm deletion of account
             newConfirmBtn.addEventListener("click", async () => {
-                modal.classList.remove("active"); // close modal immediately to avoid double clicks
-
+                modal.classList.remove("active");
                 try {
                     const res = await fetch(`/users/${encodeURIComponent(currentUser)}`, {
                         method: 'DELETE',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ currentUser })
                     });
-
                     const data = await res.json();
+
+                    // if deletion was successful, clear localStorage and redirect to logout
                     if (data.success) {
                         localStorage.removeItem("loggedInUser");
                         localStorage.removeItem("userProfilePic");
@@ -497,10 +485,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             });
 
-            // cencel button logic
-            document.getElementById("cancel-delete-btn").onclick = () => {
-                modal.classList.remove("active");
-            };
+            document.getElementById("cancel-delete-btn").onclick = () => modal.classList.remove("active");
         });
     }
 

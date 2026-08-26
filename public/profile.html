@@ -9,7 +9,10 @@
     <link rel="stylesheet" href="css/variables.css">
     <link rel="stylesheet" href="css/layout.css">
     <link rel="stylesheet" href="css/components.css">
-    <link rel="stylesheet" href="css/feedStyle.css">
+    <link rel="stylesheet" href="css/modals.css">
+    <link rel="stylesheet" href="css/avatars.css">
+    <link rel="stylesheet" href="css/posts.css">
+    <link rel="stylesheet" href="css/profileStyle.css">
 </head>
 
 <body>
@@ -37,7 +40,7 @@
                 </a>
             </div>
 
-            <button type="button" class="logout-btn" id="logout-btn-trigger">Logout</button>
+            <button type="button" class="btn btn-primary logout-btn" id="logout-btn-trigger">Logout</button>
 
             <div class="account-card mt-auto" role="button" tabindex="0">
                 <div class="avatar avatar-purple" id="nav-user-avatar">US</div>
@@ -51,41 +54,45 @@
 
         <!-- main profile area -->
         <main class="main-feed">
-            <section class="post-card" style="padding: 32px; margin-bottom: 24px;">
-                <div style="display: flex; align-items: center; gap: 24px; flex-wrap: wrap;">
-                    <div id="profile-avatar-container" class="avatar" style="width: 90px; height: 90px; font-size: 2rem;">US</div>
-                    <div style="flex-grow: 1;">
-                        <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 8px;">
-                            <h2 id="profile-username" style="margin: 0 !important; font-size: 1.6rem !important;">Username</h2>
-                            <button id="profile-action-btn" class="btn btn-primary" style="width: auto; padding: 8px 20px; display: none;">Edit Profile</button>
+            <!-- Profile Header -->
+            <section class="post-card profile-header-card">
+                <div class="profile-header-layout">
+                    <div id="profile-avatar-container" class="avatar profile-avatar-lg">US</div>
+                    <div class="profile-info-section">
+                        <div class="profile-title-row">
+                            <h2 id="profile-username" class="profile-username-text">Username</h2>
+                            <button id="profile-action-btn" class="btn btn-primary modal-action-btn" style="display: none;">Edit Profile</button>
                         </div>
-                        <p id="profile-handle" style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 12px;">@username</p>
-                        <p id="profile-bio" style="color: var(--text-main); font-size: 1rem; margin-bottom: 16px; line-height: 1.4;">No bio yet.</p>
-                        <p id="profile-city-container" style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 16px; display: none;">
+                        <p id="profile-handle" class="profile-meta-text">@username</p>
+                        <p id="profile-bio" class="profile-bio-text">No bio yet.</p>
+
+                        <!-- City Container - hidden by default -->
+                        <p id="profile-city-container" class="profile-meta-text" style="display: none; margin-bottom: 16px;">
                             <i class="bi bi-geo-alt-fill"></i> <span id="profile-city">No city specified</span>
                         </p>
-                        <div style="display: flex; gap: 20px; font-size: 0.9rem; color: var(--text-muted);">
-                            <span><strong id="profile-posts-count" style="color: var(--text-main);">0</strong> Posts</span>
-                            <span><strong id="profile-friends-count" style="color: var(--text-main);">0</strong> Friends</span>
-                            <span>Joined <strong id="profile-joined-date" style="color: var(--text-main);">Recently</strong></span>
+
+                        <div class="profile-stats-row">
+                            <span><strong id="profile-posts-count" class="profile-stat-value">0</strong> Posts</span>
+                            <span><strong id="profile-friends-count" class="profile-stat-value">0</strong> Friends</span>
+                            <span>Joined <strong id="profile-joined-date" class="profile-stat-value">Recently</strong></span>
                         </div>
                     </div>
                 </div>
             </section>
 
-            <h3 style="margin: 0 0 16px 4px; font-size: 1.2rem !important;">User Posts</h3>
+            <h3 class="profile-section-title">User Posts</h3>
 
             <section class="post-feed" id="user-posts-container">
             </section>
         </main>
 
-        <!-- Frinds list on right sidebar -->
+        <!-- Friends list on right sidebar -->
         <aside class="right-sidebar">
             <section class="sidebar-card">
                 <div class="card-title-row">
                     <h2>Friends List</h2>
                 </div>
-                <div id="friends-list-container" style="padding: 10px; color: var(--text-muted); font-size: 0.9rem;">
+                <div id="friends-list-container" class="friends-list-wrapper">
                     No friends added yet.
                 </div>
             </section>
@@ -94,7 +101,7 @@
 
     <!-- edit profile modal -->
     <div id="edit-profile-modal" class="modal-overlay">
-        <div class="modal-content" style="max-width: 450px;">
+        <div class="modal-content modal-content-md">
             <div class="modal-header">
                 <h3>Edit Profile</h3>
                 <button id="close-edit-profile-btn" class="close-modal-btn">&times;</button>
@@ -116,24 +123,24 @@
 
                 <div class="input-group">
                     <label class="input-label">Bio</label>
-                    <textarea id="edit-bio-input" class="modal-textarea-custom" rows="3" placeholder="Write something about yourself..." style="border: 1px solid var(--border-color); border-radius: 6px; padding: 10px;"></textarea>
+                    <textarea id="edit-bio-input" class="modal-textarea-custom modal-input-box" rows="3" placeholder="Write something about yourself..."></textarea>
                 </div>
-                <div class="input-group" style="margin-top: 12px;">
+                <div class="input-group">
                     <label class="input-label">City</label>
-                    <input type="text" id="edit-city-input" placeholder="---" style="border: 1px solid var(--border-color); border-radius: 6px; padding: 10px; width: 100%; background: transparent; color: var(--text-main);">
+                    <input type="text" id="edit-city-input" placeholder="Enter your city..." class="modal-input-box">
                 </div>
 
-                <!-- account deletion -->
-                <div style="margin-top: 30px; padding-top: 20px; border-top: 1px dashed #ef4444;">
-                    <h4 style="color: #ef4444; font-size: 1rem; margin-bottom: 8px;"><i class="bi bi-exclamation-triangle"></i> Account Deletion</h4>
-                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 12px;">Once you delete your account, there is no going back. Your profile and ALL your posts will be permanently deleted.</p>
-                    <button type="button" class="danger-btn" id="delete-account-btn" style="width: auto; padding: 8px 16px; font-size: 0.9rem; margin: 0;">Delete Account</button>
+                <!-- account deletion section -->
+                <div class="danger-zone-container">
+                    <h4 class="danger-zone-title"><i class="bi bi-exclamation-triangle"></i> Account Deletion </h4>
+                    <p class="danger-zone-text">Once you delete your account, there is no going back. Your profile and ALL your posts will be permanently deleted.</p>
+                    <button type="button" class="danger-btn danger-zone-btn" id="delete-account-btn">Delete Account</button>
                 </div>
 
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" id="cancel-edit-profile-btn" style="width: auto; padding: 8px 16px;">Cancel</button>
-                <button type="button" class="btn btn-primary" id="save-profile-btn" style="width: auto; padding: 8px 20px;">Save Changes</button>
+                <button type="button" class="btn btn-secondary modal-action-btn" id="cancel-edit-profile-btn">Cancel</button>
+                <button type="button" class="btn btn-primary modal-action-btn" id="save-profile-btn">Save Changes</button>
             </div>
         </div>
     </div>
