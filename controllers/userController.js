@@ -80,7 +80,17 @@ export const updateUserProfile = async (req, res) => {
 
         if (bio !== undefined) user.bio = bio;
         if (city !== undefined) user.city = city;
-        if (profilePicture !== undefined) user.profilePicture = profilePicture;
+
+        if (profilePicture !== undefined) {
+            console.log(`[Update] New profile picture received. Updating User DB...`);
+            user.profilePicture = profilePicture;
+
+            // update profile pic. in all posts (strict: false bypasses strict schema rules)
+            const postUpdateResult = await Post.updateMany(
+                { author: new RegExp('^' + username.trim() + '$', 'i') },
+                { $set: { authorProfilePic: profilePicture } },
+                { strict: false }
+            );
 
             // update in all comments
             const commentUpdateResult = await Post.updateMany(

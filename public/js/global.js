@@ -166,11 +166,32 @@ document.addEventListener("DOMContentLoaded", () => {
                 </div>
             `);
         }
-
-        // edit post modal (popup) 
+        // Crop Modal (for profile pic.)
+        if (!document.getElementById("crop-modal")) {
+            document.body.insertAdjacentHTML("beforeend", `
+                <div id="crop-modal" class="modal-overlay" style="z-index: 10000;">
+                    <div class="crop-modal-content">
+                        <h3>Adjust Profile Photo</h3>
+                        <p>Position and zoom your photo to fit the circle</p>
+                        <div class="crop-viewport-wrapper">
+                            <canvas id="crop-canvas" width="220" height="220"></canvas>
+                        </div>
+                        <div class="zoom-slider-group">
+                            <i class="bi bi-zoom-out"></i>
+                            <input type="range" id="zoom-slider" min="1" max="3" step="0.05" value="1">
+                            <i class="bi bi-zoom-in"></i>
+                        </div>
+                        <div class="crop-modal-actions">
+                            <button type="button" class="btn btn-secondary cancel-btn" id="cancel-crop-btn">Cancel</button>
+                            <button type="button" class="btn btn-primary" id="save-crop-btn">Save Avatar</button>
+                        </div>
+                    </div>
+                </div>
+            `);
+        }
+        // Edit Post Modal
         if (!document.getElementById("edit-modal-overlay")) {
             document.body.insertAdjacentHTML("beforeend", `
-                <!-- popup (modal) for EDITING a post -->
                 <div id="edit-modal-overlay" class="modal-overlay">
                     <div class="modal-content">
                         <div class="modal-header">
@@ -179,11 +200,10 @@ document.addEventListener("DOMContentLoaded", () => {
                         </div>
                         <div class="modal-body">
                             <textarea id="edit-modal-textarea" class="modal-textarea-custom" rows="4"></textarea>
-
                             <input type="file" id="edit-modal-media-upload" accept="image/*,video/*" style="display: none;">
                             <div id="edit-modal-media-preview-container" class="modal-media-preview-container" style="display: none;">
-                                <img id="edit-modal-media-preview" src="" style="max-width: 100%; max-height: 250px; border-radius: 8px; display: none;">
-                                <video id="edit-modal-video-preview" controls style="max-width: 100%; max-height: 250px; border-radius: 8px; display: none;"></video>
+                                <img id="edit-modal-media-preview" class="modal-preview-media" src="" style="display: none;">
+                                <video id="edit-modal-video-preview" class="modal-preview-media" controls style="display: none;"></video>
                                 <button id="edit-modal-clear-media" class="clear-media-btn">&times;</button>
                             </div>
                         </div>
@@ -572,26 +592,14 @@ document.addEventListener("DOMContentLoaded", () => {
             document.getElementById("single-post-blur-modal")?.remove();
             if (typeof window.reloadPostsFeed === "function") window.reloadPostsFeed();
         }
-    }
+    });
 
-    // --- Navigate to Profile from bottom-left account card ---
-    const accountCard = document.querySelector(".account-card");
-    const navAvatar = document.getElementById("nav-user-avatar");
+    document.getElementById("close-edit-modal-btn")?.addEventListener("click", closeEditPostModal);
 
-    const navigateToMyProfile = () => {
-        const user = localStorage.getItem("loggedInUser");
-        if (user) {
-            window.location.href = `profile.html?user=${encodeURIComponent(user)}`;
+    // Toggle disabled state on comment input
+    document.addEventListener("input", (e) => {
+        if (e.target.classList.contains("comment-input")) {
+            e.target.nextElementSibling.disabled = !e.target.value.trim();
         }
-    };
-
-    if (accountCard) {
-        accountCard.addEventListener("click", navigateToMyProfile);
-    }
-    if (navAvatar) {
-        navAvatar.addEventListener("click", (e) => {
-            e.stopPropagation();
-            navigateToMyProfile();
-        });
-    }
+    });
 });
