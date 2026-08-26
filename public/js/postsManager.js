@@ -16,8 +16,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let hasMorePosts = false;
     let isLoading = false;
 
-
-    // === FETCH POSTS FUNCTION ===
+    // === fetch posts function ===
     const loadPosts = async (page = 1, append = false) => {
         if (!postFeed || isLoading) return;
         isLoading = true;
@@ -72,19 +71,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 // --- Infinite Scroll Logic ---
                 document.getElementById("infinite-scroll-trigger")?.remove();
-
                 if (hasMorePosts) {
-                    // Create an invisible trigger element at the bottom of the feed
-                    postFeed.insertAdjacentHTML("afterend", `<div id="infinite-scroll-trigger" style="height: 20px; width: 100%;"></div>`);
-
+                    postFeed.insertAdjacentHTML("afterend", `<div id="infinite-scroll-trigger" class="infinite-scroll-trigger"></div>`);
                     const trigger = document.getElementById("infinite-scroll-trigger");
                     const observer = new IntersectionObserver((entries) => {
                         if (entries[0].isIntersecting && !isLoading) {
-                            observer.disconnect(); // Stop observing this trigger to prevent duplicate calls
-                            loadPosts(currentPage + 1, true); // Load next page
+                            observer.disconnect();
+                            loadPosts(currentPage + 1, true);
                         }
-                    }, { rootMargin: "200px" }); // Load 200px before reaching the exact bottom
-
+                    }, { rootMargin: "200px" });
                     observer.observe(trigger);
                 }
             }
@@ -102,8 +97,8 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("single-post-blur-modal")?.remove();
         document.body.insertAdjacentHTML("beforeend", `
             <div id="single-post-blur-modal" class="modal-overlay active">
-                <div class="modal-content" style="position: relative; padding: 48px 24px 24px; max-width: 600px;">
-                    <button id="close-blur-modal-btn" class="close-modal-btn" style="position: absolute; top: 10px; right: 16px; font-size: 1.8rem; line-height: 1; background: none; border: none; cursor: pointer; color: var(--text-muted, #766f7d); z-index: 10;">&times;</button>
+                <div class="modal-content single-post-modal-content">
+                    <button id="close-blur-modal-btn" class="single-post-close-btn" title="Close">&times;</button>
                     ${window.createPostCardHTML(post)}
                 </div>
             </div>`);
@@ -218,7 +213,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Toggle facebook share button active state
+    // facebook share toggle 
     document.getElementById("share-facebook-btn")?.addEventListener("click", function () {
         this.classList.toggle("active");
     });
