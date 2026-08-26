@@ -1,4 +1,5 @@
-﻿body {
+body {
+
     /* === Feed Tabs & Navigation === */
     .feed-tabs {
         position: sticky;
@@ -8,7 +9,8 @@
         grid-template-columns: 1fr 1fr;
         height: 54px;
         background: rgba(255, 255, 255, 0.85);
-        backdrop-filter: blur(8px); /* glass effect when post is not fully shown */
+        backdrop-filter: blur(8px);
+        /* glass effect when post is not fully shown */
         border-bottom: 1px solid var(--border-color);
         transition: background-color 0.3s ease, border-color 0.3s ease;
     }
@@ -24,31 +26,32 @@
         transition: background 0.2s, color 0.2s;
     }
 
-        .tab:hover {
-            background: var(--bg-hover-light);
-            color: var(--text-main);
-        }
+    .tab:hover {
+        background: var(--bg-hover-light);
+        color: var(--text-main);
+    }
 
-        .tab.active {
-            color: var(--text-main);
-        }
+    .tab.active {
+        color: var(--text-main);
+    }
 
-            .tab.active::after {
-                content: "";
-                position: absolute;
-                bottom: 0;
-                left: 50%;
-                transform: translateX(-50%);
-                width: 60px;
-                height: 4px;
-                border-radius: 999px;
-                background: var(--btn-primary); /* blue line under selected tab */
-            }
+    .tab.active::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 60px;
+        height: 4px;
+        border-radius: 999px;
+        background: var(--btn-primary);
+        /* blue line under selected tab */
+    }
 }
 
-    body.dark-mode .feed-tabs {
-        background: rgba(36, 30, 48, 0.85);
-    }
+body.dark-mode .feed-tabs {
+    background: rgba(36, 30, 48, 0.85);
+}
 
 /* === Post Composter (Placeholder) === */
 .composer-placeholder {
@@ -65,10 +68,10 @@
     transition: all 0.2s ease;
 }
 
-    .composer-placeholder:hover {
-        border-color: var(--btn-primary);
-        box-shadow: 0 0 0 2px var(--focus-ring);
-    }
+.composer-placeholder:hover {
+    border-color: var(--btn-primary);
+    box-shadow: 0 0 0 2px var(--focus-ring);
+}
 
 .placeholder-text-box {
     color: var(--text-muted);
@@ -84,16 +87,16 @@
     gap: 14px;
 }
 
-    .composer-icons-group i {
-        color: var(--text-muted);
-        font-size: 1.2rem;
-        transition: color 0.2s ease;
-        cursor: pointer;
-    }
+.composer-icons-group i {
+    color: var(--text-muted);
+    font-size: 1.2rem;
+    transition: color 0.2s ease;
+    cursor: pointer;
+}
 
-        .composer-icons-group i:hover {
-            color: var(--btn-primary);
-        }
+.composer-icons-group i:hover {
+    color: var(--btn-primary);
+}
 
 /* === Post Cards Structure & Animations === */
 .post-card {
@@ -146,7 +149,9 @@
     gap: 5px;
 }
 
-.delete-post-btn, .edit-post-btn, .delete-comment-btn {
+.delete-post-btn,
+.edit-post-btn,
+.delete-comment-btn {
     background: none;
     border: none;
     color: var(--text-muted);
@@ -157,15 +162,16 @@
     border-radius: 4px;
 }
 
-    .delete-post-btn:hover, .delete-comment-btn:hover {
-        color: #ef4444;
-        background: rgba(239, 68, 68, 0.1);
-    }
+.delete-post-btn:hover,
+.delete-comment-btn:hover {
+    color: #ef4444;
+    background: rgba(239, 68, 68, 0.1);
+}
 
-    .edit-post-btn:hover {
-        color: var(--btn-primary);
-        background: rgba(99, 102, 241, 0.1);
-    }
+.edit-post-btn:hover {
+    color: var(--btn-primary);
+    background: rgba(99, 102, 241, 0.1);
+}
 
 .post-text {
     color: var(--text-main);
@@ -195,16 +201,18 @@
     padding-top: 12px;
 }
 
-    .post-stats > span {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        cursor: pointer;
-        transition: color 0.15s;
-        position: relative;
-    }
+.post-stats>span {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: color 0.15s;
+    position: relative;
+}
 
-.stat-reply i, .stat-like i, .stat-share i {
+.stat-reply i,
+.stat-like i,
+.stat-share i {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -221,36 +229,38 @@
     color: var(--btn-primary);
 }
 
-    .stat-reply:hover i {
-        background-color: var(--focus-ring);
-        color: var(--btn-primary);
-    }
+.stat-reply:hover i {
+    background-color: var(--focus-ring);
+    color: var(--btn-primary);
+}
 
-.stat-share:hover, .stat-share.active {
+.stat-share:hover,
+.stat-share.active {
     color: #00ba7c;
 }
 
-    .stat-share:hover i, .stat-share.active i {
-        background-color: rgba(0, 186, 124, 0.1);
-        color: #00ba7c;
-    }
+.stat-share:hover i,
+.stat-share.active i {
+    background-color: rgba(0, 186, 124, 0.1);
+    color: #00ba7c;
+}
 
 .stat-like:hover {
     color: #f91880;
 }
 
-    .stat-like:hover i {
-        background-color: rgba(249, 24, 128, 0.1);
-        color: #f91880;
-    }
+.stat-like:hover i {
+    background-color: rgba(249, 24, 128, 0.1);
+    color: #f91880;
+}
 
 .stat-like.liked {
     color: #f91880;
 }
 
-    .stat-like.liked i {
-        color: #f91880;
-    }
+.stat-like.liked i {
+    color: #f91880;
+}
 
 .stat-like i.pop-animation {
     animation: heartSplash 0.35s ease-out;
@@ -280,7 +290,7 @@
     background: var(--card-bg);
     border: 1px solid var(--border-color);
     border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     display: none;
     z-index: 100;
     min-width: 150px;
@@ -307,10 +317,10 @@
     transition: background 0.2s;
 }
 
-    .share-item:hover {
-        background: var(--bg-hover-light);
-        color: #00ba7c;
-    }
+.share-item:hover {
+    background: var(--bg-hover-light);
+    color: #00ba7c;
+}
 
 /* === Commenting system === */
 .comments-section {
@@ -379,10 +389,10 @@
     transition: border 0.2s;
 }
 
-    .comment-input:focus {
-        border-color: var(--btn-primary);
-        box-shadow: 0 0 0 2px var(--focus-ring);
-    }
+.comment-input:focus {
+    border-color: var(--btn-primary);
+    box-shadow: 0 0 0 2px var(--focus-ring);
+}
 
 .reply-btn {
     border-radius: 999px;
@@ -398,7 +408,7 @@
     transition: background-color 0.2s, opacity 0.2s;
 }
 
-.comment-input:not(:placeholder-shown) + .reply-btn {
+.comment-input:not(:placeholder-shown)+.reply-btn {
     opacity: 1;
     pointer-events: auto;
 }
@@ -423,20 +433,20 @@
     width: 100%;
 }
 
-    .search-box:focus-within {
-        border-color: var(--btn-primary);
-        box-shadow: 0 0 0 2px var(--focus-ring);
-        color: var(--btn-primary);
-    }
+.search-box:focus-within {
+    border-color: var(--btn-primary);
+    box-shadow: 0 0 0 2px var(--focus-ring);
+    color: var(--btn-primary);
+}
 
-    .search-box input {
-        flex: 1;
-        border: none;
-        outline: none;
-        background: transparent;
-        font-size: 0.9rem;
-        color: var(--text-main);
-    }
+.search-box input {
+    flex: 1;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-size: 0.9rem;
+    color: var(--text-main);
+}
 
 .filter-box-custom {
     position: relative;
@@ -458,11 +468,12 @@
     transition: border 0.15s, background 0.15s;
 }
 
-    .filter-selected:hover, .filter-box-custom.open .filter-selected {
-        background: var(--bg-hover-light);
-        border-color: var(--btn-primary);
-        color: var(--btn-primary);
-    }
+.filter-selected:hover,
+.filter-box-custom.open .filter-selected {
+    background: var(--bg-hover-light);
+    border-color: var(--btn-primary);
+    color: var(--btn-primary);
+}
 
 #filter-selected-text {
     font-size: 0.9rem;
@@ -473,6 +484,7 @@
 }
 
 .filter-arrow {
+    margin-left: auto;
     transition: transform 0.2s ease;
 }
 
@@ -488,7 +500,7 @@
     background: var(--card-bg);
     border: 1px solid var(--border-color);
     border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     display: none;
     z-index: 100;
     overflow: hidden;
@@ -507,15 +519,15 @@
     transition: background 0.2s;
 }
 
-    .filter-option:hover {
-        background: var(--bg-hover-light);
-    }
+.filter-option:hover {
+    background: var(--bg-hover-light);
+}
 
-    .filter-option.selected {
-        background: var(--focus-ring);
-        color: var(--btn-primary);
-        font-weight: 700;
-    }
+.filter-option.selected {
+    background: var(--focus-ring);
+    color: var(--btn-primary);
+    font-weight: 700;
+}
 
 /* styling for the new date input inside filter */
 .filter-date-range {
@@ -533,28 +545,28 @@
     gap: 4px;
 }
 
-    .date-input-wrapper label {
-        font-size: 0.75rem;
-        font-weight: 700;
-        color: var(--text-muted);
-        text-transform: uppercase;
-    }
+.date-input-wrapper label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+}
 
-    .date-input-wrapper input {
-        width: 100%;
-        padding: 6px;
-        border: 1px solid var(--border-color);
-        border-radius: 6px;
-        font-size: 0.85rem;
-        color: var(--text-main);
-        background: var(--bg-color);
-        outline: none;
-        transition: border-color 0.2s;
-    }
+.date-input-wrapper input {
+    width: 100%;
+    padding: 6px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    font-size: 0.85rem;
+    color: var(--text-main);
+    background: var(--bg-color);
+    outline: none;
+    transition: border-color 0.2s;
+}
 
-        .date-input-wrapper input:focus {
-            border-color: var(--btn-primary);
-        }
+.date-input-wrapper input:focus {
+    border-color: var(--btn-primary);
+}
 
 /* dynamic news section styling */
 .sidebar-card {
@@ -573,11 +585,11 @@
     padding: 16px 16px 8px;
 }
 
-    .card-title-row h2 {
-        font-size: 1.15rem !important;
-        margin: 0 !important;
-        color: var(--text-main) !important;
-    }
+.card-title-row h2 {
+    font-size: 1.15rem !important;
+    margin: 0 !important;
+    color: var(--text-main) !important;
+}
 
 .news-item {
     display: block;
@@ -588,24 +600,122 @@
     text-decoration: none !important;
 }
 
-    .news-item:last-child {
-        border-bottom: none;
-    }
+.news-item:last-child {
+    border-bottom: none;
+}
 
-    .news-item:hover {
-        background: var(--bg-hover-light);
-    }
+.news-item:hover {
+    background: var(--bg-hover-light);
+}
 
-    .news-item strong {
-        display: block;
-        font-size: 0.9rem;
-        line-height: 1.35;
-        margin-bottom: 4px;
-        color: var(--text-main);
-    }
+.news-item strong {
+    display: block;
+    font-size: 0.9rem;
+    line-height: 1.35;
+    margin-bottom: 4px;
+    color: var(--text-main);
+}
 
-    .news-item span {
-        color: var(--text-muted);
-        font-size: 0.8rem;
-        display: block;
-    }
+.news-item span {
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    display: block;
+}
+
+/* sidebar search and filtering layouts */
+.sidebar-search-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 8px 0;
+}
+
+.sidebar-search-fields .search-box {
+    margin-bottom: 0;
+}
+
+.search-inputs-container {
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.search-input-field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.search-input-field label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+}
+
+.search-input-field input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background-color: var(--card-bg);
+    color: var(--text-main);
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.search-input-field input:focus {
+    border-color: var(--btn-primary);
+}
+
+.search-date-row {
+    display: flex;
+    gap: 8px;
+}
+
+.search-date-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.search-date-col label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+}
+
+.search-date-col input {
+    width: 100%;
+    padding: 6px 8px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background-color: var(--card-bg);
+    color: var(--text-main);
+    font-size: 0.85rem;
+    outline: none;
+}
+
+.search-buttons-group {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.search-buttons-group .btn {
+    padding: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    border-radius: 6px;
+}
+
+.search-results-list {
+    margin-top: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
