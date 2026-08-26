@@ -80,17 +80,7 @@ export const updateUserProfile = async (req, res) => {
 
         if (bio !== undefined) user.bio = bio;
         if (city !== undefined) user.city = city;
-
-        if (profilePicture !== undefined) {
-            console.log(`[Update] New profile picture received. Updating User DB...`);
-            user.profilePicture = profilePicture;
-
-            // update profile pic. in all posts (strict: false bypasses strict schema rules)
-            const postUpdateResult = await Post.updateMany(
-                { author: new RegExp('^' + username.trim() + '$', 'i') },
-                { $set: { authorProfilePic: profilePicture } },
-                { strict: false }
-            );
+        if (profilePicture !== undefined) user.profilePicture = profilePicture;
 
             // update in all comments
             const commentUpdateResult = await Post.updateMany(
@@ -246,5 +236,37 @@ export const searchUsers = async (req, res, next) => {
     } catch (error) {
         console.error('Error searching users:', error);
         return res.status(500).json({ success: false, error: 'Failed to search users' });
+    }
+};
+};
+
+// GET /users (List / Search)
+export const listUsers = async (req, res) => {
+    try {
+        const { search } = req.query;
+        // For now, an empty array as a placeholder for the user list.
+        return res.status(200).json({ success: true, users: [] });
+    } catch (error) {
+        return res.status(500).json({ success: false, error: 'Failed to list users' });
+    }
+};
+
+// DELETE /users/:username (Delete own user)
+export const deleteUser = async (req, res) => {
+    try {
+        const { username } = req.params;
+        const { currentUser } = req.body;
+
+        if (currentUser && currentUser.toLowerCase() !== username.toLowerCase()) {
+            return res.status(403).json({ success: false, error: 'Forbidden: Cannot delete other users' });
+        }
+
+        const user = await User.findByUsername(username);
+        if (!user) return res.status(404).json({ success: false, error: 'User not found' });
+
+        await User.deleteOne({ _id: user._id });
+        return res.status(200).json({ success: true, message: "User deleted" });
+    } catch (error) {
+        return res.status(500).json({ success: false, error: 'Failed to delete user' });
     }
 };

@@ -64,9 +64,12 @@ export const getPosts = async (req, res, next) => {
             const scopeConditions = [];
 
             if (scopesArray.includes('friends')) {
-                // currentUser's friends + currentUser itself
-                const authorsList = [...((user && user.friends) ? user.friends : []), currentUser];
-                scopeConditions.push({ author: { $in: authorsList } });
+                if (user && user.friends && user.friends.length > 0) {
+                    scopeConditions.push({ author: { $in: user.friends } });
+                } else {
+                    // User has no friends, return empty (Edge case 9.3)
+                    scopeConditions.push({ author: { $in: [] } });
+                }
             }
 
             if (scopesArray.includes('groups')) {
@@ -78,6 +81,11 @@ export const getPosts = async (req, res, next) => {
                 // Return posts that match EITHER friends OR groups
                 query.$and.push({ $or: scopeConditions });
             }
+        }
+
+        // Clean up empty $and array to prevent MongoDB errors
+        if (query.$and.length === 0) {
+            delete query.$and;
         }
 
         // Clean up empty $and array to prevent MongoDB errors
