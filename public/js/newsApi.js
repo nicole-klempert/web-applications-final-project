@@ -1,12 +1,17 @@
-// --- Web Service Request (AJAX via fetch API) ---
-// Fetching real-time TV and entertainment schedule from TVMaze API (100% free, no key needed)
+// Fetching real-time TV and entertainment schedule from TVMaze API 
 async function fetchNews() {
     const newsContainer = document.getElementById("dynamic-news-container");
     if (!newsContainer) return;
 
+    // active load before request
+    newsContainer.innerHTML = '<div style="padding:20px; text-align:center;">Loading entertainment updates...</div>';
+
     try {
+        // passing data to web service
+        const countryCode = 'US';
+
         // fetch from backend proxy route instead of directly querying external api
-        const response = await fetch('/api/news');
+        const response = await fetch(`/api/news?country=${countryCode}`);
         if (!response.ok) throw new Error("Network response was not ok");
         const shows = await response.json();
 
@@ -17,7 +22,7 @@ async function fetchNews() {
             const network = item.show.network ? item.show.network.name : "Streaming";
             const url = item.show.url;
 
-            // Formatting real entertainment data 
+            // Formatting entertainment data
             const newsHTML = `
                 <a href="${url}" target="_blank" class="news-item">
                     <strong>${showName}</strong>
@@ -33,8 +38,6 @@ async function fetchNews() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-    // Initial fetch on page load with a slight delay to ensure DOM is ready
-    setTimeout(() => {
-        fetchNews();
-    }, 600);
+    // Initial fetch on page load 
+    fetchNews();
 });
