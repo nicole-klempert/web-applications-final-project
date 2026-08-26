@@ -93,6 +93,23 @@ h2, h3 {
         background-color: var(--btn-primary-hover) !important;
     }
 
+/* Small buttons for friends list */
+.btn-sm {
+    padding: 4px 12px !important;
+    font-size: 0.85rem !important;
+    width: auto !important;
+}
+
+/* Enforce "Sent" Button Color & Locked State */
+.btn.cancel-btn:disabled {
+    background-color: var(--bg-color) !important;
+    color: var(--text-main) !important;
+    border: 1px solid var(--text-muted) !important;
+    opacity: 0.8;
+    cursor: not-allowed !important;
+    pointer-events: none;
+}
+
 /* --- Links --- */
 .forgot-link {
     color: var(--text-muted);
@@ -410,6 +427,49 @@ input[type="date"] {
         text-decoration: none;
     }
 
+/* Avatar size modifiers */
+.avatar-lg {
+    width: 90px !important;
+    height: 90px !important;
+    font-size: 2rem !important;
+}
+
+.avatar-sm {
+    width: 30px !important;
+    height: 30px !important;
+    font-size: 0.8rem !important;
+}
+
+/* Profile & Friends List UI Helpers */
+.pending-requests-container {
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 15px;
+    margin-bottom: 15px;
+}
+
+.pending-request-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    background: var(--bg-hover-light);
+    padding: 8px;
+    border-radius: 8px;
+}
+
+.friend-list-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.friend-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
 /* --- Profile Photo Crop Modal --- */
 .crop-modal-content {
     background: var(--card-bg);
@@ -669,7 +729,12 @@ input[type="date"] {
     box-shadow: 0 10px 30px rgba(36, 28, 44, 0.04);
     transition: all 0.3s ease;
 }
-
+.empty-state-flat {
+    padding: 20px 10px;
+    box-shadow: none;
+    border: none;
+    margin: 0;
+}
     .empty-state-box:hover {
         border-color: var(--btn-primary);
         box-shadow: 0 12px 36px rgba(99, 102, 241, 0.08);

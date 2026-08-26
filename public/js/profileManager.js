@@ -33,31 +33,14 @@ document.addEventListener("DOMContentLoaded", () => {
     const ctx = canvas.getContext("2d");
     const zoomSlider = document.getElementById("zoom-slider");
 
-    // Edit Post Modal Elements
-    const editPostModal = document.getElementById("edit-modal-overlay");
-    const editPostTextarea = document.getElementById("edit-modal-textarea");
-    const editPostMediaInput = document.getElementById("edit-modal-media-upload");
-    const editPostPreviewContainer = document.getElementById("edit-modal-media-preview-container");
-    const editPostImgPreview = document.getElementById("edit-modal-media-preview");
-    const editPostVideoPreview = document.getElementById("edit-modal-video-preview");
-
     let profileData = null;
     let finalCroppedBase64 = "";
-    let currentPostBeingEdited = null;
-    let editMediaCleared = false;
 
     // Cropping internal states
     let img = new Image();
     let imgX = 0, imgY = 0, scale = 1, isDragging = false, startX = 0, startY = 0;
 
-    const fileToDataURL = (file) => new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-    });
-
-    // --- מעבר לפרופיל בלחיצה על כרטיס המשתמש בפינה השמאלית למטה ---
+    // --- go to my profile ---
     const accountCard = document.querySelector(".account-card");
     const navAvatar = document.getElementById("nav-user-avatar");
     const navigateToMyProfile = () => {
@@ -75,7 +58,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // --- סנכרון תמונות אווטאר בסרגל הניווט ובכרטיס המשתמש למטה ---
+    // --- sync sidebar avatars ---
     const syncSidebarAvatars = (newPic, username) => {
         const initials = username ? username.substring(0, 2).toUpperCase() : "US";
         const avatars = [
@@ -98,82 +81,15 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     };
 
-    // --- פונקציות עזר עצמאיות ליצירת כרטיס הפוסט ---
-    const formatTimeAgo = (dateString) => {
-        if (!dateString) return "Just now";
-        const diff = (new Date() - new Date(dateString)) / 1000;
-        if (isNaN(diff) || diff < 60) return "Just now";
-        if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
-        if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
-        if (diff < 172800) return "Yesterday";
-        if (diff < 604800) return `${Math.floor(diff / 86400)}d ago`;
-        return new Date(dateString).toLocaleDateString("en-US", { month: "short", day: "numeric" });
-    };
-
-    const getAvatarHTML = (dbPic, authorName, size = 40) => {
-        const myPic = localStorage.getItem("userProfilePic") || "";
-        const isMe = authorName && authorName.trim().toLowerCase() === currentUser.toLowerCase();
-        const picToUse = (isMe && myPic.trim() !== "" && myPic !== "undefined" && myPic !== "null") ? myPic : dbPic;
-        if (picToUse && picToUse.trim() !== "" && picToUse !== "undefined" && picToUse !== "null") {
-            return `<div class="avatar" style="width:${size}px; height:${size}px; background-image: url('${picToUse}'); background-size: cover; background-position: center;"></div>`;
-        }
-        const initials = authorName ? authorName.substring(0, 2).toUpperCase() : "US";
-        return `<div class="avatar avatar-purple" style="width:${size}px; height:${size}px;">${initials}</div>`;
-    };
-
-    const createPostCardHTML = (post) => {
-        const isOwner = post.author && (post.author.trim().toLowerCase() === currentUser.toLowerCase());
-        const isLiked = Array.isArray(post.likedBy) && post.likedBy.includes(currentUser);
-        const timeAgo = formatTimeAgo(post.createdAt);
-
-        let mediaHTML = "";
-        if (post.mediaUrl) {
-            mediaHTML = post.mediaType === "video"
-                ? `<video src="${post.mediaUrl}" controls preload="metadata" class="post-media-content"></video>`
-                : `<img src="${post.mediaUrl}" alt="media" loading="lazy" class="post-media-content" />`;
-        }
-
-        // כפתורי עריכה ומחיקה מופיעים רק לבעל הפוסט
-        const actionsHTML = isOwner ? `
-            <div class="post-actions-right">
-                <button class="edit-post-btn" title="Edit"><i class="bi bi-pencil"></i></button>
-                <button class="delete-post-btn" title="Delete"><i class="bi bi-trash3"></i></button>
-            </div>` : "";
-
-        return `
-            <article class="post-card" data-post-id="${post._id || ''}">
-                <div class="post-card-header">
-                    <div class="author-info-group">
-                        <a href="profile.html?user=${encodeURIComponent(post.author || 'User')}" style="text-decoration:none;">
-                            ${getAvatarHTML(post.authorProfilePic, post.author, 40)}
-                        </a>
-                        <div>
-                            <a href="profile.html?user=${encodeURIComponent(post.author || 'User')}" class="post-author" style="text-decoration:none; color:inherit;">
-                                ${post.author || "User"}
-                            </a>
-                            <span class="post-meta">@${(post.author || "user").toLowerCase().replace(/\s/g, '')} · ${timeAgo}</span>
-                        </div>
-                    </div>
-                    ${actionsHTML}
-                </div>
-                <div class="post-text">${post.content || ""}</div>
-                ${mediaHTML}
-                <div class="post-stats">
-                    <span class="stat-reply"><i class="bi bi-chat"></i> <span class="reply-count">${(post.comments || []).length}</span></span>
-                    <span class="stat-like ${isLiked ? 'liked' : ''}"><i class="bi ${isLiked ? 'bi-heart-fill' : 'bi-heart'}"></i> <span class="like-count">${post.likes || 0}</span></span>
-                </div>
-            </article>`;
-    };
-
-    // --- טעינת נתוני הפרופיל ---
+    // --- load profile data ---
     const loadProfileData = async () => {
         try {
-            const res = await fetch(`/users/${encodeURIComponent(profileUsername)}`);
+            const res = await fetch(`/users/${encodeURIComponent(profileUsername)}?currentUser=${encodeURIComponent(currentUser)}`);
             const data = await res.json();
             if (data.success) {
                 profileData = data.user;
 
-                // סנכרון תמונות חכם
+                // sync profile picture to localStorage if it's the current user's profile
                 if (isMyProfile) {
                     const localPic = localStorage.getItem("userProfilePic") || "";
                     if (profileData.profilePicture && profileData.profilePicture.trim() !== "" && profileData.profilePicture !== "undefined" && profileData.profilePicture !== "null") {
@@ -210,24 +126,22 @@ document.addEventListener("DOMContentLoaded", () => {
             : (isMyProfile ? (localStorage.getItem("userProfilePic") || "") : "");
 
         if (picToUse && picToUse.trim() !== "" && picToUse !== "undefined" && picToUse !== "null") {
-            avatarEl.className = "avatar";
+            avatarEl.className = "avatar avatar-lg";
             avatarEl.style.backgroundImage = `url('${picToUse}')`;
             avatarEl.style.backgroundSize = "cover";
             avatarEl.style.backgroundPosition = "center";
             avatarEl.innerText = "";
         } else {
-            avatarEl.className = "avatar avatar-purple";
+            avatarEl.className = "avatar avatar-purple avatar-lg";
             avatarEl.removeAttribute("style");
-            avatarEl.style.width = "90px";
-            avatarEl.style.height = "90px";
-            avatarEl.style.fontSize = "2rem";
             avatarEl.innerText = profileData.username.substring(0, 2).toUpperCase();
         }
 
         actionBtn.style.display = "block";
         if (isMyProfile) {
             actionBtn.innerText = "Edit Profile";
-            actionBtn.className = "btn btn-primary";
+            actionBtn.className = "btn btn-primary btn-sm";
+            actionBtn.disabled = false;
             actionBtn.onclick = () => {
                 finalCroppedBase64 = picToUse || "";
                 editBioInput.value = profileData.bio || "";
@@ -242,14 +156,169 @@ document.addEventListener("DOMContentLoaded", () => {
                 editModal.classList.add("active");
             };
         } else {
-            // TODO for team: Implement "Add Friend" / "Remove Friend" button logic here
-            actionBtn.style.display = "none";
+            // Viewing someone else's profile 
+            const isFriend = profileData.friends && profileData.friends.some(f => f.username.toLowerCase() === currentUser.toLowerCase());
+            const hasSentRequest = profileData.hasSentRequest;
+
+            if (isFriend) {
+                actionBtn.innerHTML = '<i class="bi bi-person-dash"></i> Remove Friend';
+                actionBtn.className = "btn btn-secondary btn-sm";
+                actionBtn.disabled = false;
+                actionBtn.onclick = () => showRemoveFriendModal(profileUsername);
+            } else if (hasSentRequest) {
+                actionBtn.innerHTML = 'Sent';
+                actionBtn.className = "btn cancel-btn btn-sm";
+                actionBtn.disabled = true;
+                actionBtn.onclick = null;
+            } else {
+                actionBtn.innerHTML = '<i class="bi bi-person-plus"></i> Add Friend';
+                actionBtn.className = "btn btn-primary btn-sm";
+                actionBtn.disabled = false;
+                actionBtn.onclick = () => toggleFriendStatus('request', profileUsername);
+            }
         }
 
-        // TODO for team: Render Friends list inside friendsListContainer
+        renderFriendsList();
     };
 
-    // --- טעינת הפוסטים של המשתמש ---
+    // --- Modal for Removing Friends ---
+    const showRemoveFriendModal = (targetUser) => {
+        let modal = document.getElementById("remove-friend-modal");
+        if (!modal) {
+            document.body.insertAdjacentHTML("beforeend", `
+                <div id="remove-friend-modal" class="modal-overlay">
+                    <div class="confirm-modal-content">
+                        <h3>Remove Friend?</h3>
+                        <p>Are you sure you want to remove this user from your friends list?</p>
+                        <button id="confirm-remove-friend-btn" class="danger-btn">Remove</button>
+                        <button id="cancel-remove-friend-btn" class="cancel-btn">Cancel</button>
+                    </div>
+                </div>
+            `);
+            modal = document.getElementById("remove-friend-modal");
+
+            // Close modal on cancel or clicking outside
+            modal.addEventListener("click", (e) => {
+                if (e.target === modal) modal.classList.remove("active");
+            });
+            document.getElementById("cancel-remove-friend-btn").addEventListener("click", () => {
+                modal.classList.remove("active");
+            });
+        }
+
+        modal.classList.add("active");
+
+        const confirmBtn = document.getElementById("confirm-remove-friend-btn");
+        // Clone button to remove previous event listeners (prevents multiple deletes)
+        const newConfirmBtn = confirmBtn.cloneNode(true);
+        confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
+
+        newConfirmBtn.addEventListener("click", () => {
+            modal.classList.remove("active");
+            toggleFriendStatus('remove', targetUser);
+        });
+    };
+
+    const toggleFriendStatus = async (action, targetUser = profileUsername) => {
+        try {
+            // Update the button visually before the fetch even finishes
+            if (actionBtn && action === 'request') {
+                actionBtn.innerHTML = 'Sent';
+                actionBtn.className = "btn cancel-btn btn-sm";
+                actionBtn.disabled = true;
+                actionBtn.onclick = null; // no double clicking
+            }
+
+            const res = await fetch(`/users/${encodeURIComponent(currentUser)}/friends`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ targetUsername: targetUser, action })
+            });
+            if (res.ok) {
+                loadProfileData(); // Reload UI to update buttons and lists
+            }
+        } catch (err) { console.error("Friend action failed", err); }
+    };
+
+    const renderFriendsList = () => {
+        const container = document.getElementById("friends-list-container");
+        if (!container) return;
+
+        let html = "";
+
+        // 1. Render Pending Requests (Only visible on My Profile)
+        if (isMyProfile && profileData.friendRequests && profileData.friendRequests.length > 0) {
+            html += `<div class="pending-requests-container">
+                        <h4 style="font-size: 0.95rem; color: var(--text-main); margin-bottom: 12px;"><i class="bi bi-person-exclamation"></i> Pending Requests</h4>`;
+
+            html += profileData.friendRequests.map(reqUser => `
+                <div class="pending-request-item">
+                    <div class="friend-info">
+                        <div class="avatar avatar-purple avatar-sm">${reqUser.substring(0, 2).toUpperCase()}</div>
+                        <a href="profile.html?user=${encodeURIComponent(reqUser)}" style="color: var(--text-main); font-weight: 600; text-decoration: none;">${reqUser}</a>
+                    </div>
+                    <div class="friend-info">
+                        <button class="btn btn-primary btn-sm accept-request-btn" data-user="${reqUser}" title="Accept"><i class="bi bi-check-lg"></i></button>
+                        <button class="btn btn-secondary btn-sm reject-request-btn" data-user="${reqUser}" title="Reject"><i class="bi bi-x-lg"></i></button>
+                    </div>
+                </div>
+            `).join("");
+            html += `</div>`;
+        }
+
+        // 2. Render Active Friends
+        html += `<h4 style="font-size: 0.95rem; color: var(--text-main); margin-bottom: 12px;"><i class="bi bi-people"></i> All Friends</h4>`;
+
+        if (!profileData.friends || profileData.friends.length === 0) {
+            html += `
+                <div class="empty-state-box empty-state-flat">
+                    <i class="bi bi-person-x" style="font-size: 2rem; color: var(--border-color); margin-bottom: 10px;"></i>
+                    <p style="margin:0; font-size: 0.9rem;">No friends added yet.</p>
+                </div>`;
+        } else {
+            html += profileData.friends.map(friendObj => {
+                const fName = friendObj.username;
+                const fPic = friendObj.profilePicture;
+                let avatarHtml = `<div class="avatar avatar-purple avatar-sm">${fName.substring(0, 2).toUpperCase()}</div>`;
+                if (fPic && fPic.trim() !== "") {
+                    avatarHtml = `<div class="avatar avatar-sm" style="background-image: url('${fPic}'); background-size: cover; background-position: center;"></div>`;
+                }
+                return `
+                <div class="friend-list-item">
+                    <div class="friend-info">
+                        ${avatarHtml}
+                        <a href="profile.html?user=${encodeURIComponent(fName)}" style="color: var(--text-main); font-weight: 600; text-decoration: none;">${fName}</a>
+                    </div>
+                    ${isMyProfile ? `<button class="btn btn-secondary btn-sm remove-friend-btn" data-user="${fName}" title="Remove Friend"><i class="bi bi-person-dash"></i></button>` : ''}
+                </div>`;
+            }).join("");
+        }
+
+        container.innerHTML = html;
+    };
+
+    // listen for friend action buttons (Accept/Reject/Remove) using event delegation
+    document.addEventListener("click", (e) => {
+        const acceptBtn = e.target.closest(".accept-request-btn");
+        if (acceptBtn) {
+            toggleFriendStatus('accept', acceptBtn.dataset.user);
+            return;
+        }
+
+        const rejectBtn = e.target.closest(".reject-request-btn");
+        if (rejectBtn) {
+            toggleFriendStatus('reject', rejectBtn.dataset.user);
+            return;
+        }
+
+        const removeBtn = e.target.closest(".remove-friend-btn");
+        if (removeBtn) {
+            showRemoveFriendModal(removeBtn.dataset.user);
+            return;
+        }
+    });
+
+    // --- load user posts ---
     const loadUserPosts = async () => {
         try {
             const res = await fetch(`/posts?search=${encodeURIComponent(profileUsername)}`);
@@ -264,7 +333,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 userPostsContainer.innerHTML = "";
                 userPosts.forEach(p => {
-                    userPostsContainer.insertAdjacentHTML("beforeend", createPostCardHTML(p));
+                    // FIX: Using window.createPostCardHTML from shared file
+                    if (typeof window.createPostCardHTML === "function") {
+                        userPostsContainer.insertAdjacentHTML("beforeend", window.createPostCardHTML(p));
+                    }
                 });
             }
         } catch (err) {
@@ -272,8 +344,12 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     };
 
-    // --- חיתוך תמונת פרופיל (Crop Canvas) מותאם דינמית למימדי התמונה כדי למנוע "זום מדי" ---
+    // Connect the shared actions reload to this specific page's reload function
+    window.reloadPostsFeed = loadUserPosts;
+
+    // --- draw image on canvas (crop profile picture) ---
     const drawImageOnCanvas = () => {
+        if (!ctx) return;
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.save();
         ctx.translate(canvas.width / 2 + imgX, canvas.height / 2 + imgY);
@@ -289,9 +365,9 @@ document.addEventListener("DOMContentLoaded", () => {
             const reader = new FileReader();
             reader.onload = (event) => {
                 img.onload = () => {
-                    // חישוב קנה מידה התחלתי מאוזן שמתאים את התמונה לקנבס
+                    // originally set scale to fit the image within the canvas
                     scale = Math.max(canvas.width / img.width, canvas.height / img.height);
-                    // התאמת טווח הסליידר דינמית לתמונה הספציפית כך שלא ירגיש זום מוגזם
+                    // update zoom slider min/max based on the initial scale
                     zoomSlider.min = (scale * 0.4).toFixed(4);
                     zoomSlider.max = (scale * 3).toFixed(4);
                     zoomSlider.value = scale;
@@ -306,9 +382,11 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    canvas.addEventListener("mousedown", (e) => { isDragging = true; startX = e.clientX - imgX; startY = e.clientY - imgY; });
-    window.addEventListener("mousemove", (e) => { if (!isDragging) return; imgX = e.clientX - startX; imgY = e.clientY - startY; drawImageOnCanvas(); });
-    window.addEventListener("mouseup", () => { isDragging = false; });
+    if (canvas) {
+        canvas.addEventListener("mousedown", (e) => { isDragging = true; startX = e.clientX - imgX; startY = e.clientY - imgY; });
+        window.addEventListener("mousemove", (e) => { if (!isDragging) return; imgX = e.clientX - startX; imgY = e.clientY - startY; drawImageOnCanvas(); });
+        window.addEventListener("mouseup", () => { isDragging = false; });
+    }
     zoomSlider?.addEventListener("input", (e) => { scale = parseFloat(e.target.value); drawImageOnCanvas(); });
 
     document.getElementById("cancel-crop-btn")?.addEventListener("click", () => { cropModal.classList.remove("active"); editModal.classList.add("active"); });
@@ -321,7 +399,7 @@ document.addEventListener("DOMContentLoaded", () => {
         editModal.classList.add("active");
     });
 
-    // --- שמירת עריכת פרופיל ---
+    // --- save profile changes ---
     document.getElementById("save-profile-btn")?.addEventListener("click", async () => {
         const newBio = editBioInput.value.trim();
         try {
@@ -352,124 +430,41 @@ document.addEventListener("DOMContentLoaded", () => {
 
     document.getElementById("close-edit-profile-btn")?.addEventListener("click", () => editModal.classList.remove("active"));
     document.getElementById("cancel-edit-profile-btn")?.addEventListener("click", () => editModal.classList.remove("active"));
-    editModal.addEventListener("click", (e) => { if (e.target === editModal) editModal.classList.remove("active"); });
+    editModal?.addEventListener("click", (e) => { if (e.target === editModal) editModal.classList.remove("active"); });
 
-    // === האזנה לכפתורי מחיקה ועריכה של פוסטים בעמוד הפרופיל ===
-    document.addEventListener("click", async (e) => {
-        const target = e.target;
-        const postCard = target.closest(".post-card");
-        const postId = postCard?.dataset.postId;
+    // --- Delete Account Logic ---
+    const deleteAccountBtn = document.getElementById("delete-account-btn");
 
-        // מחיקת פוסט
-        const deleteBtn = target.closest(".delete-post-btn");
-        if (deleteBtn && postId) {
-            const modal = document.getElementById("delete-confirm-modal");
-            if (modal) {
-                modal.classList.add("active");
-                const confirmBtn = document.getElementById("confirm-delete-btn");
-                const newConfirm = confirmBtn.cloneNode(true);
-                confirmBtn.parentNode.replaceChild(newConfirm, confirmBtn);
-                newConfirm.addEventListener("click", async () => {
-                    modal.classList.remove("active");
-                    await fetch(`/posts/${postId}`, { method: "DELETE" });
-                    loadUserPosts();
-                });
-                document.getElementById("cancel-delete-btn").onclick = () => modal.classList.remove("active");
-            }
-            return;
-        }
+    if (deleteAccountBtn) {
+        deleteAccountBtn.addEventListener("click", async () => {
+            //  double confirmation prompt to prevent accidental deletion
+            const confirmDelete = confirm("Are you sure you want to delete your account? This action cannot be undone and all your data will be permanently removed.");
 
-        // עריכת פוסט
-        if (target.closest(".edit-post-btn") && postCard) {
-            currentPostBeingEdited = postCard;
-            editMediaCleared = false;
-            if (editPostTextarea) editPostTextarea.value = postCard.querySelector(".post-text")?.innerText || "";
-            const existingImg = postCard.querySelector("img.post-media-content");
-            const existingVid = postCard.querySelector("video.post-media-content");
+            if (confirmDelete) {
+                try {
+                    const res = await fetch(`/users/${encodeURIComponent(currentUser)}`, {
+                        method: 'DELETE',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ currentUser })
+                    });
 
-            if (editPostPreviewContainer && editPostImgPreview && editPostVideoPreview) {
-                editPostPreviewContainer.style.display = "none";
-                editPostImgPreview.style.display = "none";
-                editPostVideoPreview.style.display = "none";
-                if (existingImg) {
-                    editPostImgPreview.src = existingImg.src;
-                    editPostImgPreview.style.display = "block";
-                    editPostPreviewContainer.style.display = "flex";
-                } else if (existingVid) {
-                    editPostVideoPreview.src = existingVid.src;
-                    editPostVideoPreview.style.display = "block";
-                    editPostPreviewContainer.style.display = "flex";
-                }
-            }
-            editPostModal?.classList.add("active");
-        }
-    });
-
-    // --- לוגיקת חלון עריכת פוסט (Edit Post Modal) ---
-    const closeEditPostModal = () => {
-        editPostModal?.classList.remove("active");
-        if (editPostMediaInput) editPostMediaInput.value = "";
-        if (editPostPreviewContainer) editPostPreviewContainer.style.display = "none";
-        editMediaCleared = false;
-    };
-
-    document.getElementById("edit-modal-image-btn")?.addEventListener("click", () => editPostMediaInput?.click());
-    document.getElementById("edit-modal-clear-media")?.addEventListener("click", () => {
-        if (editPostMediaInput) editPostMediaInput.value = "";
-        if (editPostPreviewContainer) editPostPreviewContainer.style.display = "none";
-        editMediaCleared = true;
-    });
-
-    if (editPostMediaInput) {
-        editPostMediaInput.addEventListener("change", function () {
-            const file = this.files[0];
-            if (file && editPostPreviewContainer) {
-                const url = URL.createObjectURL(file);
-                editPostPreviewContainer.style.display = "flex";
-                editMediaCleared = false;
-                if (file.type.startsWith("video/")) {
-                    editPostVideoPreview.src = url;
-                    editPostVideoPreview.style.display = "block";
-                    editPostImgPreview.style.display = "none";
-                } else {
-                    editPostImgPreview.src = url;
-                    editPostImgPreview.style.display = "block";
-                    editPostVideoPreview.style.display = "none";
+                    const data = await res.json();
+                    if (data.success) {
+                        alert("Account deleted successfully.");
+                        // clear localStorage and redirect to logout or home page
+                        localStorage.removeItem("loggedInUser");
+                        localStorage.removeItem("userProfilePic");
+                        window.location.href = "/logout";
+                    } else {
+                        alert(data.error || "Failed to delete account");
+                    }
+                } catch (err) {
+                    console.error("Error deleting account:", err);
+                    alert("Network error. Could not delete account.");
                 }
             }
         });
     }
-
-    document.getElementById("edit-modal-publish-btn")?.addEventListener("click", async () => {
-        if (!currentPostBeingEdited) return;
-        const postId = currentPostBeingEdited.dataset.postId;
-        const newText = editPostTextarea?.value.trim() || "";
-        const newFile = editPostMediaInput?.files[0];
-
-        let finalMediaUrl = undefined, finalMediaType = undefined;
-        if (newFile) {
-            finalMediaUrl = await fileToDataURL(newFile);
-            finalMediaType = newFile.type.startsWith("video/") ? "video" : "image";
-        } else if (editMediaCleared) {
-            finalMediaUrl = "";
-            finalMediaType = "";
-        }
-
-        const payload = { content: newText };
-        if (finalMediaUrl !== undefined) payload.mediaUrl = finalMediaUrl;
-        if (finalMediaType !== undefined) payload.mediaType = finalMediaType;
-
-        const res = await fetch(`/posts/${postId}`, {
-            method: "PUT", headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload)
-        });
-        if (res.ok) {
-            closeEditPostModal();
-            loadUserPosts();
-        }
-    });
-
-    document.getElementById("close-edit-modal-btn")?.addEventListener("click", closeEditPostModal);
 
     loadProfileData();
 });

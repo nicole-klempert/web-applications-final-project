@@ -16,4 +16,11 @@ router.put('/:username', updateUserProfile);
 // POST /users/:username/friends
 router.post('/:username/friends', toggleFriend);
 
+// GET /users - List and Search users
+import { listUsers, deleteUser } from '../controllers/userController.js';
+router.get('/', listUsers);
+
+// DELETE /users/:username - Delete own user
+router.delete('/:username', deleteUser);
+
 export default router;

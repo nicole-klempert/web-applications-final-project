@@ -3,49 +3,88 @@ import bcrypt from 'bcryptjs';
 import { encrypt, decrypt, generateBlindIndex } from '../utils/cryptoUtils.js';
 
 const userSchema = new mongoose.Schema({
-  // the encrypted username (iv:tag:ciphertext)
-  usernameEncrypted: {
-    type: String,
-    required: true
-  },
-  // the hash of the username, used for querying and uniqueness
-  usernameHash: {
-    type: String,
-    required: true,
-    unique: true,
-    index: true
-  },
-  // the encrypted email (iv:tag:ciphertext)
-  emailEncrypted: {
-    type: String,
-    required: true
-  },
-  // the hash of the email, used for querying and indexing
-  emailHash: {
-    type: String,
-    required: true,
-    index: true
-  },
-  // the hashed password (one-way, cannot be decrypted)
-  password: {
-    type: String,
-    required: true
-  },
-  // the encrypted birthday (iv:tag:ciphertext)
-  birthdayEncrypted: {
-    type: String,
-    required: true
-  },
-  // the encrypted recovery question
-  recoveryQuestionEncrypted: {
-    type: String,
-    required: true
-  },
-  // the encrypted recovery answer
-  recoveryAnswerEncrypted: {
-    type: String,
-    required: true
-  }
+    // the encrypted username (iv:tag:ciphertext)
+    usernameEncrypted: {
+        type: String,
+        required: true
+    },
+    // the hash of the username, used for querying and uniqueness
+    usernameHash: {
+        type: String,
+        required: true,
+        unique: true,
+        index: true
+    },
+    // the encrypted email (iv:tag:ciphertext)
+    emailEncrypted: {
+        type: String,
+        required: true
+    },
+    // the hash of the email, used for querying and indexing
+    emailHash: {
+        type: String,
+        required: true,
+        index: true
+    },
+    // the hashed password (one-way, cannot be decrypted)
+    password: {
+        type: String,
+        required: true
+    },
+    // the encrypted birthday (iv:tag:ciphertext)
+    birthdayEncrypted: {
+        type: String,
+        required: true
+    },
+    // the encrypted recovery question
+    recoveryQuestionEncrypted: {
+        type: String,
+        required: true
+    },
+    // the encrypted recovery answer
+    recoveryAnswerEncrypted: {
+        type: String,
+        required: true
+    },
+    // optional profile bio
+    bio: {
+        type: String,
+        default: ''
+    },
+
+    // optional city of residence
+    city: {
+        type: String,
+        default: ''
+    },
+
+    // optional profile picture URL or path
+    profilePicture: {
+        type: String,
+        default: ''
+    },
+
+    // list of friends (usernames)
+    friends: [{
+        type: String
+    }],
+
+    // list of pending friend requests (usernames)
+    friendRequests: [{
+        type: String
+    }],
+
+    // list of groups the user manages (references to Group model)
+    managedGroups: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Group'
+    }],
+
+    // list of groups the user has joined (references to Group model)
+    joinedGroups: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Group'
+    }]
 }, {
   // automatically include virtuals when converting documents to JSON or Objects
   toJSON: { virtuals: true },

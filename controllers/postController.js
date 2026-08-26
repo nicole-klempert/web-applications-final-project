@@ -1,4 +1,5 @@
 import Post from '../models/postModel.js';
+import User from '../models/userModel.js';
 
 // GET /posts 
 export const getPosts = async (req, res, next) => {
@@ -8,13 +9,16 @@ export const getPosts = async (req, res, next) => {
         const skip = (page - 1) * limit;
         const query = {};
 
-        // text search across content and author fields (case-insensitive)
+        // Ensure query.$and is initialized safely
+        query.$and = [];
+
+        // text search across content and author fields
         if (req.query.search && req.query.search.trim() !== "") {
             const regex = new RegExp(req.query.search.trim(), "i");
-            query.$or = [{ content: { $regex: regex } }, { author: { $regex: regex } }];
+            query.$and.push({ $or: [{ content: { $regex: regex } }, { author: { $regex: regex } }] });
         }
 
-        // filter by date range if startDate or endDate is provided
+        // filter by date range
         if (req.query.startDate || req.query.endDate) {
             query.createdAt = {};
             if (req.query.startDate) query.createdAt.$gte = new Date(req.query.startDate);
@@ -25,18 +29,47 @@ export const getPosts = async (req, res, next) => {
             }
         }
 
-        // filter by post type (text, image, video) if specified
+        // filter by post type
         if (req.query.type && req.query.type !== "all") {
             if (req.query.type === "text") {
-                // posts with no mediaUrl or mediaUrl is empty string or null
-                query.$and = [
-                    { $or: [{ mediaUrl: "" }, { mediaUrl: { $exists: false } }, { mediaUrl: null }] }
-                ];
+                query.$and.push({ $or: [{ mediaUrl: "" }, { mediaUrl: { $exists: false } }, { mediaUrl: null }] });
             } else if (req.query.type === "image") {
                 query.mediaType = "image";
             } else if (req.query.type === "video") {
                 query.mediaType = "video";
             }
+        }
+
+        // Feed Scope filtering (Friends + Groups Multi-select logic)
+        const { feedScopes, currentUser } = req.query;
+        if (feedScopes && feedScopes !== 'all' && currentUser) {
+            const scopesArray = feedScopes.split(",");
+            const user = await User.findByUsername(currentUser);
+            const scopeConditions = [];
+
+            if (scopesArray.includes('friends')) {
+                if (user && user.friends && user.friends.length > 0) {
+                    scopeConditions.push({ author: { $in: user.friends } });
+                } else {
+                    // User has no friends, return empty (Edge case 9.3)
+                    scopeConditions.push({ author: { $in: [] } });
+                }
+            }
+
+            if (scopesArray.includes('groups')) {
+                // Placeholder for groups: expects a groupId
+                scopeConditions.push({ groupId: { $exists: true } });
+            }
+
+            if (scopeConditions.length > 0) {
+                // Return posts that match EITHER friends OR groups
+                query.$and.push({ $or: scopeConditions });
+            }
+        }
+
+        // Clean up empty $and array to prevent MongoDB errors
+        if (query.$and.length === 0) {
+            delete query.$and;
         }
 
         const totalPosts = await Post.countDocuments(query);

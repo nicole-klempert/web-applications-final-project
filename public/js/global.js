@@ -32,6 +32,37 @@ document.addEventListener("DOMContentLoaded", () => {
                 </div>
             `);
         }
+
+        // edit post modal (popup) 
+        if (!document.getElementById("edit-modal-overlay")) {
+            document.body.insertAdjacentHTML("beforeend", `
+                <!-- popup (modal) for EDITING a post -->
+                <div id="edit-modal-overlay" class="modal-overlay">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3>Edit Post</h3>
+                            <button id="close-edit-modal-btn" class="close-modal-btn">&times;</button>
+                        </div>
+                        <div class="modal-body">
+                            <textarea id="edit-modal-textarea" class="modal-textarea-custom" rows="4"></textarea>
+
+                            <input type="file" id="edit-modal-media-upload" accept="image/*,video/*" style="display: none;">
+                            <div id="edit-modal-media-preview-container" class="modal-media-preview-container" style="display: none;">
+                                <img id="edit-modal-media-preview" src="" style="max-width: 100%; max-height: 250px; border-radius: 8px; display: none;">
+                                <video id="edit-modal-video-preview" controls style="max-width: 100%; max-height: 250px; border-radius: 8px; display: none;"></video>
+                                <button id="edit-modal-clear-media" class="clear-media-btn">&times;</button>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button id="edit-modal-image-btn" class="media-trigger-btn">
+                                <i class="bi bi-image"></i> Change Media
+                            </button>
+                            <button id="edit-modal-publish-btn" class="publish-btn">Save Changes</button>
+                        </div>
+                    </div>
+                </div>
+            `);
+        }
     };
 
     // use the function to inject modals into the DOM
@@ -166,5 +197,26 @@ document.addEventListener("DOMContentLoaded", () => {
                 window.location.href = "/logout";
             });
         }
+    }
+
+    // --- Navigate to Profile from bottom-left account card ---
+    const accountCard = document.querySelector(".account-card");
+    const navAvatar = document.getElementById("nav-user-avatar");
+
+    const navigateToMyProfile = () => {
+        const user = localStorage.getItem("loggedInUser");
+        if (user) {
+            window.location.href = `profile.html?user=${encodeURIComponent(user)}`;
+        }
+    };
+
+    if (accountCard) {
+        accountCard.addEventListener("click", navigateToMyProfile);
+    }
+    if (navAvatar) {
+        navAvatar.addEventListener("click", (e) => {
+            e.stopPropagation();
+            navigateToMyProfile();
+        });
     }
 });

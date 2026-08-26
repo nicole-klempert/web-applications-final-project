@@ -89,7 +89,7 @@ app.use((req, res, next) => {
         return res.status(404).json({ success: false, error: 'Resource not found' });
     }
     // else, send the 404.html page
-    res.status(404).sendFile(path.join(__dirname, 'public', '404.html'));
+    res.status(404).sendFile(path.join(__dirname, 'public/errors', '404.html'));
 });
 
 // 500 handler: central error middleware to catch all unhandled server errors gracefully
@@ -106,7 +106,7 @@ app.use((err, req, res, next) => {
     }
 
     // else, send the custom styled 500.html page
-    res.status(500).sendFile(path.join(__dirname, 'public', '500.html'));
+    res.status(500).sendFile(path.join(__dirname, 'public/errors', '500.html'));
 });
 
 // start server
