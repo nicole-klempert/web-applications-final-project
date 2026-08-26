@@ -19,6 +19,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const actionBtn = document.getElementById("profile-action-btn");
     const userPostsContainer = document.getElementById("user-posts-container");
     const friendsListContainer = document.getElementById("friends-list-container");
+    const cityContainerEl = document.getElementById("profile-city-container");
+    const cityEl = document.getElementById("profile-city");
+    const postsCountEl = document.getElementById("profile-posts-count");
+    const editCityInput = document.getElementById("edit-city-input");
 
     // Edit Profile & Crop Elements
     const editModal = document.getElementById("edit-profile-modal");
@@ -118,6 +122,16 @@ document.addEventListener("DOMContentLoaded", () => {
         usernameEl.innerText = profileData.username;
         handleEl.innerText = `@${profileData.username.toLowerCase().replace(/\s+/g, '')}`;
         bioEl.innerText = profileData.bio || "No bio provided yet.";
+        if (profileData.city) {
+            cityContainerEl.style.display = "block";
+            cityEl.innerText = profileData.city;
+        } else if (isMyProfile) {
+            cityContainerEl.style.display = "block";
+            cityEl.innerText = "No city specified";
+        } else {
+            // if viewing someone else's profile and they haven't set a city, hide the city container
+            cityContainerEl.style.display = "none";
+        }
         friendsCountEl.innerText = (profileData.friends || []).length;
         joinedDateEl.innerText = new Date(profileData.createdAt).toLocaleDateString("en-US", { month: "short", year: "numeric" });
 
@@ -145,6 +159,7 @@ document.addEventListener("DOMContentLoaded", () => {
             actionBtn.onclick = () => {
                 finalCroppedBase64 = picToUse || "";
                 editBioInput.value = profileData.bio || "";
+                editCityInput.value = profileData.city || "";
                 if (finalCroppedBase64) {
                     editAvatarLivePreview.src = finalCroppedBase64;
                     editAvatarLivePreview.style.display = "block";
@@ -326,6 +341,10 @@ document.addEventListener("DOMContentLoaded", () => {
             if (data.success) {
                 const userPosts = (data.posts || []).filter(p => p.author && p.author.toLowerCase() === profileUsername.toLowerCase());
 
+                if (postsCountEl) {
+                    postsCountEl.innerText = userPosts.length;
+                }
+
                 if (userPosts.length === 0) {
                     userPostsContainer.innerHTML = `<div style="text-align: center; padding: 40px; color: var(--text-muted);">No posts found from this user.</div>`;
                     return;
@@ -333,7 +352,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 userPostsContainer.innerHTML = "";
                 userPosts.forEach(p => {
-                    // FIX: Using window.createPostCardHTML from shared file
                     if (typeof window.createPostCardHTML === "function") {
                         userPostsContainer.insertAdjacentHTML("beforeend", window.createPostCardHTML(p));
                     }
@@ -402,12 +420,13 @@ document.addEventListener("DOMContentLoaded", () => {
     // --- save profile changes ---
     document.getElementById("save-profile-btn")?.addEventListener("click", async () => {
         const newBio = editBioInput.value.trim();
+        const newCity = editCityInput.value.trim();
+
         try {
             const res = await fetch(`/users/${encodeURIComponent(currentUser)}`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ currentUser, bio: newBio, profilePicture: finalCroppedBase64 })
-            });
+                body: JSON.stringify({ currentUser, bio: newBio, city: newCity, profilePicture: finalCroppedBase64 }) });
             const data = await res.json();
             if (data.success) {
                 if (finalCroppedBase64) {
@@ -436,11 +455,27 @@ document.addEventListener("DOMContentLoaded", () => {
     const deleteAccountBtn = document.getElementById("delete-account-btn");
 
     if (deleteAccountBtn) {
-        deleteAccountBtn.addEventListener("click", async () => {
-            //  double confirmation prompt to prevent accidental deletion
-            const confirmDelete = confirm("Are you sure you want to delete your account? This action cannot be undone and all your data will be permanently removed.");
+        deleteAccountBtn.addEventListener("click", () => {
+            // take global modal reference to avoid creating multiple modals
+            const modal = document.getElementById("delete-confirm-modal");
+            if (!modal) return;
 
-            if (confirmDelete) {
+            // texts for the modal
+            modal.querySelector("h3").innerText = "Delete Account?";
+            modal.querySelector("p").innerText = "WARNING: This action cannot be undone. All your data, including all posts, will be permanently deleted.";
+
+            // show the modal
+            modal.classList.add("active");
+
+            // double click prevention: clone the confirm button to remove previous event listeners
+            const confirmBtn = document.getElementById("confirm-delete-btn");
+            const newConfirmBtn = confirmBtn.cloneNode(true);
+            confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
+
+            // delete account logic
+            newConfirmBtn.addEventListener("click", async () => {
+                modal.classList.remove("active"); // close modal immediately to avoid double clicks
+
                 try {
                     const res = await fetch(`/users/${encodeURIComponent(currentUser)}`, {
                         method: 'DELETE',
@@ -450,8 +485,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
                     const data = await res.json();
                     if (data.success) {
-                        alert("Account deleted successfully.");
-                        // clear localStorage and redirect to logout or home page
                         localStorage.removeItem("loggedInUser");
                         localStorage.removeItem("userProfilePic");
                         window.location.href = "/logout";
@@ -462,7 +495,12 @@ document.addEventListener("DOMContentLoaded", () => {
                     console.error("Error deleting account:", err);
                     alert("Network error. Could not delete account.");
                 }
-            }
+            });
+
+            // cencel button logic
+            document.getElementById("cancel-delete-btn").onclick = () => {
+                modal.classList.remove("active");
+            };
         });
     }
 

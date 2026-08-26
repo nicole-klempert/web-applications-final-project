@@ -1,4 +1,5 @@
 import User from '../models/userModel.js';
+import Post from '../models/postModel.js';
 
 // GET /users/:username
 // extracts user profile information for the given username
@@ -167,7 +168,7 @@ export const listUsers = async (req, res) => {
     }
 };
 
-// DELETE /users/:username (Delete own user)
+// DELETE /users/:username (Delete own user and posts)
 export const deleteUser = async (req, res) => {
     try {
         const { username } = req.params;
@@ -180,8 +181,13 @@ export const deleteUser = async (req, res) => {
         const user = await User.findByUsername(username);
         if (!user) return res.status(404).json({ success: false, error: 'User not found' });
 
+        // delete all posts authored by this user (case-insensitive match)
+        await Post.deleteMany({ author: new RegExp('^' + username + '$', 'i') });
+
+        // delete the user itself
         await User.deleteOne({ _id: user._id });
-        return res.status(200).json({ success: true, message: "User deleted" });
+
+        return res.status(200).json({ success: true, message: "User and posts deleted" });
     } catch (error) {
         return res.status(500).json({ success: false, error: 'Failed to delete user' });
     }

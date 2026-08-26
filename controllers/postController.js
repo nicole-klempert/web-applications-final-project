@@ -48,12 +48,9 @@ export const getPosts = async (req, res, next) => {
             const scopeConditions = [];
 
             if (scopesArray.includes('friends')) {
-                if (user && user.friends && user.friends.length > 0) {
-                    scopeConditions.push({ author: { $in: user.friends } });
-                } else {
-                    // User has no friends, return empty (Edge case 9.3)
-                    scopeConditions.push({ author: { $in: [] } });
-                }
+                // currentUser's friends + currentUser itself
+                const authorsList = [...((user && user.friends) ? user.friends : []), currentUser];
+                scopeConditions.push({ author: { $in: authorsList } });
             }
 
             if (scopesArray.includes('groups')) {
