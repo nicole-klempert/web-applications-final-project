@@ -10,6 +10,8 @@
     <link rel="stylesheet" href="css/variables.css">
     <link rel="stylesheet" href="css/layout.css">
     <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/avatars.css">
+    <link rel="stylesheet" href="css/modals.css">
 </head>
 
 <body>
@@ -103,33 +105,12 @@
         </section>
     </main>
 
-    <!-- crop & zoom Modal === -->
-    <div class="modal-overlay" id="crop-modal-overlay" style="display: none; z-index: 10000;">
-        <div class="crop-modal-content">
-            <h3>Adjust Profile Photo</h3>
-            <p>Position and zoom your photo to fit the circle</p>
-
-            <div class="crop-viewport-wrapper">
-                <canvas id="crop-canvas" width="220" height="220"></canvas>
-            </div>
-
-            <div class="zoom-slider-group">
-                <i class="bi bi-zoom-out"></i>
-                <input type="range" id="zoom-slider" min="1" max="3" step="0.05" value="1">
-                <i class="bi bi-zoom-in"></i>
-            </div>
-
-            <div class="crop-modal-actions">
-                <button type="button" class="btn cancel-btn" id="cancel-crop-btn">Cancel</button>
-                <button type="button" class="btn btn-primary" id="save-crop-btn">Save Avatar</button>
-            </div>
-        </div>
-    </div>
-
     <footer class="site-footer">
         <p>&copy; 2026 Web Application Project - Shahaf Abraham, Nicole Klempert & Lior Shif</p>
     </footer>
 
+    <script src="js/global.js"></script>
     <script src="js/auth.js"></script>
+
 </body>
 </html>

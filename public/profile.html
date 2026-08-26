@@ -145,26 +145,6 @@
         </div>
     </div>
 
-    <!-- picture crop modal -->
-    <div id="crop-modal" class="modal-overlay">
-        <div class="crop-modal-content">
-            <h3>Crop Profile Picture</h3>
-            <p>Drag the image to position it and use the slider to zoom.</p>
-            <div class="crop-viewport-wrapper">
-                <canvas id="crop-canvas" width="200" height="200"></canvas>
-            </div>
-            <div class="zoom-slider-group">
-                <i class="bi bi-zoom-out"></i>
-                <input type="range" id="zoom-slider" min="0.5" max="3" step="0.01" value="1">
-                <i class="bi bi-zoom-in"></i>
-            </div>
-            <div class="crop-modal-actions">
-                <button type="button" class="btn btn-secondary" id="cancel-crop-btn">Cancel</button>
-                <button type="button" class="btn btn-primary" id="apply-crop-btn">Crop & Save</button>
-            </div>
-        </div>
-    </div>
-
     <button id="back-to-top" class="back-to-top-btn" title="Back to top">
         <i class="bi bi-arrow-up"></i>
     </button>
@@ -175,7 +155,6 @@
 
     <script src="js/global.js"></script>
     <script src="js/profileManager.js"></script>
-    <script src="js/sharedPostActions.js"></script>
 
 </body>
 </html>

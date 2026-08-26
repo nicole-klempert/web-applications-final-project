@@ -350,60 +350,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
     window.reloadPostsFeed = loadUserPosts;
 
-    // --- crop profile picture logic ---
-    const drawImageOnCanvas = () => {
-        if (!ctx) return;
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.save();
-        ctx.translate(canvas.width / 2 + imgX, canvas.height / 2 + imgY);
-        ctx.scale(scale, scale);
-        ctx.drawImage(img, -img.width / 2, -img.height / 2);
-        ctx.restore();
-    };
-
-    // --- event listeners for cropping ---
-    editAvatarTrigger?.addEventListener("click", () => editProfileFileInput?.click());
-    editProfileFileInput?.addEventListener("change", function (e) {
-        const file = e.target.files[0];
-
-        // reset the file input value to allow re-selecting the same file if needed
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                img.onload = () => {
-                    scale = Math.max(canvas.width / img.width, canvas.height / img.height);
-                    zoomSlider.min = (scale * 0.4).toFixed(4);
-                    zoomSlider.max = (scale * 3).toFixed(4);
-                    zoomSlider.value = scale;
-                    imgX = 0; imgY = 0;
-                    drawImageOnCanvas();
-                    editModal.classList.remove("active");
-                    cropModal.classList.add("active");
-                };
-                img.src = event.target.result;
-            };
-            reader.readAsDataURL(file);
-        }
-    });
-
-    // --- drag and zoom logic ---
-    if (canvas) {
-        canvas.addEventListener("mousedown", (e) => { isDragging = true; startX = e.clientX - imgX; startY = e.clientY - imgY; });
-        window.addEventListener("mousemove", (e) => { if (!isDragging) return; imgX = e.clientX - startX; imgY = e.clientY - startY; drawImageOnCanvas(); });
-        window.addEventListener("mouseup", () => { isDragging = false; });
+    // --- Initialize Universal Image Cropper ---
+    if (typeof window.initImageCropper === "function") {
+        window.initImageCropper({
+            triggerId: "edit-avatar-trigger",
+            fileInputId: "edit-profile-file-input",
+            livePreviewId: "edit-avatar-live-preview",
+            placeholderId: "edit-avatar-placeholder",
+            hideModalId: "edit-profile-modal",
+            onCropApply: (base64String) => {
+                finalCroppedBase64 = base64String;
+            }
+        });
     }
-    zoomSlider?.addEventListener("input", (e) => { scale = parseFloat(e.target.value); drawImageOnCanvas(); });
-
-    // --- crop modal buttons ---
-    document.getElementById("cancel-crop-btn")?.addEventListener("click", () => { cropModal.classList.remove("active"); editModal.classList.add("active"); });
-    document.getElementById("apply-crop-btn")?.addEventListener("click", () => {
-        finalCroppedBase64 = canvas.toDataURL("image/png");
-        editAvatarLivePreview.src = finalCroppedBase64;
-        editAvatarLivePreview.style.display = "block";
-        editAvatarPlaceholder.style.display = "none";
-        cropModal.classList.remove("active");
-        editModal.classList.add("active");
-    });
 
     // --- save profile changes ---
     document.getElementById("save-profile-btn")?.addEventListener("click", async () => {
