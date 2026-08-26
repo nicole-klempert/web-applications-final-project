@@ -471,5 +471,100 @@ document.addEventListener("DOMContentLoaded", () => {
 
     document.getElementById("close-edit-modal-btn")?.addEventListener("click", closeEditPostModal);
 
+    // === USER SEARCH ===
+    const searchBtn = document.getElementById("searchBtn");
+    const resetSearchBtn = document.getElementById("resetSearchBtn");
+    const searchUsernameInput = document.getElementById("searchUsername");
+    const searchEmailInput = document.getElementById("searchEmail");
+    const searchJoinedFromInput = document.getElementById("searchJoinedFrom");
+    const searchJoinedToInput = document.getElementById("searchJoinedTo");
+    const searchResultsContainer = document.getElementById("searchResultsContainer");
+
+    const displaySearchResults = (users) => {
+        if (!searchResultsContainer) return;
+        searchResultsContainer.innerHTML = "";
+
+        if (users.length === 0) {
+            searchResultsContainer.innerHTML = `<div class="text-center text-muted p-2 small">No users found.</div>`;
+            return;
+        }
+
+        users.forEach(user => {
+            const isMe = user.username.trim().toLowerCase() === currentUser.trim().toLowerCase();
+            const profileLink = `profile.html?user=${encodeURIComponent(user.username)}`;
+
+            // Build avatar HTML
+            let avatarHTML = "";
+            if (user.profilePicture && user.profilePicture.trim() !== "" && user.profilePicture !== "undefined" && user.profilePicture !== "null") {
+                avatarHTML = `<img src="${user.profilePicture}" class="avatar" alt="avatar" />`;
+            } else {
+                const initials = user.username.substring(0, 2).toUpperCase();
+                avatarHTML = `<div class="avatar avatar-purple">${initials}</div>`;
+            }
+
+            const itemHTML = `
+                <a href="${profileLink}" class="account-card">
+                    ${avatarHTML}
+                    <div>
+                        <span class="name">${user.username} ${isMe ? '<span class="text-primary small">(You)</span>' : ''}</span>
+                        <span class="handle">${user.email}</span>
+                    </div>
+                </a>
+            `;
+            searchResultsContainer.insertAdjacentHTML("beforeend", itemHTML);
+        });
+    };
+
+    const fetchSearchResults = async () => {
+        if (!searchResultsContainer) return;
+        // Use Bootstrap
+        searchResultsContainer.innerHTML = `<div class="text-center text-muted p-2 small"><span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Searching...</div>`;
+
+        const usernameVal = searchUsernameInput ? searchUsernameInput.value.trim() : "";
+        const emailVal = searchEmailInput ? searchEmailInput.value.trim() : "";
+        const fromVal = searchJoinedFromInput ? searchJoinedFromInput.value : "";
+        const toVal = searchJoinedToInput ? searchJoinedToInput.value : "";
+
+        const params = new URLSearchParams({
+            username: usernameVal,
+            email: emailVal,
+            joinedFrom: fromVal,
+            joinedTo: toVal
+        });
+
+        try {
+            const res = await fetch(`/users/search?${params}`);
+            const data = await res.json();
+            if (data.success) {
+                displaySearchResults(data.users || []);
+            } else {
+                searchResultsContainer.innerHTML = `<div class="text-center text-muted p-2 small">Error loading results.</div>`;
+            }
+        } catch (err) {
+            console.error("User search error:", err);
+            searchResultsContainer.innerHTML = `<div class="text-center text-muted p-2 small">Error connecting to server.</div>`;
+        }
+    };
+
+    searchBtn?.addEventListener("click", fetchSearchResults);
+    resetSearchBtn?.addEventListener("click", () => {
+        if (searchUsernameInput) searchUsernameInput.value = "";
+        if (searchEmailInput) searchEmailInput.value = "";
+        if (searchJoinedFromInput) searchJoinedFromInput.value = "";
+        if (searchJoinedToInput) searchJoinedToInput.value = "";
+        if (searchResultsContainer) searchResultsContainer.innerHTML = "";
+    });
+
+    let debounceTimeout = null;
+    const handleSearchInput = () => {
+        clearTimeout(debounceTimeout);
+        debounceTimeout = setTimeout(fetchSearchResults, 300);
+    };
+
+    searchUsernameInput?.addEventListener("input", handleSearchInput);
+    searchEmailInput?.addEventListener("input", handleSearchInput);
+    searchJoinedFromInput?.addEventListener("change", fetchSearchResults);
+    searchJoinedToInput?.addEventListener("change", fetchSearchResults);
+
     loadProfileData();
 });
