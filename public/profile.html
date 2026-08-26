@@ -1,5 +1,6 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="utf-8" />
     <title>Profile - Web Application Project</title>
@@ -54,33 +55,25 @@
 
         <!-- main profile area -->
         <main class="main-feed">
-            <!-- Profile Header -->
-            <section class="post-card profile-header-card">
-                <div class="profile-header-layout">
-                    <div id="profile-avatar-container" class="avatar profile-avatar-lg">US</div>
-                    <div class="profile-info-section">
-                        <div class="profile-title-row">
-                            <h2 id="profile-username" class="profile-username-text">Username</h2>
-                            <button id="profile-action-btn" class="btn btn-primary modal-action-btn" style="display: none;">Edit Profile</button>
+            <section class="post-card profile-card">
+                <div class="profile-card-content">
+                    <div id="profile-avatar-container" class="avatar profile-avatar">US</div>
+                    <div class="profile-details">
+                        <div class="profile-name-row">
+                            <h2 id="profile-username" class="profile-username">Username</h2>
+                            <button id="profile-action-btn" class="btn btn-primary profile-action-btn">Edit Profile</button>
                         </div>
-                        <p id="profile-handle" class="profile-meta-text">@username</p>
-                        <p id="profile-bio" class="profile-bio-text">No bio yet.</p>
-
-                        <!-- City Container - hidden by default -->
-                        <p id="profile-city-container" class="profile-meta-text" style="display: none; margin-bottom: 16px;">
-                            <i class="bi bi-geo-alt-fill"></i> <span id="profile-city">No city specified</span>
-                        </p>
-
-                        <div class="profile-stats-row">
-                            <span><strong id="profile-posts-count" class="profile-stat-value">0</strong> Posts</span>
-                            <span><strong id="profile-friends-count" class="profile-stat-value">0</strong> Friends</span>
-                            <span>Joined <strong id="profile-joined-date" class="profile-stat-value">Recently</strong></span>
+                        <p id="profile-handle" class="profile-handle">@username</p>
+                        <p id="profile-bio" class="profile-bio">No bio yet.</p>
+                        <div class="profile-stats">
+                            <span><strong id="profile-friends-count" class="profile-stat-highlight">0</strong> Friends</span>
+                            <span>Joined <strong id="profile-joined-date" class="profile-stat-highlight">Recently</strong></span>
                         </div>
                     </div>
                 </div>
             </section>
 
-            <h3 class="profile-section-title">User Posts</h3>
+            <h3 class="user-posts-header">User Posts</h3>
 
             <section class="post-feed" id="user-posts-container">
             </section>
@@ -88,6 +81,43 @@
 
         <!-- Friends list on right sidebar -->
         <aside class="right-sidebar">
+            <!-- Search Users -->
+            <section class="sidebar-card">
+                <div class="card-title-row">
+                    <h2>Search Users</h2>
+                </div>
+                <div class="search-inputs-container">
+                    <div class="search-input-field">
+                        <label>Username</label>
+                        <input type="text" id="searchUsername" placeholder="Search by username..." />
+                    </div>
+
+                    <div class="search-input-field">
+                        <label>Email</label>
+                        <input type="text" id="searchEmail" placeholder="Search by email..." />
+                    </div>
+
+                    <div class="search-date-row">
+                        <div class="search-date-col">
+                            <label>Joined From</label>
+                            <input type="date" id="searchJoinedFrom" />
+                        </div>
+                        <div class="search-date-col">
+                            <label>Joined To</label>
+                            <input type="date" id="searchJoinedTo" />
+                        </div>
+                    </div>
+
+                    <div class="search-buttons-group">
+                        <button type="button" id="searchBtn" class="btn btn-primary">Search</button>
+                        <button type="button" id="resetSearchBtn" class="btn btn-secondary">Reset</button>
+                    </div>
+
+                    <div id="searchResultsContainer" class="search-results-list">
+                        <!-- Results will be here -->
+                    </div>
+                </div>
+            </section>
             <section class="sidebar-card">
                 <div class="card-title-row">
                     <h2>Friends List</h2>
@@ -101,7 +131,7 @@
 
     <!-- edit profile modal -->
     <div id="edit-profile-modal" class="modal-overlay">
-        <div class="modal-content modal-content-md">
+        <div class="modal-content profile-modal">
             <div class="modal-header">
                 <h3>Edit Profile</h3>
                 <button id="close-edit-profile-btn" class="close-modal-btn">&times;</button>
@@ -123,12 +153,16 @@
 
                 <div class="input-group">
                     <label class="input-label">Bio</label>
-                    <textarea id="edit-bio-input" class="modal-textarea-custom modal-input-box" rows="3" placeholder="Write something about yourself..."></textarea>
+                    <textarea id="edit-bio-input" class="modal-textarea-custom" rows="3"
+                        placeholder="Write something about yourself..."></textarea>
                 </div>
-                <div class="input-group">
-                    <label class="input-label">City</label>
-                    <input type="text" id="edit-city-input" placeholder="Enter your city..." class="modal-input-box">
-                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary modal-btn-cancel" id="cancel-edit-profile-btn">Cancel</button>
+                <button type="button" class="btn btn-primary modal-btn-save" id="save-profile-btn">Save Changes</button>
+            </div>
+        </div>
+    </div>
 
                 <!-- account deletion section -->
                 <div class="danger-zone-container">
@@ -157,4 +191,5 @@
     <script src="js/profileManager.js"></script>
 
 </body>
+
 </html>
