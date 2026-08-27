@@ -286,6 +286,21 @@ document.addEventListener("DOMContentLoaded", () => {
     editProfileFileInput?.addEventListener("change", function (e) {
         const file = e.target.files[0];
         if (file) {
+            // validate file type
+            if (!file.type.startsWith("image/")) {
+                alert("Please select a valid image file.");
+                editProfileFileInput.value = "";
+                return;
+            }
+
+            // validate file size (max 5MB)
+            const maxSize = 5 * 1024 * 1024;
+            if (file.size > maxSize) {
+                alert("The selected file is too large! Maximum allowed size is 5MB.");
+                editProfileFileInput.value = "";
+                return;
+            }
+
             const reader = new FileReader();
             reader.onload = (event) => {
                 img.onload = () => {
@@ -423,11 +438,39 @@ document.addEventListener("DOMContentLoaded", () => {
     if (editPostMediaInput) {
         editPostMediaInput.addEventListener("change", function () {
             const file = this.files[0];
-            if (file && editPostPreviewContainer) {
+            if (!file) return;
+
+            // validate file type (image or video)
+            const isImage = file.type.startsWith("image/");
+            const isVideo = file.type.startsWith("video/");
+            if (!isImage && !isVideo) {
+                alert("Please select a valid image or video file.");
+                this.value = "";
+                if (editPostPreviewContainer) editPostPreviewContainer.style.display = "none";
+                return;
+            }
+
+            // validate file size (max 5MB for image, 10MB for video)
+            const maxImgSize = 5 * 1024 * 1024;
+            const maxVidSize = 10 * 1024 * 1024;
+            if (isImage && file.size > maxImgSize) {
+                alert("The selected image is too large! Maximum allowed size is 5MB.");
+                this.value = "";
+                if (editPostPreviewContainer) editPostPreviewContainer.style.display = "none";
+                return;
+            }
+            if (isVideo && file.size > maxVidSize) {
+                alert("The selected video is too large! Maximum allowed size is 10MB.");
+                this.value = "";
+                if (editPostPreviewContainer) editPostPreviewContainer.style.display = "none";
+                return;
+            }
+
+            if (editPostPreviewContainer) {
                 const url = URL.createObjectURL(file);
                 editPostPreviewContainer.style.display = "flex";
                 editMediaCleared = false;
-                if (file.type.startsWith("video/")) {
+                if (isVideo) {
                     editPostVideoPreview.src = url;
                     editPostVideoPreview.style.display = "block";
                     editPostImgPreview.style.display = "none";
@@ -524,6 +567,12 @@ document.addEventListener("DOMContentLoaded", () => {
         const emailVal = searchEmailInput ? searchEmailInput.value.trim() : "";
         const fromVal = searchJoinedFromInput ? searchJoinedFromInput.value : "";
         const toVal = searchJoinedToInput ? searchJoinedToInput.value : "";
+
+        if (fromVal && toVal && new Date(fromVal) > new Date(toVal)) {
+            alert("Joined From date cannot be later than Joined To date.");
+            if (searchJoinedToInput) searchJoinedToInput.value = "";
+            return;
+        }
 
         const params = new URLSearchParams({
             username: usernameVal,
