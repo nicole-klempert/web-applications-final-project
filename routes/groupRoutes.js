@@ -14,6 +14,11 @@ import {
 } from '../controllers/groupController.js';
 
 import {
+    getPostsPerGroup,
+    getMembersPerCity
+} from '../controllers/statisticsController.js';
+
+import {
     isAuthenticated,
     isGroupAdmin,
     isGroupOwner
@@ -41,6 +46,26 @@ router.get(
 router.post(
     '/',
     createGroup
+);
+
+
+// ==================================================
+// GROUP STATISTICS / AGGREGATIONS
+// ==================================================
+
+// Aggregation 1:
+// number of posts in each group
+router.get(
+    '/statistics/posts-per-group',
+    getPostsPerGroup
+);
+
+
+// Aggregation 2:
+// number of unique group members in each city
+router.get(
+    '/statistics/members-per-city',
+    getMembersPerCity
 );
 
 
