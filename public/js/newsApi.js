@@ -4,8 +4,7 @@ async function fetchNews() {
     if (!newsContainer) return;
 
     // active load before request
-    newsContainer.innerHTML = '<div style="padding:20px; text-align:center;">Loading entertainment updates...</div>';
-
+    newsContainer.innerHTML = '<div class="news-status-message">Loading entertainment updates...</div>';
     try {
         // passing data to web service
         const countryCode = 'US';
@@ -33,8 +32,7 @@ async function fetchNews() {
         });
     } catch (error) {
         console.error("Failed to fetch news service:", error);
-        newsContainer.innerHTML = '<div style="padding:20px; color:#ef4444; text-align:center;">Failed to load updates.</div>';
-    }
+        newsContainer.innerHTML = '<div class="news-error-message">Failed to load updates.</div>';    }
 }
 
 document.addEventListener("DOMContentLoaded", () => {
