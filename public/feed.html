@@ -9,6 +9,9 @@
     <link rel="stylesheet" href="css/variables.css">
     <link rel="stylesheet" href="css/layout.css">
     <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/modals.css">
+    <link rel="stylesheet" href="css/avatars.css">
+    <link rel="stylesheet" href="css/posts.css">
     <link rel="stylesheet" href="css/feedStyle.css">
 </head>
 
@@ -40,7 +43,7 @@
             </div>
 
             <!-- using a button to prevent page jumping -->
-            <button type="button" class="logout-btn" id="logout-btn-trigger">Logout</button>
+            <button type="button" class="btn btn-primary logout-btn" id="logout-btn-trigger">Logout</button>
 
             <!-- connected user -->
             <div class="account-card mt-auto" role="button" tabindex="0">
@@ -55,11 +58,14 @@
 
         <!--The main content of every specific page, different for each page of this project.-->
         <main class="main-feed">
-            <header class="feed-tabs">
-                <button class="tab active" type="button">
+            <header class="feed-tabs" id="feed-scope-tabs">
+                <button class="tab active" data-scope="all" type="button" title="All Posts">
                     <i class="bi bi-house-door-fill nav-icon"></i>
                 </button>
-                <button class="tab" type="button">
+                <button class="tab" data-scope="friends" type="button" title="Friends Only">
+                    <i class="bi bi-person-lines-fill nav-icon"></i>
+                </button>
+                <button class="tab" data-scope="groups" type="button" title="Groups Only">
                     <i class="bi bi-people-fill nav-icon"></i>
                 </button>
             </header>
@@ -128,8 +134,8 @@
                     <h2>Airing Today</h2>
                 </div>
                 <div id="dynamic-news-container">
-                    <div style="padding: 20px; text-align: center; color: var(--text-muted); font-size: 0.9rem;">
-                        <i class="bi bi-arrow-repeat" style="display:inline-block; animation: spin 2s linear infinite;"></i> Loading updates...
+                    <div class="loading-state-container">
+                        <i class="bi bi-arrow-repeat spin-icon"></i> Loading updates...
                     </div>
                 </div>
             </section>
@@ -140,11 +146,6 @@
     <button id="back-to-top" class="back-to-top-btn" title="Back to top">
         <i class="bi bi-arrow-up"></i>
     </button>
-
-    <!--The footer of the page, contains important information/links/contact details etc.-->
-    <footer class="site-footer">
-        <p>&copy; 2026 Web Application Project - Shahaf Abraham, Nicole Klempert & Lior Shif</p>
-    </footer>
 
     <!-- popup (modal) for creating a new post -->
     <div id="post-modal-overlay" class="modal-overlay">
@@ -159,16 +160,16 @@
                 <!-- media preview area -->
                 <input type="file" id="modal-media-upload" accept="image/*,video/*" style="display: none;">
                 <div id="modal-media-preview-container" class="modal-media-preview-container" style="display: none;">
-                    <img id="modal-media-preview" src="" style="max-width: 100%; max-height: 250px; border-radius: 8px; display: none;">
-                    <video id="modal-video-preview" controls style="max-width: 100%; max-height: 250px; border-radius: 8px; display: none;"></video>
+                    <img id="modal-media-preview" class="modal-preview-media" src="" style="display: none;">
+                    <video id="modal-video-preview" class="modal-preview-media" controls style="display: none;"></video>
                     <button id="modal-clear-media" class="clear-media-btn">&times;</button>
                 </div>
             </div>
             <div class="modal-footer">
                 <!-- Grouping buttons together on the left -->
-                <div style="display: flex; gap: 10px; align-items: center;">
+                <div class="modal-action-group">
                     <!-- Styled Facebook toggle button -->
-                    <button type="button" class="fb-toggle-btn" id="share-facebook-btn" style="margin-bottom: 0;">
+                    <button type="button" class="fb-toggle-btn mb-0" id="share-facebook-btn">
                         <i class="bi bi-facebook"></i> Share
                     </button>
                     <button id="modal-image-btn" class="media-trigger-btn">
@@ -180,65 +181,14 @@
         </div>
     </div>
 
-    <!-- popup (modal) for EDITING a post -->
-    <div id="edit-modal-overlay" class="modal-overlay">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Edit Post</h3>
-                <button id="close-edit-modal-btn" class="close-modal-btn">&times;</button>
-            </div>
-            <div class="modal-body">
-                <textarea id="edit-modal-textarea" class="modal-textarea-custom" rows="4"></textarea>
-
-                <input type="file" id="edit-modal-media-upload" accept="image/*,video/*" style="display: none;">
-                <div id="edit-modal-media-preview-container" class="modal-media-preview-container" style="display: none;">
-                    <img id="edit-modal-media-preview" src="" style="max-width: 100%; max-height: 250px; border-radius: 8px; display: none;">
-                    <video id="edit-modal-video-preview" controls style="max-width: 100%; max-height: 250px; border-radius: 8px; display: none;"></video>
-                    <button id="edit-modal-clear-media" class="clear-media-btn">&times;</button>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button id="edit-modal-image-btn" class="media-trigger-btn">
-                    <i class="bi bi-image"></i> Change Media
-                </button>
-                <button id="edit-modal-publish-btn" class="publish-btn">Save Changes</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Edit Post Modal -->
-    <div id="edit-modal-overlay" class="modal-overlay">
-        <div class="modal-content" style="max-width: 500px;">
-            <div class="modal-header">
-                <h3>Edit Post</h3>
-                <button id="close-edit-modal-btn" class="close-modal-btn">&times;</button>
-            </div>
-            <div class="modal-body">
-                <textarea id="edit-modal-textarea" class="modal-textarea-custom" rows="4" placeholder="What's on your mind?"></textarea>
-                <div id="edit-modal-media-preview-container" class="media-preview-container" style="display: none; margin-top: 10px; position: relative;">
-                    <img id="edit-modal-media-preview" src="" style="max-width: 100%; max-height: 250px; border-radius: 8px; display: none;" alt="Preview" />
-                    <video id="edit-modal-video-preview" controls style="max-width: 100%; max-height: 250px; border-radius: 8px; display: none;"></video>
-                    <button id="edit-modal-clear-media" type="button" style="position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.6); color: #fff; border: none; border-radius: 50%; width: 28px; height: 28px; cursor: pointer;">&times;</button>
-                </div>
-                <input type="file" id="edit-modal-media-upload" accept="image/*,video/*" style="display: none;" />
-            </div>
-            <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center;">
-                <button type="button" id="edit-modal-image-btn" class="btn btn-secondary" style="width: auto; padding: 6px 12px;"><i class="bi bi-image"></i> Change Media</button>
-                <button type="button" id="edit-modal-publish-btn" class="btn btn-primary" style="width: auto; padding: 8px 20px;">Save Changes</button>
-            </div>
-        </div>
-    </div>
+    <footer class="site-footer">
+        <p>&copy; 2026 Web Application Project - Shahaf Abraham, Nicole Klempert & Lior Shif</p>
+    </footer>
 
     <script src="js/global.js"></script>
     <script src="js/newsApi.js"></script>
     <script src="js/filters.js"></script>
     <script src="js/postsManager.js"></script>
-    <style>
-        @keyframes spin {
-            100% {
-                transform: rotate(360deg);
-            }
-        }
-    </style>
+
 </body>
 </html>

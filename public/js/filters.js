@@ -11,6 +11,48 @@ document.addEventListener("DOMContentLoaded", () => {
 
     let searchTimeout = null;
     let activeTypeFilter = "all";
+    let activeFeedScopes = ["all"]; // Array to allow multiple selections
+
+    // --- Handling Multi-Select Top Tabs (All / Friends / Groups) ---
+    const scopeTabs = document.querySelectorAll("#feed-scope-tabs .tab");
+    if (scopeTabs.length > 0) {
+        scopeTabs.forEach(tab => {
+            tab.addEventListener("click", () => {
+                const scope = tab.dataset.scope;
+
+                if (scope === "all") {
+                    // Reset to just 'all'
+                    activeFeedScopes = ["all"];
+                } else {
+                    // Remove 'all' if it's currently there
+                    activeFeedScopes = activeFeedScopes.filter(s => s !== "all");
+
+                    // Toggle the clicked scope (Friends / Groups)
+                    if (activeFeedScopes.includes(scope)) {
+                        activeFeedScopes = activeFeedScopes.filter(s => s !== scope);
+                    } else {
+                        activeFeedScopes.push(scope);
+                    }
+
+                    // If everything was deselected, revert to 'all'
+                    if (activeFeedScopes.length === 0) {
+                        activeFeedScopes = ["all"];
+                    }
+                }
+
+                // Update UI classes
+                scopeTabs.forEach(t => {
+                    if (activeFeedScopes.includes(t.dataset.scope)) {
+                        t.classList.add("active");
+                    } else {
+                        t.classList.remove("active");
+                    }
+                });
+
+                triggerReload();
+            });
+        });
+    }
 
     // Function to get current filter values, accessible globally
     window.getPostFilters = () => ({
@@ -19,7 +61,9 @@ document.addEventListener("DOMContentLoaded", () => {
         group: groupInput ? groupInput.value.trim() : "",
         startDate: dateStartInput ? dateStartInput.value : "",
         endDate: dateEndInput ? dateEndInput.value : "",
-        type: activeTypeFilter
+        type: activeTypeFilter,
+        feedScopes: activeFeedScopes.join(","), // send as "friends,groups"
+        currentUser: localStorage.getItem("loggedInUser") || ""
     });
 
     // update the filter display text based on current selections

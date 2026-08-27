@@ -5,6 +5,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
     }
 
+    // Get the profile username from the URL query parameter, defaulting to the current user if not provided
     const urlParams = new URLSearchParams(window.location.search);
     const profileUsername = urlParams.get("user") || currentUser;
     const isMyProfile = profileUsername.toLowerCase() === currentUser.toLowerCase();
@@ -19,6 +20,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const actionBtn = document.getElementById("profile-action-btn");
     const userPostsContainer = document.getElementById("user-posts-container");
     const friendsListContainer = document.getElementById("friends-list-container");
+    const cityContainerEl = document.getElementById("profile-city-container");
+    const cityEl = document.getElementById("profile-city");
+    const postsCountEl = document.getElementById("profile-posts-count");
+    const editCityInput = document.getElementById("edit-city-input");
 
     // Edit Profile & Crop Elements
     const editModal = document.getElementById("edit-profile-modal");
@@ -33,40 +38,25 @@ document.addEventListener("DOMContentLoaded", () => {
     const ctx = canvas.getContext("2d");
     const zoomSlider = document.getElementById("zoom-slider");
 
-    // Edit Post Modal Elements
-    const editPostModal = document.getElementById("edit-modal-overlay");
-    const editPostTextarea = document.getElementById("edit-modal-textarea");
-    const editPostMediaInput = document.getElementById("edit-modal-media-upload");
-    const editPostPreviewContainer = document.getElementById("edit-modal-media-preview-container");
-    const editPostImgPreview = document.getElementById("edit-modal-media-preview");
-    const editPostVideoPreview = document.getElementById("edit-modal-video-preview");
-
     let profileData = null;
     let finalCroppedBase64 = "";
-    let currentPostBeingEdited = null;
-    let editMediaCleared = false;
 
-    // Cropping internal states
+    // cropping internal states
     let img = new Image();
     let imgX = 0, imgY = 0, scale = 1, isDragging = false, startX = 0, startY = 0;
 
-    const fileToDataURL = (file) => new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-    });
+    // --- go to my profile ---
+    const navigateToMyProfile = () => window.location.href = `profile.html?user=${encodeURIComponent(currentUser)}`;
 
-    // --- מעבר לפרופיל בלחיצה על כרטיס המשתמש בפינה השמאלית למטה ---
+    // --- sidebar avatar click navigation ---
     const accountCard = document.querySelector(".account-card");
-    const navAvatar = document.getElementById("nav-user-avatar");
-    const navigateToMyProfile = () => {
-        window.location.href = `profile.html?user=${encodeURIComponent(currentUser)}`;
-    };
     if (accountCard) {
         accountCard.style.cursor = "pointer";
         accountCard.addEventListener("click", navigateToMyProfile);
     }
+
+    // --- nav avatar click navigation ---
+    const navAvatar = document.getElementById("nav-user-avatar");
     if (navAvatar) {
         navAvatar.style.cursor = "pointer";
         navAvatar.addEventListener("click", (e) => {
@@ -75,113 +65,25 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // --- סנכרון תמונות אווטאר בסרגל הניווט ובכרטיס המשתמש למטה ---
-    const syncSidebarAvatars = (newPic, username) => {
-        const initials = username ? username.substring(0, 2).toUpperCase() : "US";
-        const avatars = [
-            document.getElementById("nav-user-avatar"),
-            document.querySelector(".account-card .avatar")
-        ];
-        avatars.forEach(avatarElement => {
-            if (!avatarElement) return;
-            avatarElement.innerHTML = "";
-            if (newPic && newPic.trim() !== "" && newPic !== "undefined" && newPic !== "null") {
-                avatarElement.className = "avatar";
-                avatarElement.style.backgroundImage = `url('${newPic}')`;
-                avatarElement.style.backgroundSize = "cover";
-                avatarElement.style.backgroundPosition = "center";
-            } else {
-                avatarElement.className = "avatar avatar-purple";
-                avatarElement.removeAttribute("style");
-                avatarElement.innerText = initials;
-            }
-        });
-    };
-
-    // --- פונקציות עזר עצמאיות ליצירת כרטיס הפוסט ---
-    const formatTimeAgo = (dateString) => {
-        if (!dateString) return "Just now";
-        const diff = (new Date() - new Date(dateString)) / 1000;
-        if (isNaN(diff) || diff < 60) return "Just now";
-        if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
-        if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
-        if (diff < 172800) return "Yesterday";
-        if (diff < 604800) return `${Math.floor(diff / 86400)}d ago`;
-        return new Date(dateString).toLocaleDateString("en-US", { month: "short", day: "numeric" });
-    };
-
-    const getAvatarHTML = (dbPic, authorName, size = 40) => {
-        const myPic = localStorage.getItem("userProfilePic") || "";
-        const isMe = authorName && authorName.trim().toLowerCase() === currentUser.toLowerCase();
-        const picToUse = (isMe && myPic.trim() !== "" && myPic !== "undefined" && myPic !== "null") ? myPic : dbPic;
-        if (picToUse && picToUse.trim() !== "" && picToUse !== "undefined" && picToUse !== "null") {
-            return `<div class="avatar" style="width:${size}px; height:${size}px; background-image: url('${picToUse}'); background-size: cover; background-position: center;"></div>`;
-        }
-        const initials = authorName ? authorName.substring(0, 2).toUpperCase() : "US";
-        return `<div class="avatar avatar-purple" style="width:${size}px; height:${size}px;">${initials}</div>`;
-    };
-
-    const createPostCardHTML = (post) => {
-        const isOwner = post.author && (post.author.trim().toLowerCase() === currentUser.toLowerCase());
-        const isLiked = Array.isArray(post.likedBy) && post.likedBy.includes(currentUser);
-        const timeAgo = formatTimeAgo(post.createdAt);
-
-        let mediaHTML = "";
-        if (post.mediaUrl) {
-            mediaHTML = post.mediaType === "video"
-                ? `<video src="${post.mediaUrl}" controls preload="metadata" class="post-media-content"></video>`
-                : `<img src="${post.mediaUrl}" alt="media" loading="lazy" class="post-media-content" />`;
-        }
-
-        // כפתורי עריכה ומחיקה מופיעים רק לבעל הפוסט
-        const actionsHTML = isOwner ? `
-            <div class="post-actions-right">
-                <button class="edit-post-btn" title="Edit"><i class="bi bi-pencil"></i></button>
-                <button class="delete-post-btn" title="Delete"><i class="bi bi-trash3"></i></button>
-            </div>` : "";
-
-        return `
-            <article class="post-card" data-post-id="${post._id || ''}">
-                <div class="post-card-header">
-                    <div class="author-info-group">
-                        <a href="profile.html?user=${encodeURIComponent(post.author || 'User')}" style="text-decoration:none;">
-                            ${getAvatarHTML(post.authorProfilePic, post.author, 40)}
-                        </a>
-                        <div>
-                            <a href="profile.html?user=${encodeURIComponent(post.author || 'User')}" class="post-author" style="text-decoration:none; color:inherit;">
-                                ${post.author || "User"}
-                            </a>
-                            <span class="post-meta">@${(post.author || "user").toLowerCase().replace(/\s/g, '')} · ${timeAgo}</span>
-                        </div>
-                    </div>
-                    ${actionsHTML}
-                </div>
-                <div class="post-text">${post.content || ""}</div>
-                ${mediaHTML}
-                <div class="post-stats">
-                    <span class="stat-reply"><i class="bi bi-chat"></i> <span class="reply-count">${(post.comments || []).length}</span></span>
-                    <span class="stat-like ${isLiked ? 'liked' : ''}"><i class="bi ${isLiked ? 'bi-heart-fill' : 'bi-heart'}"></i> <span class="like-count">${post.likes || 0}</span></span>
-                </div>
-            </article>`;
-    };
-
-    // --- טעינת נתוני הפרופיל ---
+    // --- load profile data ---
     const loadProfileData = async () => {
         try {
-            const res = await fetch(`/users/${encodeURIComponent(profileUsername)}`);
+            // Fetch the profile data from the server
+            const res = await fetch(`/users/${encodeURIComponent(profileUsername)}?currentUser=${encodeURIComponent(currentUser)}`);
             const data = await res.json();
+            
             if (data.success) {
                 profileData = data.user;
 
-                // סנכרון תמונות חכם
+                // if it's my profile, sync the profile picture with localStorage and sidebar avatars
                 if (isMyProfile) {
                     const localPic = localStorage.getItem("userProfilePic") || "";
                     if (profileData.profilePicture && profileData.profilePicture.trim() !== "" && profileData.profilePicture !== "undefined" && profileData.profilePicture !== "null") {
                         localStorage.setItem("userProfilePic", profileData.profilePicture);
-                        syncSidebarAvatars(profileData.profilePicture, currentUser);
+                        window.syncSidebarAvatars(profileData.profilePicture, currentUser);
                     } else if (localPic.trim() !== "" && localPic !== "undefined" && localPic !== "null") {
                         profileData.profilePicture = localPic;
-                        syncSidebarAvatars(localPic, currentUser);
+                        window.syncSidebarAvatars(localPic, currentUser);
                     }
                 }
 
@@ -196,41 +98,58 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     };
 
+    // --- render profile UI ---
     const renderProfileUI = () => {
         if (!profileData) return;
 
         usernameEl.innerText = profileData.username;
         handleEl.innerText = `@${profileData.username.toLowerCase().replace(/\s+/g, '')}`;
         bioEl.innerText = profileData.bio || "No bio provided yet.";
+
+        // Show city if available, otherwise show "No city specified" for own profile, or hide for others
+        if (profileData.city) {
+            cityContainerEl.style.display = "block";
+            cityEl.innerText = profileData.city;
+        } else if (isMyProfile) {
+            cityContainerEl.style.display = "block";
+            cityEl.innerText = "No city specified";
+        } else {
+            cityContainerEl.style.display = "none";
+        }
+
+        // Update friends count and joined date
         friendsCountEl.innerText = (profileData.friends || []).length;
         joinedDateEl.innerText = new Date(profileData.createdAt).toLocaleDateString("en-US", { month: "short", year: "numeric" });
 
+        // Determine which profile picture to use: the one from the server or the one from localStorage (if it's my profile)
         const picToUse = (profileData.profilePicture && profileData.profilePicture.trim() !== "" && profileData.profilePicture !== "undefined" && profileData.profilePicture !== "null")
             ? profileData.profilePicture
             : (isMyProfile ? (localStorage.getItem("userProfilePic") || "") : "");
 
+        // Render the avatar according to the available picture or fallback to initials
         if (picToUse && picToUse.trim() !== "" && picToUse !== "undefined" && picToUse !== "null") {
-            avatarEl.className = "avatar";
+            avatarEl.className = "avatar profile-avatar-lg";
             avatarEl.style.backgroundImage = `url('${picToUse}')`;
             avatarEl.style.backgroundSize = "cover";
             avatarEl.style.backgroundPosition = "center";
             avatarEl.innerText = "";
         } else {
-            avatarEl.className = "avatar avatar-purple";
+            avatarEl.className = "avatar avatar-purple profile-avatar-lg";
             avatarEl.removeAttribute("style");
-            avatarEl.style.width = "90px";
-            avatarEl.style.height = "90px";
-            avatarEl.style.fontSize = "2rem";
             avatarEl.innerText = profileData.username.substring(0, 2).toUpperCase();
         }
 
+        // Render the action button based on whether it's my profile or someone else's
         actionBtn.style.display = "block";
+        // if it's my profile, show "Edit Profile"
         if (isMyProfile) {
             actionBtn.innerText = "Edit Profile";
-            actionBtn.className = "btn btn-primary";
+            actionBtn.className = "btn btn-primary modal-action-btn";
+            actionBtn.disabled = false;
             actionBtn.onclick = () => {
                 finalCroppedBase64 = picToUse || "";
                 editBioInput.value = profileData.bio || "";
+                editCityInput.value = profileData.city || "";
                 if (finalCroppedBase64) {
                     editAvatarLivePreview.src = finalCroppedBase64;
                     editAvatarLivePreview.style.display = "block";
@@ -241,30 +160,187 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
                 editModal.classList.add("active");
             };
+           // if it's someone else's, show "Add Friend" or "Remove Friend" based on friendship status
         } else {
-            // TODO for team: Implement "Add Friend" / "Remove Friend" button logic here
-            actionBtn.style.display = "none";
+            const isFriend = profileData.friends && profileData.friends.some(f => f.username.toLowerCase() === currentUser.toLowerCase());
+            const hasSentRequest = profileData.hasSentRequest;
+
+            if (isFriend) {
+                actionBtn.innerHTML = '<i class="bi bi-person-dash"></i> Remove Friend';
+                actionBtn.className = "btn btn-secondary btn-sm";
+                actionBtn.disabled = false;
+                actionBtn.onclick = () => showRemoveFriendModal(profileUsername);
+            } else if (hasSentRequest) {
+                actionBtn.innerHTML = 'Sent';
+                actionBtn.className = "btn cancel-btn btn-sm";
+                actionBtn.disabled = true;
+                actionBtn.onclick = null;
+            } else {
+                actionBtn.innerHTML = '<i class="bi bi-person-plus"></i> Add Friend';
+                actionBtn.className = "btn btn-primary btn-sm";
+                actionBtn.disabled = false;
+                actionBtn.onclick = () => toggleFriendStatus('request', profileUsername);
+            }
         }
 
-        // TODO for team: Render Friends list inside friendsListContainer
+        renderFriendsList();
     };
 
-    // --- טעינת הפוסטים של המשתמש ---
+    // --- remove friend modal ---
+    const showRemoveFriendModal = (targetUser) => {
+        const modal = document.getElementById("delete-confirm-modal");
+        if (!modal) return;
+
+        // Update modal content for removing a friend
+        modal.querySelector("h3").innerText = "Remove Friend?";
+        modal.querySelector("p").innerText = `Are you sure you want to remove ${targetUser} from your friends list?`;
+        modal.classList.add("active");
+
+        const confirmBtn = document.getElementById("confirm-delete-btn");
+        const newConfirmBtn = confirmBtn.cloneNode(true);
+        confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
+
+        // Confirm removal of friend
+        newConfirmBtn.addEventListener("click", () => {
+            modal.classList.remove("active");
+            toggleFriendStatus('remove', targetUser);
+        });
+
+        // Cancel removal of friend
+        document.getElementById("cancel-delete-btn").onclick = () => {
+            modal.classList.remove("active");
+        };
+    };
+
+    // --- toggle friend status (request, accept, reject, remove) ---
+    const toggleFriendStatus = async (action, targetUser = profileUsername) => {
+        try {
+            // check if requesting has already been sent, if so, disable the button and return early
+            if (actionBtn && action === 'request') {
+                actionBtn.innerHTML = 'Sent';
+                actionBtn.className = "btn cancel-btn btn-sm";
+                actionBtn.disabled = true;
+                actionBtn.onclick = null;
+            }
+
+            // Send the friend action request to the server
+            const res = await fetch(`/users/${encodeURIComponent(currentUser)}/friends`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ targetUsername: targetUser, action })
+            });
+            if (res.ok) {
+                loadProfileData();
+            }
+        } catch (err) { console.error("Friend action failed", err); }
+    };
+
+    // --- render friends list ---
+    const renderFriendsList = () => {
+        const container = document.getElementById("friends-list-container");
+        if (!container) return;
+
+        let html = "";
+
+        // pending friend requests section (only for my profile)
+        if (isMyProfile && profileData.friendRequests && profileData.friendRequests.length > 0) {
+            html += `<div class="pending-requests-container">
+                        <h4 class="section-header-sm"><i class="bi bi-person-exclamation"></i> Pending Requests</h4>`;
+
+            html += profileData.friendRequests.map(reqUser => `
+                <div class="pending-request-item">
+                    <div class="friend-info">
+                        <div class="avatar avatar-purple avatar-sm">${reqUser.substring(0, 2).toUpperCase()}</div>
+                        <a href="profile.html?user=${encodeURIComponent(reqUser)}" class="friend-name-link">${reqUser}</a>
+                    </div>
+                    <div class="friend-info">
+                        <button class="btn btn-primary btn-sm accept-request-btn" data-user="${reqUser}" title="Accept"><i class="bi bi-check-lg"></i></button>
+                        <button class="btn btn-secondary btn-sm reject-request-btn" data-user="${reqUser}" title="Reject"><i class="bi bi-x-lg"></i></button>
+                    </div>
+                </div>
+            `).join("");
+            html += `</div>`;
+        }
+
+        // active friends section
+        html += `<h4 class="section-header-sm"><i class="bi bi-people"></i> All Friends</h4>`;
+
+        // if no friends, show empty state
+        if (!profileData.friends || profileData.friends.length === 0) {
+            html += `
+                <div class="empty-state-box empty-state-flat">
+                    <i class="bi bi-person-x empty-friends-icon"></i>
+                    <p class="empty-friends-text">No friends added yet.</p>
+                </div>`;
+        } else {
+            html += profileData.friends.map(friendObj => {
+                const fName = friendObj.username;
+                const fPic = friendObj.profilePicture;
+
+                // use the global getAvatarHTML function if it exists, otherwise fallback to initials
+                let avatarHtml = typeof window.getAvatarHTML === "function"
+                    ? window.getAvatarHTML(fPic, fName, 32)
+                    : `<div class="avatar avatar-purple avatar-sm">${fName.substring(0, 2).toUpperCase()}</div>`;
+
+                return `
+                <div class="friend-list-item">
+                    <div class="friend-info">
+                        ${avatarHtml}
+                        <a href="profile.html?user=${encodeURIComponent(fName)}" class="friend-name-link">${fName}</a>
+                    </div>
+                    ${isMyProfile ? `<button class="btn btn-secondary btn-sm remove-friend-btn" data-user="${fName}" title="Remove Friend"><i class="bi bi-person-dash"></i></button>` : ''}
+                </div>`;
+            }).join("");
+        }
+
+        container.innerHTML = html;
+    };
+
+    // event delegation for friend buttons
+    document.addEventListener("click", (e) => {
+        const acceptBtn = e.target.closest(".accept-request-btn");
+        if (acceptBtn) return toggleFriendStatus('accept', acceptBtn.dataset.user);
+
+        const rejectBtn = e.target.closest(".reject-request-btn");
+        if (rejectBtn) return toggleFriendStatus('reject', rejectBtn.dataset.user);
+
+        const removeBtn = e.target.closest(".remove-friend-btn");
+        if (removeBtn) return showRemoveFriendModal(removeBtn.dataset.user);
+    });
+
+    // --- load user posts ---
     const loadUserPosts = async () => {
         try {
+            // fetch posts authored by the profile user
             const res = await fetch(`/posts?search=${encodeURIComponent(profileUsername)}`);
             const data = await res.json();
+            // filter posts to only include those authored by the profile user (case-insensitive)
             if (data.success) {
                 const userPosts = (data.posts || []).filter(p => p.author && p.author.toLowerCase() === profileUsername.toLowerCase());
+
+                if (postsCountEl) {
+                    postsCountEl.innerText = userPosts.length;
+                }
+
+                // if the profile picture is missing, try to find a post with a valid authorProfilePic and use it as the profile picture
+                const postWithPic = userPosts.find(p => p.authorProfilePic && p.authorProfilePic.trim() !== "" && p.authorProfilePic !== "undefined");
+                if (postWithPic && (!profileData.profilePicture || profileData.profilePicture.trim() === "" || profileData.profilePicture === "undefined")) {
+                    profileData.profilePicture = postWithPic.authorProfilePic;
+                    renderProfileUI(); // update the profile UI with the new profile picture
+                }
 
                 if (userPosts.length === 0) {
                     userPostsContainer.innerHTML = `<div style="text-align: center; padding: 40px; color: var(--text-muted);">No posts found from this user.</div>`;
                     return;
                 }
 
+
+                // clear existing posts and render the fetched posts
                 userPostsContainer.innerHTML = "";
                 userPosts.forEach(p => {
-                    userPostsContainer.insertAdjacentHTML("beforeend", createPostCardHTML(p));
+                    if (typeof window.createPostCardHTML === "function") {
+                        userPostsContainer.insertAdjacentHTML("beforeend", window.createPostCardHTML(p));
+                    }
                 });
             }
         } catch (err) {
@@ -272,87 +348,44 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     };
 
-    // --- חיתוך תמונת פרופיל (Crop Canvas) מותאם דינמית למימדי התמונה כדי למנוע "זום מדי" ---
-    const drawImageOnCanvas = () => {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.save();
-        ctx.translate(canvas.width / 2 + imgX, canvas.height / 2 + imgY);
-        ctx.scale(scale, scale);
-        ctx.drawImage(img, -img.width / 2, -img.height / 2);
-        ctx.restore();
-    };
+    window.reloadPostsFeed = loadUserPosts;
 
-    editAvatarTrigger?.addEventListener("click", () => editProfileFileInput?.click());
-    editProfileFileInput?.addEventListener("change", function (e) {
-        const file = e.target.files[0];
-        if (file) {
-            // validate file type
-            if (!file.type.startsWith("image/")) {
-                alert("Please select a valid image file.");
-                editProfileFileInput.value = "";
-                return;
+    // --- Initialize Universal Image Cropper ---
+    if (typeof window.initImageCropper === "function") {
+        window.initImageCropper({
+            triggerId: "edit-avatar-trigger",
+            fileInputId: "edit-profile-file-input",
+            livePreviewId: "edit-avatar-live-preview",
+            placeholderId: "edit-avatar-placeholder",
+            hideModalId: "edit-profile-modal",
+            onCropApply: (base64String) => {
+                finalCroppedBase64 = base64String;
             }
+        });
+    }
 
-            // validate file size (max 5MB)
-            const maxSize = 5 * 1024 * 1024;
-            if (file.size > maxSize) {
-                alert("The selected file is too large! Maximum allowed size is 5MB.");
-                editProfileFileInput.value = "";
-                return;
-            }
-
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                img.onload = () => {
-                    // חישוב קנה מידה התחלתי מאוזן שמתאים את התמונה לקנבס
-                    scale = Math.max(canvas.width / img.width, canvas.height / img.height);
-                    // התאמת טווח הסליידר דינמית לתמונה הספציפית כך שלא ירגיש זום מוגזם
-                    zoomSlider.min = (scale * 0.4).toFixed(4);
-                    zoomSlider.max = (scale * 3).toFixed(4);
-                    zoomSlider.value = scale;
-                    imgX = 0; imgY = 0;
-                    drawImageOnCanvas();
-                    editModal.classList.remove("active");
-                    cropModal.classList.add("active");
-                };
-                img.src = event.target.result;
-            };
-            reader.readAsDataURL(file);
-        }
-    });
-
-    canvas.addEventListener("mousedown", (e) => { isDragging = true; startX = e.clientX - imgX; startY = e.clientY - imgY; });
-    window.addEventListener("mousemove", (e) => { if (!isDragging) return; imgX = e.clientX - startX; imgY = e.clientY - startY; drawImageOnCanvas(); });
-    window.addEventListener("mouseup", () => { isDragging = false; });
-    zoomSlider?.addEventListener("input", (e) => { scale = parseFloat(e.target.value); drawImageOnCanvas(); });
-
-    document.getElementById("cancel-crop-btn")?.addEventListener("click", () => { cropModal.classList.remove("active"); editModal.classList.add("active"); });
-    document.getElementById("apply-crop-btn")?.addEventListener("click", () => {
-        finalCroppedBase64 = canvas.toDataURL("image/png");
-        editAvatarLivePreview.src = finalCroppedBase64;
-        editAvatarLivePreview.style.display = "block";
-        editAvatarPlaceholder.style.display = "none";
-        cropModal.classList.remove("active");
-        editModal.classList.add("active");
-    });
-
-    // --- שמירת עריכת פרופיל ---
+    // --- save profile changes ---
     document.getElementById("save-profile-btn")?.addEventListener("click", async () => {
         const newBio = editBioInput.value.trim();
+        const newCity = editCityInput.value.trim();
+
+        // send the updated profile data to the server
         try {
             const res = await fetch(`/users/${encodeURIComponent(currentUser)}`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ currentUser, bio: newBio, profilePicture: finalCroppedBase64 })
+                body: JSON.stringify({ currentUser, bio: newBio, city: newCity, profilePicture: finalCroppedBase64 })
             });
             const data = await res.json();
+
+            // if the update was successful, update localStorage and sidebar avatars, then reload profile data
             if (data.success) {
                 if (finalCroppedBase64) {
                     localStorage.setItem("userProfilePic", finalCroppedBase64);
-                    syncSidebarAvatars(finalCroppedBase64, currentUser);
+                    window.syncSidebarAvatars(finalCroppedBase64, currentUser);
                 } else {
                     localStorage.removeItem("userProfilePic");
-                    syncSidebarAvatars("", currentUser);
+                    window.syncSidebarAvatars("", currentUser);
                 }
 
                 editModal.classList.remove("active");
@@ -365,154 +398,150 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
+    // --- close edit profile modal ---
     document.getElementById("close-edit-profile-btn")?.addEventListener("click", () => editModal.classList.remove("active"));
     document.getElementById("cancel-edit-profile-btn")?.addEventListener("click", () => editModal.classList.remove("active"));
-    editModal.addEventListener("click", (e) => { if (e.target === editModal) editModal.classList.remove("active"); });
+    editModal?.addEventListener("click", (e) => { if (e.target === editModal) editModal.classList.remove("active"); });
 
-    // === האזנה לכפתורי מחיקה ועריכה של פוסטים בעמוד הפרופיל ===
-    document.addEventListener("click", async (e) => {
-        const target = e.target;
-        const postCard = target.closest(".post-card");
-        const postId = postCard?.dataset.postId;
-
-        // מחיקת פוסט
-        const deleteBtn = target.closest(".delete-post-btn");
-        if (deleteBtn && postId) {
+    // --- delete account logic ---
+    const deleteAccountBtn = document.getElementById("delete-account-btn");
+    if (deleteAccountBtn) {
+        deleteAccountBtn.addEventListener("click", () => {
             const modal = document.getElementById("delete-confirm-modal");
-            if (modal) {
-                modal.classList.add("active");
-                const confirmBtn = document.getElementById("confirm-delete-btn");
-                const newConfirm = confirmBtn.cloneNode(true);
-                confirmBtn.parentNode.replaceChild(newConfirm, confirmBtn);
-                newConfirm.addEventListener("click", async () => {
-                    modal.classList.remove("active");
-                    await fetch(`/posts/${postId}`, { method: "DELETE" });
-                    loadUserPosts();
-                });
-                document.getElementById("cancel-delete-btn").onclick = () => modal.classList.remove("active");
-            }
-            return;
-        }
+            if (!modal) return;
 
-        // עריכת פוסט
-        if (target.closest(".edit-post-btn") && postCard) {
-            currentPostBeingEdited = postCard;
-            editMediaCleared = false;
-            if (editPostTextarea) editPostTextarea.value = postCard.querySelector(".post-text")?.innerText || "";
-            const existingImg = postCard.querySelector("img.post-media-content");
-            const existingVid = postCard.querySelector("video.post-media-content");
+            // update modal content for deleting account
+            modal.querySelector("h3").innerText = "Delete Account?";
+            modal.querySelector("p").innerText = "WARNING: This action cannot be undone. All your data, including all posts, will be permanently deleted.";
+            modal.classList.add("active");
 
-            if (editPostPreviewContainer && editPostImgPreview && editPostVideoPreview) {
-                editPostPreviewContainer.style.display = "none";
-                editPostImgPreview.style.display = "none";
-                editPostVideoPreview.style.display = "none";
-                if (existingImg) {
-                    editPostImgPreview.src = existingImg.src;
-                    editPostImgPreview.style.display = "block";
-                    editPostPreviewContainer.style.display = "flex";
-                } else if (existingVid) {
-                    editPostVideoPreview.src = existingVid.src;
-                    editPostVideoPreview.style.display = "block";
-                    editPostPreviewContainer.style.display = "flex";
+            const confirmBtn = document.getElementById("confirm-delete-btn");
+            const newConfirmBtn = confirmBtn.cloneNode(true);
+            confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
+
+            // confirm deletion of account
+            newConfirmBtn.addEventListener("click", async () => {
+                modal.classList.remove("active");
+                try {
+                    const res = await fetch(`/users/${encodeURIComponent(currentUser)}`, {
+                        method: 'DELETE',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ currentUser })
+                    });
+                    const data = await res.json();
+
+                    // if deletion was successful, clear localStorage and redirect to logout
+                    if (data.success) {
+                        localStorage.removeItem("loggedInUser");
+                        localStorage.removeItem("userProfilePic");
+                        window.location.href = "/logout";
+                    } else {
+                        alert(data.error || "Failed to delete account");
+                    }
+                } catch (err) {
+                    console.error("Error deleting account:", err);
+                    alert("Network error. Could not delete account.");
                 }
-            }
-            editPostModal?.classList.add("active");
-        }
-    });
+            });
 
-    // --- לוגיקת חלון עריכת פוסט (Edit Post Modal) ---
-    const closeEditPostModal = () => {
-        editPostModal?.classList.remove("active");
-        if (editPostMediaInput) editPostMediaInput.value = "";
-        if (editPostPreviewContainer) editPostPreviewContainer.style.display = "none";
-        editMediaCleared = false;
-    };
-
-    document.getElementById("edit-modal-image-btn")?.addEventListener("click", () => editPostMediaInput?.click());
-    document.getElementById("edit-modal-clear-media")?.addEventListener("click", () => {
-        if (editPostMediaInput) editPostMediaInput.value = "";
-        if (editPostPreviewContainer) editPostPreviewContainer.style.display = "none";
-        editMediaCleared = true;
-    });
-
-    if (editPostMediaInput) {
-        editPostMediaInput.addEventListener("change", function () {
-            const file = this.files[0];
-            if (!file) return;
-
-            // validate file type (image or video)
-            const isImage = file.type.startsWith("image/");
-            const isVideo = file.type.startsWith("video/");
-            if (!isImage && !isVideo) {
-                alert("Please select a valid image or video file.");
-                this.value = "";
-                if (editPostPreviewContainer) editPostPreviewContainer.style.display = "none";
-                return;
-            }
-
-            // validate file size (max 5MB for image, 10MB for video)
-            const maxImgSize = 5 * 1024 * 1024;
-            const maxVidSize = 10 * 1024 * 1024;
-            if (isImage && file.size > maxImgSize) {
-                alert("The selected image is too large! Maximum allowed size is 5MB.");
-                this.value = "";
-                if (editPostPreviewContainer) editPostPreviewContainer.style.display = "none";
-                return;
-            }
-            if (isVideo && file.size > maxVidSize) {
-                alert("The selected video is too large! Maximum allowed size is 10MB.");
-                this.value = "";
-                if (editPostPreviewContainer) editPostPreviewContainer.style.display = "none";
-                return;
-            }
-
-            if (editPostPreviewContainer) {
-                const url = URL.createObjectURL(file);
-                editPostPreviewContainer.style.display = "flex";
-                editMediaCleared = false;
-                if (isVideo) {
-                    editPostVideoPreview.src = url;
-                    editPostVideoPreview.style.display = "block";
-                    editPostImgPreview.style.display = "none";
-                } else {
-                    editPostImgPreview.src = url;
-                    editPostImgPreview.style.display = "block";
-                    editPostVideoPreview.style.display = "none";
-                }
-            }
+            document.getElementById("cancel-delete-btn").onclick = () => modal.classList.remove("active");
         });
     }
 
-    document.getElementById("edit-modal-publish-btn")?.addEventListener("click", async () => {
-        if (!currentPostBeingEdited) return;
-        const postId = currentPostBeingEdited.dataset.postId;
-        const newText = editPostTextarea?.value.trim() || "";
-        const newFile = editPostMediaInput?.files[0];
+    // === USER SEARCH ===
+    const searchBtn = document.getElementById("searchBtn");
+    const resetSearchBtn = document.getElementById("resetSearchBtn");
+    const searchUsernameInput = document.getElementById("searchUsername");
+    const searchEmailInput = document.getElementById("searchEmail");
+    const searchJoinedFromInput = document.getElementById("searchJoinedFrom");
+    const searchJoinedToInput = document.getElementById("searchJoinedTo");
+    const searchResultsContainer = document.getElementById("searchResultsContainer");
 
-        let finalMediaUrl = undefined, finalMediaType = undefined;
-        if (newFile) {
-            finalMediaUrl = await fileToDataURL(newFile);
-            finalMediaType = newFile.type.startsWith("video/") ? "video" : "image";
-        } else if (editMediaCleared) {
-            finalMediaUrl = "";
-            finalMediaType = "";
+    const displaySearchResults = (users) => {
+        if (!searchResultsContainer) return;
+        searchResultsContainer.innerHTML = "";
+
+        if (users.length === 0) {
+            searchResultsContainer.innerHTML = `<div class="text-center text-muted p-2 small">No users found.</div>`;
+            return;
         }
 
-        const payload = { content: newText };
-        if (finalMediaUrl !== undefined) payload.mediaUrl = finalMediaUrl;
-        if (finalMediaType !== undefined) payload.mediaType = finalMediaType;
+        users.forEach(user => {
+            const isMe = user.username.trim().toLowerCase() === currentUser.trim().toLowerCase();
+            const profileLink = `profile.html?user=${encodeURIComponent(user.username)}`;
 
-        const res = await fetch(`/posts/${postId}`, {
-            method: "PUT", headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload)
+            // Build avatar HTML
+            let avatarHTML = "";
+            if (user.profilePicture && user.profilePicture.trim() !== "" && user.profilePicture !== "undefined" && user.profilePicture !== "null") {
+                avatarHTML = `<img src="${user.profilePicture}" class="avatar" alt="avatar" />`;
+            } else {
+                const initials = user.username.substring(0, 2).toUpperCase();
+                avatarHTML = `<div class="avatar avatar-purple">${initials}</div>`;
+            }
+
+            const itemHTML = `
+                <a href="${profileLink}" class="account-card">
+                    ${avatarHTML}
+                    <div>
+                        <span class="name">${user.username} ${isMe ? '<span class="text-primary small">(You)</span>' : ''}</span>
+                        <span class="handle">${user.email}</span>
+                    </div>
+                </a>
+            `;
+            searchResultsContainer.insertAdjacentHTML("beforeend", itemHTML);
         });
-        if (res.ok) {
-            closeEditPostModal();
-            loadUserPosts();
+    };
+
+    const fetchSearchResults = async () => {
+        if (!searchResultsContainer) return;
+        // Use Bootstrap
+        searchResultsContainer.innerHTML = `<div class="text-center text-muted p-2 small"><span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Searching...</div>`;
+
+        const usernameVal = searchUsernameInput ? searchUsernameInput.value.trim() : "";
+        const emailVal = searchEmailInput ? searchEmailInput.value.trim() : "";
+        const fromVal = searchJoinedFromInput ? searchJoinedFromInput.value : "";
+        const toVal = searchJoinedToInput ? searchJoinedToInput.value : "";
+
+        const params = new URLSearchParams({
+            username: usernameVal,
+            email: emailVal,
+            joinedFrom: fromVal,
+            joinedTo: toVal
+        });
+
+        try {
+            const res = await fetch(`/users/search?${params}`);
+            const data = await res.json();
+            if (data.success) {
+                displaySearchResults(data.users || []);
+            } else {
+                searchResultsContainer.innerHTML = `<div class="text-center text-muted p-2 small">Error loading results.</div>`;
+            }
+        } catch (err) {
+            console.error("User search error:", err);
+            searchResultsContainer.innerHTML = `<div class="text-center text-muted p-2 small">Error connecting to server.</div>`;
         }
+    };
+
+    searchBtn?.addEventListener("click", fetchSearchResults);
+    resetSearchBtn?.addEventListener("click", () => {
+        if (searchUsernameInput) searchUsernameInput.value = "";
+        if (searchEmailInput) searchEmailInput.value = "";
+        if (searchJoinedFromInput) searchJoinedFromInput.value = "";
+        if (searchJoinedToInput) searchJoinedToInput.value = "";
+        if (searchResultsContainer) searchResultsContainer.innerHTML = "";
     });
 
-    document.getElementById("close-edit-modal-btn")?.addEventListener("click", closeEditPostModal);
+    let debounceTimeout = null;
+    const handleSearchInput = () => {
+        clearTimeout(debounceTimeout);
+        debounceTimeout = setTimeout(fetchSearchResults, 300);
+    };
+
+    searchUsernameInput?.addEventListener("input", handleSearchInput);
+    searchEmailInput?.addEventListener("input", handleSearchInput);
+    searchJoinedFromInput?.addEventListener("change", fetchSearchResults);
+    searchJoinedToInput?.addEventListener("change", fetchSearchResults);
 
     // === USER SEARCH ===
     const searchBtn = document.getElementById("searchBtn");

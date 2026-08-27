@@ -1,0 +1,191 @@
+﻿/* Profile Header Card */
+.profile-header-card {
+    padding: 32px;
+    margin-bottom: 24px;
+}
+
+.profile-header-layout {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    flex-wrap: wrap;
+}
+
+.profile-avatar-lg {
+    width: 90px !important;
+    height: 90px !important;
+    font-size: 2rem !important;
+}
+
+.profile-info-section {
+    flex-grow: 1;
+}
+
+.profile-title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+.profile-username-text {
+    margin: 0 !important;
+    font-size: 1.6rem !important;
+}
+
+.profile-meta-text {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    margin-bottom: 12px;
+}
+
+.profile-bio-text {
+    color: var(--text-main);
+    font-size: 1rem;
+    margin-bottom: 16px;
+    line-height: 1.4;
+}
+
+.profile-stats-row {
+    display: flex;
+    gap: 20px;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+.profile-stat-value {
+    color: var(--text-main);
+}
+
+.profile-section-title {
+    margin: 0 0 16px 4px;
+    font-size: 1.2rem !important;
+}
+
+/* Sidebar Friends List */
+.friends-list-wrapper {
+    padding: 10px;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+/* Modals & Inputs */
+.modal-content-md {
+    max-width: 450px !important;
+}
+
+.modal-input-box {
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 10px;
+    width: 100%;
+    background: transparent;
+    color: var(--text-main);
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+    .modal-input-box:focus {
+        border-color: var(--btn-primary);
+        box-shadow: 0 0 0 2px var(--focus-ring);
+    }
+
+.modal-action-btn {
+    width: auto !important;
+    padding: 8px 16px !important;
+}
+
+/* Account Deletion */
+.danger-zone-container {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px dashed #ef4444;
+}
+
+.danger-zone-title {
+    color: #ef4444;
+    font-size: 1rem;
+    margin-bottom: 8px;
+}
+
+.danger-zone-text {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+}
+
+.danger-zone-btn {
+    width: auto !important;
+    padding: 8px 16px !important;
+    font-size: 0.9rem !important;
+    margin: 0 !important;
+}
+
+/* user friends list helpers */
+.pending-requests-container {
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 15px;
+    margin-bottom: 15px;
+}
+
+.pending-request-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    background: var(--bg-hover-light);
+    padding: 8px;
+    border-radius: 8px;
+}
+
+.friend-list-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.friend-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* --- Friends List Dynamic Elements --- */
+.section-header-sm {
+    font-size: 0.95rem;
+    color: var(--text-main);
+    margin-bottom: 12px;
+}
+
+.friend-name-link {
+    color: var(--text-main);
+    font-weight: 600;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+    .friend-name-link:hover {
+        color: var(--btn-primary);
+    }
+
+.empty-friends-icon {
+    font-size: 2rem;
+    color: var(--border-color);
+    margin-bottom: 10px;
+}
+
+.empty-friends-text {
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+.city-margin {
+    display: none;
+    margin-bottom: 16px;
+}
+
+.search-padding {
+    padding: 0 16px 16px;
+}

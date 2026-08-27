@@ -10,7 +10,10 @@
     <link rel="stylesheet" href="css/variables.css">
     <link rel="stylesheet" href="css/layout.css">
     <link rel="stylesheet" href="css/components.css">
-    <link rel="stylesheet" href="css/feedStyle.css">
+    <link rel="stylesheet" href="css/modals.css">
+    <link rel="stylesheet" href="css/avatars.css">
+    <link rel="stylesheet" href="css/posts.css">
+    <link rel="stylesheet" href="css/profileStyle.css">
 </head>
 
 <body>
@@ -38,7 +41,7 @@
                 </a>
             </div>
 
-            <button type="button" class="logout-btn" id="logout-btn-trigger">Logout</button>
+            <button type="button" class="btn btn-primary logout-btn" id="logout-btn-trigger">Logout</button>
 
             <div class="account-card mt-auto" role="button" tabindex="0">
                 <div class="avatar avatar-purple" id="nav-user-avatar">US</div>
@@ -52,31 +55,38 @@
 
         <!-- main profile area -->
         <main class="main-feed">
-            <section class="post-card profile-card">
-                <div class="profile-card-content">
-                    <div id="profile-avatar-container" class="avatar profile-avatar">US</div>
-                    <div class="profile-details">
-                        <div class="profile-name-row">
-                            <h2 id="profile-username" class="profile-username">Username</h2>
-                            <button id="profile-action-btn" class="btn btn-primary profile-action-btn">Edit Profile</button>
+            <!-- Profile Header -->
+            <section class="post-card profile-header-card">
+                <div class="profile-header-layout">
+                    <div id="profile-avatar-container" class="avatar profile-avatar-lg">US</div>
+                    <div class="profile-info-section">
+                        <div class="profile-title-row">
+                            <h2 id="profile-username" class="profile-username-text">Username</h2>
+                            <button id="profile-action-btn" class="btn btn-primary modal-action-btn" style="display: none;">Edit Profile</button>
                         </div>
-                        <p id="profile-handle" class="profile-handle">@username</p>
-                        <p id="profile-bio" class="profile-bio">No bio yet.</p>
-                        <div class="profile-stats">
-                            <span><strong id="profile-friends-count" class="profile-stat-highlight">0</strong> Friends</span>
-                            <span>Joined <strong id="profile-joined-date" class="profile-stat-highlight">Recently</strong></span>
+                        <p id="profile-handle" class="profile-meta-text">@username</p>
+                        <p id="profile-bio" class="profile-bio-text">No bio yet.</p>
+
+                        <!-- City Container - hidden by default -->
+                        <p id="profile-city-container" class="profile-meta-text city-margin">
+                            <i class="bi bi-geo-alt-fill"></i> <span id="profile-city">No city specified</span>
+                        </p>
+
+                        <div class="profile-stats-row">
+                            <span><strong id="profile-posts-count" class="profile-stat-value">0</strong> Posts</span>
+                            <span><strong id="profile-friends-count" class="profile-stat-value">0</strong> Friends</span>
+                            <span>Joined <strong id="profile-joined-date" class="profile-stat-value">Recently</strong></span>
                         </div>
                     </div>
                 </div>
             </section>
 
-            <h3 class="user-posts-header">User Posts</h3>
+            <h3 class="profile-section-title">User Posts</h3>
 
             <section class="post-feed" id="user-posts-container">
             </section>
         </main>
 
-        <!-- ToDo: Frinds list on right sidebar -->
         <aside class="right-sidebar">
             <!-- Search Users -->
             <section class="sidebar-card">
@@ -117,11 +127,50 @@
             </section>
             <section class="sidebar-card">
                 <div class="card-title-row">
-                    <h2>Friends List</h2>
+                    <h2 class="sidebar-title">Friends List</h2>
                 </div>
-                <!-- TODO : Implement Friends List & Pending Requests here -->
-                <div id="friends-list-container" style="padding: 10px; color: var(--text-muted); font-size: 0.9rem;">
+                <div id="friends-list-container" class="friends-list-wrapper">
                     No friends added yet.
+                </div>
+            </section>
+
+            <hr class="sidebar-divider" />
+
+            <!-- search area -->
+            <section class="sidebar-card">
+                <div class="card-title-row">
+                    <h2 class="sidebar-title">Search Users</h2>
+                </div>
+
+                <div class="sidebar-search-fields search-padding">
+                    <label class="search-box">
+                        <span><i class="bi bi-person"></i></span>
+                        <input type="search" id="searchUsername" placeholder="Search by username..." />
+                    </label>
+
+                    <label class="search-box">
+                        <span><i class="bi bi-envelope"></i></span>
+                        <input type="search" id="searchEmail" placeholder="Search by email..." />
+                    </label>
+
+                    <label class="search-box">
+                        <span><i class="bi bi-calendar"></i></span>
+                        <input type="text" placeholder="Joined From" onfocus="(this.type='date')" onblur="(this.type='text')" id="searchJoinedFrom" />
+                    </label>
+
+                    <label class="search-box">
+                        <span><i class="bi bi-calendar"></i></span>
+                        <input type="text" placeholder="Joined To" onfocus="(this.type='date')" onblur="(this.type='text')" id="searchJoinedTo" />
+                    </label>
+
+                    <div class="search-buttons-group">
+                        <button type="button" id="searchBtn" class="btn btn-primary">Search</button>
+                        <button type="button" id="resetSearchBtn" class="btn btn-secondary">Reset</button>
+                    </div>
+
+                    <div id="searchResultsContainer" class="search-results-list">
+                        <!-- Results will be here -->
+                    </div>
                 </div>
             </section>
         </aside>
@@ -129,7 +178,7 @@
 
     <!-- edit profile modal -->
     <div id="edit-profile-modal" class="modal-overlay">
-        <div class="modal-content profile-modal">
+        <div class="modal-content modal-content-md">
             <div class="modal-header">
                 <h3>Edit Profile</h3>
                 <button id="close-edit-profile-btn" class="close-modal-btn">&times;</button>
@@ -151,33 +200,24 @@
 
                 <div class="input-group">
                     <label class="input-label">Bio</label>
-                    <textarea id="edit-bio-input" class="modal-textarea-custom" rows="3"
-                        placeholder="Write something about yourself..."></textarea>
+                    <textarea id="edit-bio-input" class="modal-textarea-custom modal-input-box" rows="3" placeholder="Write something about yourself..."></textarea>
                 </div>
+                <div class="input-group">
+                    <label class="input-label">City</label>
+                    <input type="text" id="edit-city-input" placeholder="Enter your city..." class="modal-input-box">
+                </div>
+
+                <!-- account deletion section -->
+                <div class="danger-zone-container">
+                    <h4 class="danger-zone-title"><i class="bi bi-exclamation-triangle"></i> Account Deletion </h4>
+                    <p class="danger-zone-text">Once you delete your account, there is no going back. Your profile and ALL your posts will be permanently deleted.</p>
+                    <button type="button" class="danger-btn danger-zone-btn" id="delete-account-btn">Delete Account</button>
+                </div>
+
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary modal-btn-cancel" id="cancel-edit-profile-btn">Cancel</button>
-                <button type="button" class="btn btn-primary modal-btn-save" id="save-profile-btn">Save Changes</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- picture crop modal -->
-    <div id="crop-modal" class="modal-overlay">
-        <div class="crop-modal-content">
-            <h3>Crop Profile Picture</h3>
-            <p>Drag the image to position it and use the slider to zoom.</p>
-            <div class="crop-viewport-wrapper">
-                <canvas id="crop-canvas" width="200" height="200"></canvas>
-            </div>
-            <div class="zoom-slider-group">
-                <i class="bi bi-zoom-out"></i>
-                <input type="range" id="zoom-slider" min="0.5" max="3" step="0.01" value="1">
-                <i class="bi bi-zoom-in"></i>
-            </div>
-            <div class="crop-modal-actions">
-                <button type="button" class="btn btn-secondary" id="cancel-crop-btn">Cancel</button>
-                <button type="button" class="btn btn-primary" id="apply-crop-btn">Crop & Save</button>
+                <button type="button" class="btn btn-secondary modal-action-btn" id="cancel-edit-profile-btn">Cancel</button>
+                <button type="button" class="btn btn-primary modal-action-btn" id="save-profile-btn">Save Changes</button>
             </div>
         </div>
     </div>
@@ -192,6 +232,7 @@
 
     <script src="js/global.js"></script>
     <script src="js/profileManager.js"></script>
+
 </body>
 
 </html>
