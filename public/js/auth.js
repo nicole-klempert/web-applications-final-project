@@ -107,134 +107,20 @@ document.addEventListener("DOMContentLoaded", () => {
     setupRealTimeValidation("new-password", "new-password-warning", passwordAllowedRegex);
     setupRealTimeValidation("confirm-password", "confirm-password-warning", passwordAllowedRegex);
 
-    // Avatar upload and cropping functionality
-    const avatarTrigger = document.getElementById("avatar-trigger");
-    const fileInput = document.getElementById("profile-picture-input");
-    const cropModal = document.getElementById("crop-modal-overlay");
-    const cropCanvas = document.getElementById("crop-canvas");
-    const zoomSlider = document.getElementById("zoom-slider");
-    const cancelCropBtn = document.getElementById("cancel-crop-btn");
-    const saveCropBtn = document.getElementById("save-crop-btn");
-    const livePreviewImg = document.getElementById("avatar-live-preview");
-    const avatarPlaceholder = document.getElementById("avatar-placeholder");
-    const hiddenCroppedData = document.getElementById("cropped-profile-data");
 
-    let sourceImage = null;
-    let offsetX = 0;
-    let offsetY = 0;
-    let isDragging = false;
-    let startX = 0;
-    let startY = 0;
-
-    if (avatarTrigger && fileInput) {
-        avatarTrigger.addEventListener("click", () => {
-            fileInput.click();
+    // --- Initialize Universal Image Cropper ---
+    if (typeof window.initImageCropper === "function") {
+        window.initImageCropper({
+            triggerId: "avatar-trigger",
+            fileInputId: "profile-picture-input",
+            livePreviewId: "avatar-live-preview",
+            placeholderId: "avatar-placeholder",
+            onCropApply: (base64String) => {
+                const hiddenCroppedData = document.getElementById("cropped-profile-data");
+                if (hiddenCroppedData) hiddenCroppedData.value = base64String;
+                localStorage.setItem("userProfilePic", base64String);
+            }
         });
-
-        fileInput.addEventListener("change", (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                const img = new Image();
-                img.onload = () => {
-                    sourceImage = img;
-                    offsetX = 0;
-                    offsetY = 0;
-                    if (zoomSlider) zoomSlider.value = "1";
-                    drawCropCanvas();
-                    if (cropModal) cropModal.style.display = "flex";
-                };
-                img.src = event.target.result;
-            };
-            reader.readAsDataURL(file);
-        });
-
-        const drawCropCanvas = () => {
-            if (!cropCanvas || !sourceImage) return;
-            const ctx = cropCanvas.getContext("2d");
-            const width = cropCanvas.width;
-            const height = cropCanvas.height;
-
-            ctx.clearRect(0, 0, width, height);
-
-            const zoom = parseFloat(zoomSlider ? zoomSlider.value : 1);
-            const baseScale = Math.max(width / sourceImage.width, height / sourceImage.height);
-            const finalScale = baseScale * zoom;
-
-            const drawWidth = sourceImage.width * finalScale;
-            const drawHeight = sourceImage.height * finalScale;
-
-            const x = (width - drawWidth) / 2 + offsetX;
-            const y = (height - drawHeight) / 2 + offsetY;
-
-            ctx.save();
-            ctx.drawImage(sourceImage, x, y, drawWidth, drawHeight);
-            ctx.restore();
-        };
-
-        if (zoomSlider) {
-            zoomSlider.addEventListener("input", drawCropCanvas);
-        }
-
-        if (cropCanvas) {
-            cropCanvas.addEventListener("mousedown", (e) => {
-                isDragging = true;
-                startX = e.clientX - offsetX;
-                startY = e.clientY - offsetY;
-            });
-
-            window.addEventListener("mousemove", (e) => {
-                if (!isDragging) return;
-                offsetX = e.clientX - startX;
-                offsetY = e.clientY - startY;
-                drawCropCanvas();
-            });
-
-            window.addEventListener("mouseup", () => {
-                isDragging = false;
-            });
-        }
-
-        if (cancelCropBtn) {
-            cancelCropBtn.addEventListener("click", () => {
-                cropModal.style.display = "none";
-                fileInput.value = "";
-            });
-        }
-
-        // save cropped avatar and display live preview
-        if (saveCropBtn) {
-            saveCropBtn.addEventListener("click", () => {
-                if (!cropCanvas) return;
-
-                // create a smaller canvas to resize the cropped image to 120x120
-                const smallCanvas = document.createElement("canvas");
-                smallCanvas.width = 120;
-                smallCanvas.height = 120;
-                const smallCtx = smallCanvas.getContext("2d");
-                smallCtx.drawImage(cropCanvas, 0, 0, 120, 120);
-
-                // downscale the image to reduce file size and convert to base64
-                const croppedBase64 = smallCanvas.toDataURL("image/jpeg", 0.75);
-
-                // show inside the circular trigger button
-                if (livePreviewImg && avatarPlaceholder) {
-                    livePreviewImg.src = croppedBase64;
-                    livePreviewImg.style.display = "block";
-                    avatarPlaceholder.style.display = "none";
-                    avatarTrigger.style.borderStyle = "solid";
-                }
-
-                if (hiddenCroppedData) {
-                    hiddenCroppedData.value = croppedBase64;
-                }
-
-                localStorage.setItem("userProfilePic", croppedBase64);
-                cropModal.style.display = "none";
-            });
-        }
     }
 
     // submit form with ajax
@@ -257,6 +143,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             const isSignupPage = document.getElementById("profile-picture-input");
+            const hiddenCroppedData = document.getElementById("cropped-profile-data"); 
             if (isSignupPage && (!hiddenCroppedData || !hiddenCroppedData.value)) {
                 localStorage.removeItem("userProfilePic");
             }

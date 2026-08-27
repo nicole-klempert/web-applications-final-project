@@ -6,10 +6,24 @@ import { decrypt } from '../utils/cryptoUtils.js';
 export const getUserProfile = async (req, res) => {
     try {
         const { username } = req.params;
+        const { currentUser } = req.query; // get current user for permissions
+
         const user = await User.findByUsername(username);
 
+        // if user was deleted but still has posts, return a fallback to avoid UI crashes
         if (!user) {
-            return res.status(404).json({ success: false, error: 'User not found' });
+            return res.status(200).json({
+                success: true,
+                user: {
+                    username: username,
+                    profilePicture: "",
+                    bio: "This user profile is no longer available.",
+                    friends: [],
+                    friendRequests: [],
+                    hasSentRequest: false,
+                    createdAt: new Date()
+                }
+            });
         }
 
         // get friends details (username and profile picture) for each friend
@@ -20,15 +34,24 @@ export const getUserProfile = async (req, res) => {
             })
         );
 
+        const isOwner = currentUser && currentUser.toLowerCase() === user.username.toLowerCase();
+
+        // check if the current user has sent a friend request to this user
+        const hasSentRequest = currentUser ? (user.friendRequests || []).some(u => u.toLowerCase() === currentUser.toLowerCase()) : false;
+
         return res.status(200).json({
             success: true,
             user: {
                 username: user.username,
-                email: user.email,
+                email: isOwner ? user.email : undefined,
                 profilePicture: user.profilePicture || "",
                 bio: user.bio || "",
+                city: user.city || "",
                 friends: friendsDetails,
-                friendRequests: user.friendRequests || [],
+                friendsCount: user.friends ? user.friends.length : 0,
+                groupsCount: ((user.joinedGroups ? user.joinedGroups.length : 0) + (user.managedGroups ? user.managedGroups.length : 0)),
+                friendRequests: isOwner ? (user.friendRequests || []) : undefined,
+                hasSentRequest: hasSentRequest,
                 createdAt: user.createdAt
             }
         });
@@ -43,7 +66,7 @@ export const getUserProfile = async (req, res) => {
 export const updateUserProfile = async (req, res) => {
     try {
         const { username } = req.params;
-        const { bio, profilePicture, currentUser } = req.body;
+        const { bio, city, profilePicture, currentUser } = req.body;
 
         // server-side validation: ensure that the current user is the same as the username being updated
         if (currentUser && currentUser.toLowerCase() !== username.toLowerCase()) {
@@ -56,8 +79,26 @@ export const updateUserProfile = async (req, res) => {
         }
 
         if (bio !== undefined) user.bio = bio;
-        if (profilePicture !== undefined) user.profilePicture = profilePicture;
+        if (city !== undefined) user.city = city;
 
+        if (profilePicture !== undefined) {
+            console.log(`[Update] New profile picture received. Updating User DB...`);
+            user.profilePicture = profilePicture;
+
+            // update profile pic. in all posts (strict: false bypasses strict schema rules)
+            const postUpdateResult = await Post.updateMany(
+                { author: new RegExp('^' + username.trim() + '$', 'i') },
+                { $set: { authorProfilePic: profilePicture } },
+                { strict: false }
+            );
+
+            // update in all comments
+            const commentUpdateResult = await Post.updateMany(
+                { "comments.author": new RegExp('^' + username.trim() + '$', 'i') },
+                { $set: { "comments.$[elem].authorProfilePic": profilePicture } },
+                { arrayFilters: [{ "elem.author": new RegExp('^' + username.trim() + '$', 'i') }], strict: false }
+            );
+        }
         await user.save();
 
         return res.status(200).json({
@@ -65,6 +106,7 @@ export const updateUserProfile = async (req, res) => {
             user: {
                 username: user.username,
                 bio: user.bio,
+                city: user.city,
                 profilePicture: user.profilePicture
             }
         });
@@ -92,6 +134,12 @@ export const toggleFriend = async (req, res) => {
             return res.status(404).json({ success: false, error: 'User not found' });
         }
 
+        // safeguard: ensure friends and friendRequests arrays are initialized
+        user.friends = user.friends || [];
+        user.friendRequests = user.friendRequests || [];
+        targetUser.friends = targetUser.friends || [];
+        targetUser.friendRequests = targetUser.friendRequests || [];
+
         const uName = user.username;
         const tName = targetUser.username;
 
@@ -101,17 +149,17 @@ export const toggleFriend = async (req, res) => {
                 targetUser.friendRequests.push(uName);
             }
         } else if (action === 'accept') {
-            // confirming a friend request (removing from friendRequests and adding to friends for both users)
+            // confirming a friend request 
             user.friendRequests = user.friendRequests.filter(u => u.toLowerCase() !== tName.toLowerCase());
             targetUser.friendRequests = targetUser.friendRequests.filter(u => u.toLowerCase() !== uName.toLowerCase());
             if (!user.friends.includes(tName)) user.friends.push(tName);
             if (!targetUser.friends.includes(uName)) targetUser.friends.push(uName);
         } else if (action === 'reject' || action === 'cancel') {
-            // ignoring a friend request (removing from friendRequests for both users)
+            // ignoring a friend request 
             user.friendRequests = user.friendRequests.filter(u => u.toLowerCase() !== tName.toLowerCase());
             targetUser.friendRequests = targetUser.friendRequests.filter(u => u.toLowerCase() !== uName.toLowerCase());
         } else if (action === 'remove') {
-            // removing a friend (removing from friends for both users)
+            // removing a friend 
             user.friends = user.friends.filter(f => f.toLowerCase() !== tName.toLowerCase());
             targetUser.friends = targetUser.friends.filter(f => f.toLowerCase() !== uName.toLowerCase());
         }
@@ -132,6 +180,15 @@ export const toggleFriend = async (req, res) => {
 export const searchUsers = async (req, res, next) => {
     try {
         const { username, email, joinedFrom, joinedTo } = req.query;
+
+        // validate date range order
+        if (joinedFrom && joinedTo) {
+            const startDate = new Date(joinedFrom);
+            const endDate = new Date(joinedTo);
+            if (!isNaN(startDate.getTime()) && !isNaN(endDate.getTime()) && startDate > endDate) {
+                return res.status(400).json({ success: false, error: 'From date cannot be later than To date' });
+            }
+        }
 
         // build database pre-filter for unencrypted createdAt range (we will use the mongo to filter down the user list as much as possible
         // so we will try to filter first by the unencrypted fields)
