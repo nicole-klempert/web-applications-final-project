@@ -622,17 +622,6 @@ body.dark-mode .feed-tabs {
     display: block;
 }
 
-.news-status-message {
-    padding: 20px;
-    text-align: center;
-}
-
-.news-error-message {
-    padding: 20px;
-    text-align: center;
-    color: #ef4444;
-}
-
 /* sidebar search and filtering layouts */
 .sidebar-search-fields {
     display: flex;
