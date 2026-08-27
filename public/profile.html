@@ -1,5 +1,6 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="utf-8" />
     <title>Profile - Web Application Project</title>
@@ -51,25 +52,25 @@
 
         <!-- main profile area -->
         <main class="main-feed">
-            <section class="post-card" style="padding: 32px; margin-bottom: 24px;">
-                <div style="display: flex; align-items: center; gap: 24px; flex-wrap: wrap;">
-                    <div id="profile-avatar-container" class="avatar" style="width: 90px; height: 90px; font-size: 2rem;">US</div>
-                    <div style="flex-grow: 1;">
-                        <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 8px;">
-                            <h2 id="profile-username" style="margin: 0 !important; font-size: 1.6rem !important;">Username</h2>
-                            <button id="profile-action-btn" class="btn btn-primary" style="width: auto; padding: 8px 20px; display: none;">Edit Profile</button>
+            <section class="post-card profile-card">
+                <div class="profile-card-content">
+                    <div id="profile-avatar-container" class="avatar profile-avatar">US</div>
+                    <div class="profile-details">
+                        <div class="profile-name-row">
+                            <h2 id="profile-username" class="profile-username">Username</h2>
+                            <button id="profile-action-btn" class="btn btn-primary profile-action-btn">Edit Profile</button>
                         </div>
-                        <p id="profile-handle" style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 12px;">@username</p>
-                        <p id="profile-bio" style="color: var(--text-main); font-size: 1rem; margin-bottom: 16px; line-height: 1.4;">No bio yet.</p>
-                        <div style="display: flex; gap: 20px; font-size: 0.9rem; color: var(--text-muted);">
-                            <span><strong id="profile-friends-count" style="color: var(--text-main);">0</strong> Friends</span>
-                            <span>Joined <strong id="profile-joined-date" style="color: var(--text-main);">Recently</strong></span>
+                        <p id="profile-handle" class="profile-handle">@username</p>
+                        <p id="profile-bio" class="profile-bio">No bio yet.</p>
+                        <div class="profile-stats">
+                            <span><strong id="profile-friends-count" class="profile-stat-highlight">0</strong> Friends</span>
+                            <span>Joined <strong id="profile-joined-date" class="profile-stat-highlight">Recently</strong></span>
                         </div>
                     </div>
                 </div>
             </section>
 
-            <h3 style="margin: 0 0 16px 4px; font-size: 1.2rem !important;">User Posts</h3>
+            <h3 class="user-posts-header">User Posts</h3>
 
             <section class="post-feed" id="user-posts-container">
             </section>
@@ -77,6 +78,43 @@
 
         <!-- ToDo: Frinds list on right sidebar -->
         <aside class="right-sidebar">
+            <!-- Search Users -->
+            <section class="sidebar-card">
+                <div class="card-title-row">
+                    <h2>Search Users</h2>
+                </div>
+                <div class="search-inputs-container">
+                    <div class="search-input-field">
+                        <label>Username</label>
+                        <input type="text" id="searchUsername" placeholder="Search by username..." />
+                    </div>
+
+                    <div class="search-input-field">
+                        <label>Email</label>
+                        <input type="text" id="searchEmail" placeholder="Search by email..." />
+                    </div>
+
+                    <div class="search-date-row">
+                        <div class="search-date-col">
+                            <label>Joined From</label>
+                            <input type="date" id="searchJoinedFrom" />
+                        </div>
+                        <div class="search-date-col">
+                            <label>Joined To</label>
+                            <input type="date" id="searchJoinedTo" />
+                        </div>
+                    </div>
+
+                    <div class="search-buttons-group">
+                        <button type="button" id="searchBtn" class="btn btn-primary">Search</button>
+                        <button type="button" id="resetSearchBtn" class="btn btn-secondary">Reset</button>
+                    </div>
+
+                    <div id="searchResultsContainer" class="search-results-list">
+                        <!-- Results will be here -->
+                    </div>
+                </div>
+            </section>
             <section class="sidebar-card">
                 <div class="card-title-row">
                     <h2>Friends List</h2>
@@ -91,7 +129,7 @@
 
     <!-- edit profile modal -->
     <div id="edit-profile-modal" class="modal-overlay">
-        <div class="modal-content" style="max-width: 450px;">
+        <div class="modal-content profile-modal">
             <div class="modal-header">
                 <h3>Edit Profile</h3>
                 <button id="close-edit-profile-btn" class="close-modal-btn">&times;</button>
@@ -113,12 +151,13 @@
 
                 <div class="input-group">
                     <label class="input-label">Bio</label>
-                    <textarea id="edit-bio-input" class="modal-textarea-custom" rows="3" placeholder="Write something about yourself..." style="border: 1px solid var(--border-color); border-radius: 6px; padding: 10px;"></textarea>
+                    <textarea id="edit-bio-input" class="modal-textarea-custom" rows="3"
+                        placeholder="Write something about yourself..."></textarea>
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" id="cancel-edit-profile-btn" style="width: auto; padding: 8px 16px;">Cancel</button>
-                <button type="button" class="btn btn-primary" id="save-profile-btn" style="width: auto; padding: 8px 20px;">Save Changes</button>
+                <button type="button" class="btn btn-secondary modal-btn-cancel" id="cancel-edit-profile-btn">Cancel</button>
+                <button type="button" class="btn btn-primary modal-btn-save" id="save-profile-btn">Save Changes</button>
             </div>
         </div>
     </div>
@@ -154,4 +193,5 @@
     <script src="js/global.js"></script>
     <script src="js/profileManager.js"></script>
 </body>
+
 </html>
