@@ -248,7 +248,6 @@ export const searchUsers = async (req, res, next) => {
         return res.status(500).json({ success: false, error: 'Failed to search users' });
     }
 };
-};
 
 // GET /users (List / Search)
 export const listUsers = async (req, res) => {

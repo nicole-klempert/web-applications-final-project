@@ -527,3 +527,184 @@ input[type="date"] {
 .reset-filters-icon {
     margin-right: 6px;
 }
+
+.sidebar-title {
+    font-size: 1.15rem !important;
+    margin: 0 !important;
+    color: var(--text-main) !important;
+    text-shadow: none !important;
+    font-weight: 700 !important;
+}
+
+/* divider for side cards */
+.sidebar-divider {
+    border: 0;
+    border-top: 1px solid var(--border-color);
+    margin: 8px 0 16px 0;
+    width: 100%;
+}
+
+/* === Search, Filter & Sidebar Widgets === */
+.search-box {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    height: 36px;
+    border: 1px solid var(--border-color);
+    border-radius: 999px;
+    padding: 0 16px;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+    transition: border 0.15s, box-shadow 0.15s;
+    background: var(--card-bg);
+    width: 100%;
+}
+
+    .search-box:focus-within {
+        border-color: var(--btn-primary);
+        box-shadow: 0 0 0 2px var(--focus-ring);
+        color: var(--btn-primary);
+    }
+
+    .search-box input {
+        flex: 1;
+        border: none;
+        outline: none;
+        background: transparent;
+        font-size: 0.9rem;
+        color: var(--text-main);
+    }
+
+.filter-box-custom {
+    position: relative;
+    margin-bottom: 16px;
+    width: 100%;
+}
+
+.filter-selected {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    height: 36px;
+    border: 1px solid var(--border-color);
+    border-radius: 999px;
+    padding: 0 16px;
+    color: var(--text-muted);
+    background: var(--card-bg);
+    cursor: pointer;
+    transition: border 0.15s, background 0.15s;
+}
+
+    .filter-selected:hover, .filter-box-custom.open .filter-selected {
+        background: var(--bg-hover-light);
+        border-color: var(--btn-primary);
+        color: var(--btn-primary);
+    }
+
+#filter-selected-text {
+    font-size: 0.9rem;
+    color: var(--text-main);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.filter-arrow {
+    transition: transform 0.2s ease;
+}
+
+.filter-box-custom.open .filter-arrow {
+    transform: rotate(180deg);
+}
+
+.filter-dropdown {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    width: 100%;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    display: none;
+    z-index: 100;
+    overflow: hidden;
+    padding: 8px 0;
+}
+
+.filter-box-custom.open .filter-dropdown {
+    display: block;
+}
+
+.filter-option {
+    padding: 8px 16px;
+    font-size: 0.9rem;
+    color: var(--text-main);
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+    .filter-option:hover {
+        background: var(--bg-hover-light);
+    }
+
+    .filter-option.selected {
+        background: var(--focus-ring);
+        color: var(--btn-primary);
+        font-weight: 700;
+    }
+/* styling for the new date input inside filter */
+.filter-date-range {
+    padding: 12px 16px;
+    display: flex;
+    gap: 8px;
+    border-top: 1px solid var(--border-color);
+    margin-top: 4px;
+}
+
+.date-input-wrapper {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    gap: 4px;
+}
+
+    .date-input-wrapper label {
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: var(--text-muted);
+        text-transform: uppercase;
+    }
+
+    .date-input-wrapper input {
+        width: 100%;
+        padding: 6px;
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        font-size: 0.85rem;
+        color: var(--text-main);
+        background: var(--bg-color);
+        outline: none;
+        transition: border-color 0.2s;
+    }
+
+        .date-input-wrapper input:focus {
+            border-color: var(--btn-primary);
+        }
+
+.search-buttons-group {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+    .search-buttons-group .btn {
+        flex: 1;
+        padding: 6px 12px !important; /* מקטין משמעותית את הריווח הפנימי */
+        font-size: 0.85rem !important; /* מקטין מעט את הטקסט */
+        border-radius: 999px !important; /* שומר עליהם עגולים לחלוטין כמו השדות */
+        height: 34px; /* גובה קבוע שמתאים בדיוק לגובה של שדות החיפוש */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }

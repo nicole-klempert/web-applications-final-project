@@ -87,34 +87,44 @@
             </section>
         </main>
 
-        <!-- Friends list on right sidebar -->
         <aside class="right-sidebar">
-            <!-- Search Users -->
             <section class="sidebar-card">
                 <div class="card-title-row">
-                    <h2>Search Users</h2>
+                    <h2 class="sidebar-title">Friends List</h2>
                 </div>
-                <div class="search-inputs-container">
-                    <div class="search-input-field">
-                        <label>Username</label>
-                        <input type="text" id="searchUsername" placeholder="Search by username..." />
-                    </div>
+                <div id="friends-list-container" class="friends-list-wrapper">
+                    No friends added yet.
+                </div>
+            </section>
 
-                    <div class="search-input-field">
-                        <label>Email</label>
-                        <input type="text" id="searchEmail" placeholder="Search by email..." />
-                    </div>
+            <hr class="sidebar-divider" />
 
-                    <div class="search-date-row">
-                        <div class="search-date-col">
-                            <label>Joined From</label>
-                            <input type="date" id="searchJoinedFrom" />
-                        </div>
-                        <div class="search-date-col">
-                            <label>Joined To</label>
-                            <input type="date" id="searchJoinedTo" />
-                        </div>
-                    </div>
+            <!-- search area -->
+            <section class="sidebar-card">
+                <div class="card-title-row">
+                    <h2 class="sidebar-title">Search Users</h2>
+                </div>
+
+                <div class="sidebar-search-fields" style="padding: 0 16px 16px;">
+                    <label class="search-box">
+                        <span><i class="bi bi-person"></i></span>
+                        <input type="search" id="searchUsername" placeholder="Search by username..." />
+                    </label>
+
+                    <label class="search-box">
+                        <span><i class="bi bi-envelope"></i></span>
+                        <input type="search" id="searchEmail" placeholder="Search by email..." />
+                    </label>
+
+                    <label class="search-box">
+                        <span><i class="bi bi-calendar"></i></span>
+                        <input type="text" placeholder="Joined From" onfocus="(this.type='date')" onblur="(this.type='text')" id="searchJoinedFrom" />
+                    </label>
+
+                    <label class="search-box">
+                        <span><i class="bi bi-calendar"></i></span>
+                        <input type="text" placeholder="Joined To" onfocus="(this.type='date')" onblur="(this.type='text')" id="searchJoinedTo" />
+                    </label>
 
                     <div class="search-buttons-group">
                         <button type="button" id="searchBtn" class="btn btn-primary">Search</button>
@@ -124,14 +134,6 @@
                     <div id="searchResultsContainer" class="search-results-list">
                         <!-- Results will be here -->
                     </div>
-                </div>
-            </section>
-            <section class="sidebar-card">
-                <div class="card-title-row">
-                    <h2>Friends List</h2>
-                </div>
-                <div id="friends-list-container" class="friends-list-wrapper">
-                    No friends added yet.
                 </div>
             </section>
         </aside>
