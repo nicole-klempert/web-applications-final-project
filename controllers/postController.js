@@ -34,22 +34,6 @@ export const getPosts = async (req, res, next) => {
             query.$and.push(groupFilter);
         }
 
-        // filter by author if explicitly provided
-        if (req.query.author && req.query.author.trim() !== "") {
-            const authorRegex = new RegExp(req.query.author.trim(), "i");
-            const authorFilter = { author: { $regex: authorRegex } };
-            query.$and = query.$and || [];
-            query.$and.push(authorFilter);
-        }
-
-        // filter by group if explicitly provided
-        if (req.query.group && req.query.group.trim() !== "") {
-            const groupRegex = new RegExp(req.query.group.trim(), "i");
-            const groupFilter = { group: { $regex: groupRegex } };
-            query.$and = query.$and || [];
-            query.$and.push(groupFilter);
-        }
-
         // filter by date range if startDate or endDate is provided
         if (req.query.startDate || req.query.endDate) {
             query.createdAt = {};
@@ -94,11 +78,6 @@ export const getPosts = async (req, res, next) => {
                 // Return posts that match EITHER friends OR groups
                 query.$and.push({ $or: scopeConditions });
             }
-        }
-
-        // Clean up empty $and array to prevent MongoDB errors
-        if (query.$and.length === 0) {
-            delete query.$and;
         }
 
         // Clean up empty $and array to prevent MongoDB errors

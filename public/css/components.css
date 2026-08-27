@@ -62,6 +62,12 @@ h2, h3 {
         background-color: var(--btn-primary-hover); /* when we hover on the buttons */
     }
 
+.btn-padding{
+    width: auto;
+    padding: 12px 28px;
+    border-radius: 999px;
+}
+
 .btn-secondary {
     background-color: var(--btn-secondary);
     color: var(--btn-secondary-text);
@@ -700,10 +706,10 @@ input[type="date"] {
 
     .search-buttons-group .btn {
         flex: 1;
-        padding: 6px 12px !important; /* מקטין משמעותית את הריווח הפנימי */
-        font-size: 0.85rem !important; /* מקטין מעט את הטקסט */
-        border-radius: 999px !important; /* שומר עליהם עגולים לחלוטין כמו השדות */
-        height: 34px; /* גובה קבוע שמתאים בדיוק לגובה של שדות החיפוש */
+        padding: 6px 12px !important; 
+        font-size: 0.85rem !important; 
+        border-radius: 999px !important; 
+        height: 34px; 
         display: flex;
         align-items: center;
         justify-content: center;

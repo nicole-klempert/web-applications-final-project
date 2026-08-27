@@ -45,7 +45,7 @@ document.addEventListener("DOMContentLoaded", () => {
                             </div>
                             <h3>No posts found</h3>
                             <p>We couldn't find any posts matching your criteria. Try adjusting your search or resetting your filters.</p>
-                            <button id="reset-filters-btn" type="button" class="btn btn-primary" style="width: auto; padding: 12px 28px; border-radius: 999px;">
+                            <button id="reset-filters-btn" type="button" class="btn btn-primary btn-padding">
                                 <i class="bi bi-arrow-counterclockwise reset-filters-icon"></i> Reset Filters
                             </button>
                         </div>`;

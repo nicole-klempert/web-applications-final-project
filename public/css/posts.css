@@ -187,7 +187,7 @@
     gap: 4px;
 }
 
-    /* שומר את התפריט פתוח כשהעכבר זז מהכפתור אל התפריט עצמו */
+    /* keeps the dropdown opened while the cursur is moving to the menu itself */
     .share-dropdown::before {
         content: "";
         position: absolute;
@@ -198,7 +198,7 @@
         background: transparent;
     }
 
-    /* הפתיחה של התפריט במעבר עכבר */
+    /* opening the dropdown menu by mouse hover */
     .stat-share:hover .share-dropdown,
     .stat-share:focus-within .share-dropdown,
     .share-dropdown:hover {
