@@ -135,6 +135,21 @@ document.addEventListener("DOMContentLoaded", () => {
             const file = e.target.files[0];
             if (!file) return;
 
+            // validate file type
+            if (!file.type.startsWith("image/")) {
+                alert("Please select a valid image file.");
+                fileInput.value = "";
+                return;
+            }
+
+            // validate file size (max 5MB)
+            const maxSize = 5 * 1024 * 1024;
+            if (file.size > maxSize) {
+                alert("The selected file is too large! Maximum allowed size is 5MB.");
+                fileInput.value = "";
+                return;
+            }
+
             const reader = new FileReader();
             reader.onload = (event) => {
                 const img = new Image();

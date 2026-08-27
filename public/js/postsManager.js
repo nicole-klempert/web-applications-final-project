@@ -286,10 +286,41 @@ document.addEventListener("DOMContentLoaded", () => {
     if (mediaInput) {
         mediaInput.addEventListener("change", function () {
             const file = this.files[0];
-            if (file && previewContainer) {
+            if (!file) return;
+
+            // validate file type (image or video)
+            const isImage = file.type.startsWith("image/");
+            const isVideo = file.type.startsWith("video/");
+            if (!isImage && !isVideo) {
+                alert("Please select a valid image or video file.");
+                this.value = "";
+                if (previewContainer) previewContainer.style.display = "none";
+                modalPublishBtn.disabled = !modalTextarea.value.trim();
+                return;
+            }
+
+            // validate file size (max 5MB for image, 10MB for video)
+            const maxImgSize = 5 * 1024 * 1024;
+            const maxVidSize = 10 * 1024 * 1024;
+            if (isImage && file.size > maxImgSize) {
+                alert("The selected image is too large! Maximum allowed size is 5MB.");
+                this.value = "";
+                if (previewContainer) previewContainer.style.display = "none";
+                modalPublishBtn.disabled = !modalTextarea.value.trim();
+                return;
+            }
+            if (isVideo && file.size > maxVidSize) {
+                alert("The selected video is too large! Maximum allowed size is 10MB.");
+                this.value = "";
+                if (previewContainer) previewContainer.style.display = "none";
+                modalPublishBtn.disabled = !modalTextarea.value.trim();
+                return;
+            }
+
+            if (previewContainer) {
                 const url = URL.createObjectURL(file);
                 previewContainer.style.display = "flex";
-                if (file.type.startsWith("video/")) {
+                if (isVideo) {
                     videoPreview.src = url;
                     videoPreview.style.display = "block";
                     imgPreview.style.display = "none";
@@ -515,11 +546,39 @@ document.addEventListener("DOMContentLoaded", () => {
     if (editMediaInput) {
         editMediaInput.addEventListener("change", function () {
             const file = this.files[0];
-            if (file && editPreviewContainer) {
+            if (!file) return;
+
+            // validate file type (image or video)
+            const isImage = file.type.startsWith("image/");
+            const isVideo = file.type.startsWith("video/");
+            if (!isImage && !isVideo) {
+                alert("Please select a valid image or video file.");
+                this.value = "";
+                if (editPreviewContainer) editPreviewContainer.style.display = "none";
+                return;
+            }
+
+            // validate file size (max 5MB for image, 10MB for video)
+            const maxImgSize = 5 * 1024 * 1024;
+            const maxVidSize = 10 * 1024 * 1024;
+            if (isImage && file.size > maxImgSize) {
+                alert("The selected image is too large! Maximum allowed size is 5MB.");
+                this.value = "";
+                if (editPreviewContainer) editPreviewContainer.style.display = "none";
+                return;
+            }
+            if (isVideo && file.size > maxVidSize) {
+                alert("The selected video is too large! Maximum allowed size is 10MB.");
+                this.value = "";
+                if (editPreviewContainer) editPreviewContainer.style.display = "none";
+                return;
+            }
+
+            if (editPreviewContainer) {
                 const url = URL.createObjectURL(file);
                 editPreviewContainer.style.display = "flex";
                 editMediaCleared = false;
-                if (file.type.startsWith("video/")) {
+                if (isVideo) {
                     editVideoPreview.src = url;
                     editVideoPreview.style.display = "block";
                     editImgPreview.style.display = "none";
@@ -556,7 +615,7 @@ document.addEventListener("DOMContentLoaded", () => {
             body: JSON.stringify(payload)
         });
         if (res.ok) {
-            closeEditModal(); 
+            closeEditModal();
             document.getElementById("single-post-blur-modal")?.remove();
             loadPosts(1, false);
         }
