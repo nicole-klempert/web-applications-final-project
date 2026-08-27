@@ -19,6 +19,13 @@ document.addEventListener("DOMContentLoaded", () => {
     const actionBtn = document.getElementById("profile-action-btn");
     const userPostsContainer = document.getElementById("user-posts-container");
     const friendsListContainer = document.getElementById("friends-list-container");
+    const groupsCountEl = document.getElementById("profile-groups-count");
+    const postsCountEl = document.getElementById("profile-posts-count");
+    const managedGroupsCountEl = document.getElementById("managed-groups-count");
+    const memberGroupsCountEl = document.getElementById("member-groups-count");
+    const managedGroupsContainer = document.getElementById("managed-groups-container");
+    const memberGroupsContainer = document.getElementById("member-groups-container");
+    const groupsTitle = document.getElementById("profile-groups-title");
 
     // Edit Profile & Crop Elements
     const editModal = document.getElementById("edit-profile-modal");
@@ -121,6 +128,143 @@ document.addEventListener("DOMContentLoaded", () => {
         return `<div class="avatar avatar-purple" style="width:${size}px; height:${size}px;">${initials}</div>`;
     };
 
+    // open group page when a group card is clicked
+    document.addEventListener("click", event => {
+        const groupCard = event.target.closest(".profile-group-card");
+        if (!groupCard) return;
+        const groupId = groupCard.dataset.groupId;
+        if (!groupId) return;
+        window.location.href = `group.html?id=${encodeURIComponent(groupId)}`;
+    });
+    // keyboard accessibility for group cards
+    document.addEventListener("keydown", event => {
+        if (event.key !== "Enter" && event.key !== " ") return;
+        const groupCard = event.target.closest(".profile-group-card");
+        if (!groupCard) return;
+        event.preventDefault();
+        const groupId = groupCard.dataset.groupId;
+        if (groupId) {
+            window.location.href = `group.html?id=${encodeURIComponent(groupId)}`;
+        }
+    });
+    // === PROFILE GROUPS ===
+    const createGroupCardHTML = (group) => {
+        const imageHTML = group.image
+            ? `<img src="${group.image}" alt="${group.name}">`
+            : `<i class="bi bi-people-fill"></i>`;
+        const description = group.description || "No description available.";
+        const categoryHTML = group.category
+            ? `<span><i class="bi bi-tag"></i> ${group.category}</span>`
+            : "";
+        const cityHTML = group.city
+            ? `<span><i class="bi bi-geo-alt"></i> ${group.city}</span>`
+            : "";
+        return `
+        <article class="profile-group-card"
+                 data-group-id="${group._id}"
+                 tabindex="0"
+                 role="button">
+            <div class="profile-group-image">
+                ${imageHTML}
+            </div>
+            <div class="profile-group-content">
+                <div class="profile-group-title-row">
+                    <h5>${group.name}</h5>
+                    <span class="profile-group-role">${group.role}</span>
+                </div>
+                <p class="profile-group-description">${description}</p>
+                <div class="profile-group-meta">
+                    ${categoryHTML}
+                    ${cityHTML}
+                    <span>
+                        <i class="bi bi-people"></i>
+                        ${group.memberCount}
+                    </span>
+                </div>
+            </div>
+        </article>
+    `;
+    };
+    const renderGroupList = (container, groups, emptyMessage) => {
+        if (!container) return;
+        if (!Array.isArray(groups) || groups.length === 0) {
+            container.innerHTML = `
+            <div class="profile-groups-message">
+                ${emptyMessage}
+            </div>
+        `;
+            return;
+        }
+        container.innerHTML = groups
+            .map(createGroupCardHTML)
+            .join("");
+    };
+    const loadProfileStats = async () => {
+        try {
+            const response = await fetch(
+                `/users/${encodeURIComponent(profileUsername)}/profile-stats`,
+                {
+                    headers: {
+                        "Accept": "application/json"
+                    }
+                }
+            );
+            const data = await response.json();
+            if (!response.ok || !data.success) {
+                throw new Error(
+                    data.error || "Failed to load profile statistics."
+                );
+            }
+            if (groupsCountEl) {
+                groupsCountEl.innerText = data.stats?.groupsCount || 0;
+            }
+            if (postsCountEl) {
+                postsCountEl.innerText = data.stats?.postsCount || 0;
+            }
+            if (managedGroupsCountEl) {
+                managedGroupsCountEl.innerText = data.managedGroups?.length || 0;
+            }
+            if (memberGroupsCountEl) {
+                memberGroupsCountEl.innerText = data.memberGroups?.length || 0;
+            }
+            if (groupsTitle) {
+                groupsTitle.innerText = isMyProfile
+                    ? "My Groups"
+                    : `${profileUsername}'s Groups`;
+            }
+            renderGroupList(
+                managedGroupsContainer,
+                data.managedGroups,
+                isMyProfile
+                    ? "You do not manage any groups yet."
+                    : "No managed groups."
+            );
+            renderGroupList(
+                memberGroupsContainer,
+                data.memberGroups,
+                isMyProfile
+                    ? "You have not joined any other groups yet."
+                    : "No joined groups."
+            );
+        } catch (error) {
+            console.error("Error loading profile groups:", error);
+            if (managedGroupsContainer) {
+                managedGroupsContainer.innerHTML = `
+                <div class="profile-groups-message">
+                    Failed to load groups.
+                </div>
+            `;
+            }
+            if (memberGroupsContainer) {
+                memberGroupsContainer.innerHTML = `
+                <div class="profile-groups-message">
+                    Failed to load groups.
+                </div>
+            `;
+            }
+        }
+    };
+
     const createPostCardHTML = (post) => {
         const isOwner = post.author && (post.author.trim().toLowerCase() === currentUser.toLowerCase());
         const isLiked = Array.isArray(post.likedBy) && post.likedBy.includes(currentUser);
@@ -187,6 +331,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 renderProfileUI();
                 loadUserPosts();
+                loadProfileStats();
             } else {
                 alert("User not found");
                 window.location.href = "feed.html";

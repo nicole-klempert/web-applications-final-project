@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="css/layout.css">
     <link rel="stylesheet" href="css/components.css">
     <link rel="stylesheet" href="css/feedStyle.css">
+    <link rel="stylesheet" href="css/profileGroups.css">
 </head>
 
 <body>
@@ -61,16 +62,49 @@
                         </div>
                         <p id="profile-handle" style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 12px;">@username</p>
                         <p id="profile-bio" style="color: var(--text-main); font-size: 1rem; margin-bottom: 16px; line-height: 1.4;">No bio yet.</p>
-                        <div style="display: flex; gap: 20px; font-size: 0.9rem; color: var(--text-muted);">
-                            <span><strong id="profile-friends-count" style="color: var(--text-main);">0</strong> Friends</span>
-                            <span>Joined <strong id="profile-joined-date" style="color: var(--text-main);">Recently</strong></span>
+                        <div class="profile-stats-row">
+                            <span><strong id="profile-friends-count">0</strong>Friends</span>
+                            <span><strong id="profile-groups-count">0</strong>Groups</span>
+                            <span><strong id="profile-posts-count">0</strong>Posts</span>
+                            <span>Joined<strong id="profile-joined-date">Recently</strong></span>
                         </div>
                     </div>
                 </div>
             </section>
 
-            <h3 style="margin: 0 0 16px 4px; font-size: 1.2rem !important;">User Posts</h3>
+            <!-- USER GROUPS -->
+            <section class="profile-groups-section">
+                <div class="profile-section-title">
+                    <div>
+                        <h3 id="profile-groups-title">My Groups</h3>
+                        <p>Groups managed by or joined by this user.</p>
+                    </div>
+                </div>
+                <!-- MANAGED GROUPS -->
+                <div class="profile-groups-category">
+                    <div class="profile-groups-category-title">
+                        <i class="bi bi-shield-check"></i>
+                        <h4>Managed Groups</h4>
+                        <span id="managed-groups-count" class="profile-groups-count">0</span>
+                    </div>
+                    <div id="managed-groups-container" class="profile-groups-grid">
+                        <div class="profile-groups-message">Loading groups...</div>
+                    </div>
+                </div>
+                <!-- MEMBER GROUPS -->
+                <div class="profile-groups-category">
+                    <div class="profile-groups-category-title">
+                        <i class="bi bi-people"></i>
+                        <h4>Member Of</h4>
+                        <span id="member-groups-count" class="profile-groups-count">0</span>
+                    </div>
+                    <div id="member-groups-container" class="profile-groups-grid">
+                        <div class="profile-groups-message">Loading groups...</div>
+                    </div>
+                </div>
+            </section>
 
+            <h3 style="margin: 0 0 16px 4px; font-size: 1.2rem !important;">User Posts</h3>
             <section class="post-feed" id="user-posts-container">
             </section>
         </main>

@@ -23,6 +23,11 @@ const groupSchema = new mongoose.Schema({
         trim: true
     },
 
+    // group visibility
+    isPublic: {
+        type: Boolean,
+        default: true
+    },
     // group image - Base64 or URL
     image: {
         type: String,

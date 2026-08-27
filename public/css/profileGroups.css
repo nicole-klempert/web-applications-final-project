@@ -1,0 +1,171 @@
+/* ==================================================
+   PROFILE STATISTICS
+   ================================================== */
+.profile-stats-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+    .profile-stats-row strong {
+        color: var(--text-main);
+    }
+/* ==================================================
+   PROFILE GROUPS
+   ================================================== */
+.profile-groups-section {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+    padding: 22px;
+    margin-bottom: 28px;
+}
+.profile-section-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 22px;
+}
+    .profile-section-title h3 {
+        margin: 0 0 5px !important;
+    }
+    .profile-section-title p {
+        margin: 0;
+        color: var(--text-muted);
+        font-size: 0.9rem;
+    }
+/* ==================================================
+   GROUP CATEGORY
+   ================================================== */
+.profile-groups-category {
+    margin-bottom: 26px;
+}
+    .profile-groups-category:last-child {
+        margin-bottom: 0;
+    }
+.profile-groups-category-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+    .profile-groups-category-title h4 {
+        margin: 0 !important;
+        font-size: 1rem !important;
+    }
+    .profile-groups-category-title i {
+        color: var(--btn-primary);
+    }
+.profile-groups-count {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    min-width: 24px;
+    height: 24px;
+    padding: 0 7px;
+    border-radius: 999px;
+    background-color: var(--btn-secondary);
+    color: var(--btn-secondary-text);
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+/* ==================================================
+   GROUP GRID
+   ================================================== */
+.profile-groups-grid {
+    display: grid;
+    grid-template-columns: repeat( auto-fill, minmax(210px, 1fr) );
+    gap: 14px;
+}
+/* ==================================================
+   GROUP CARD
+   ================================================== */
+.profile-group-card {
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    overflow: hidden;
+    background-color: var(--card-bg);
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+    .profile-group-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    }
+.profile-group-image {
+    height: 105px;
+    background-color: var(--btn-secondary);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+    .profile-group-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    .profile-group-image i {
+        font-size: 2rem;
+        color: var(--btn-primary);
+    }
+.profile-group-content {
+    padding: 13px;
+}
+.profile-group-title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+    .profile-group-title-row h5 {
+        margin: 0 !important;
+        font-size: 0.95rem !important;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+    }
+.profile-group-role {
+    padding: 3px 7px;
+    border-radius: 999px;
+    background-color: var(--btn-secondary);
+    color: var(--btn-secondary-text);
+    font-size: 0.65rem;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+.profile-group-description {
+    margin: 8px 0;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    line-height: 1.35;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+.profile-group-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+.profile-groups-message {
+    grid-column: 1 / -1;
+    padding: 20px;
+    text-align: center;
+    color: var(--text-muted);
+}
+/* ==================================================
+   RESPONSIVE
+   ================================================== */
+@media (max-width: 600px) {
+    .profile-stats-row {
+        gap: 10px 16px;
+    }
+    .profile-groups-grid {
+        grid-template-columns: 1fr;
+    }
+}
