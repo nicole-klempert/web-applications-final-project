@@ -65,10 +65,10 @@
     transition: all 0.2s ease;
 }
 
-    .composer-placeholder:hover {
-        border-color: var(--btn-primary);
-        box-shadow: 0 0 0 2px var(--focus-ring);
-    }
+.composer-placeholder:hover {
+    border-color: var(--btn-primary);
+    box-shadow: 0 0 0 2px var(--focus-ring);
+}
 
 .placeholder-text-box {
     color: var(--text-muted);
@@ -84,16 +84,16 @@
     gap: 14px;
 }
 
-    .composer-icons-group i {
-        color: var(--text-muted);
-        font-size: 1.2rem;
-        transition: color 0.2s ease;
-        cursor: pointer;
-    }
+.composer-icons-group i {
+    color: var(--text-muted);
+    font-size: 1.2rem;
+    transition: color 0.2s ease;
+    cursor: pointer;
+}
 
-        .composer-icons-group i:hover {
-            color: var(--btn-primary);
-        }
+.composer-icons-group i:hover {
+    color: var(--btn-primary);
+}
 
 /* dynamic news section styling */
 .sidebar-card {
