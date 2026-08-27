@@ -257,8 +257,30 @@ document.addEventListener("DOMContentLoaded", () => {
     const previewContainer = document.getElementById("modal-media-preview-container");
     const imgPreview = document.getElementById("modal-media-preview");
     const videoPreview = document.getElementById("modal-video-preview");
+    const postTargetSelect = document.getElementById("post-target-select");
+    const loadMemberGroups = async () => {
+        if (!postTargetSelect) return;
+        try {
+            const response = await fetch("/groups?limit=20", {
+                headers: { "Accept": "application/json" }
+            });
+            const data = await response.json();
+            if (!response.ok || !data.success) return;
+            const memberGroups = (data.groups || []).filter(group => group.isMember);
+            postTargetSelect.innerHTML = `<option value="">My Feed</option>`;
+            memberGroups.forEach(group => {
+                const option = document.createElement("option");
+                option.value = group._id;
+                option.textContent = group.name;
+                postTargetSelect.appendChild(option);
+            });
+        } catch (error) {
+            console.error("Failed to load user groups:", error);
+        }
+    };
 
-    document.getElementById("trigger-modal-bar")?.addEventListener("click", () => {
+    document.getElementById("trigger-modal-bar")?.addEventListener("click", async () => {
+        await loadMemberGroups();
         modalOverlay?.classList.add("active");
         modalTextarea?.focus();
     });
@@ -268,6 +290,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (modalTextarea) modalTextarea.value = "";
         if (mediaInput) mediaInput.value = "";
         if (previewContainer) previewContainer.style.display = "none";
+        if (postTargetSelect) postTargetSelect.value = "";
         if (modalPublishBtn) modalPublishBtn.disabled = true;
     };
 
@@ -313,13 +336,24 @@ document.addEventListener("DOMContentLoaded", () => {
                 mediaUrl = await fileToDataURL(file);
                 mediaType = file.type.startsWith("video/") ? "video" : "image";
             }
-            const res = await fetch('/posts', {
-                method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    author: currentUser,
-                    authorProfilePic: localStorage.getItem("userProfilePic") || "",
-                    content: modalTextarea.value.trim(), mediaUrl, mediaType
-                })
+            const groupId = postTargetSelect?.value || "";
+
+            const payload = {
+                author: currentUser,
+                authorProfilePic: localStorage.getItem("userProfilePic") || "",
+                content: modalTextarea.value.trim(),
+                mediaUrl,
+                mediaType
+            };
+
+            if (groupId) {
+                payload.groupId = groupId;
+            }
+
+            const res = await fetch("/posts", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
             });
             if (res.status === 413) {
                 modalPublishBtn.disabled = false;

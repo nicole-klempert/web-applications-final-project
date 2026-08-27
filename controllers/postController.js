@@ -22,36 +22,36 @@ export const getPosts = async (req, res, next) => {
 
 
         /*
-         * GROUP FILTER
-         *
-         * if a group id is provided:
-         * return only posts that belong to that group.
-         *
-         * if no group id is provided:
-         * return only regular feed posts.
-         */
+ * GROUP FILTER
+ *
+ * if a group id is provided:
+ * return only posts that belong to that group.
+ *
+ * if no group id is provided:
+ * return regular posts + posts from groups
+ * the logged-in user is a member of.
+ */
         if (req.query.group && req.query.group.trim() !== "") {
-
             query.group = req.query.group.trim();
-
         } else {
+            const currentUserId = req.session?.user?.id;
 
-            /*
-             * Regular feed posts.
-             *
-             * New regular posts are saved with group: null.
-             *
-             * $exists also supports older posts that were created
-             * before the group feature was implemented.
-             *
-             * $expr supports older documents where group was saved
-             * as an empty string.
-             */
+            let memberGroupIds = [];
+
+            if (currentUserId) {
+                const memberGroups = await Group.find({
+                    members: currentUserId
+                }).select("_id");
+
+                memberGroupIds = memberGroups.map(group => group._id);
+            }
+
             query.$and = [
                 {
                     $or: [
                         { group: null },
-                        { group: { $exists: false } }
+                        { group: { $exists: false } },
+                        { group: { $in: memberGroupIds } }
                     ]
                 }
             ];
