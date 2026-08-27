@@ -91,6 +91,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // apply the current filters and trigger a reload of the posts feed
     const triggerReload = () => {
+        const startVal = dateStartInput ? dateStartInput.value : "";
+        const endVal = dateEndInput ? dateEndInput.value : "";
+
+        if (startVal && endVal && new Date(startVal) > new Date(endVal)) {
+            alert("Filter Start date cannot be later than End date.");
+            if (dateEndInput) dateEndInput.value = "";
+            return;
+        }
+
         updateFilterDisplayUI();
         if (typeof window.reloadPostsFeed === "function") {
             window.reloadPostsFeed();

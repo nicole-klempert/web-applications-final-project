@@ -160,10 +160,41 @@ document.addEventListener("DOMContentLoaded", () => {
     if (mediaInput) {
         mediaInput.addEventListener("change", function () {
             const file = this.files[0];
-            if (file && previewContainer) {
+            if (!file) return;
+
+            // validate file type (image or video)
+            const isImage = file.type.startsWith("image/");
+            const isVideo = file.type.startsWith("video/");
+            if (!isImage && !isVideo) {
+                alert("Please select a valid image or video file.");
+                this.value = "";
+                if (previewContainer) previewContainer.style.display = "none";
+                modalPublishBtn.disabled = !modalTextarea.value.trim();
+                return;
+            }
+
+            // validate file size (max 5MB for image, 10MB for video)
+            const maxImgSize = 5 * 1024 * 1024;
+            const maxVidSize = 10 * 1024 * 1024;
+            if (isImage && file.size > maxImgSize) {
+                alert("The selected image is too large! Maximum allowed size is 5MB.");
+                this.value = "";
+                if (previewContainer) previewContainer.style.display = "none";
+                modalPublishBtn.disabled = !modalTextarea.value.trim();
+                return;
+            }
+            if (isVideo && file.size > maxVidSize) {
+                alert("The selected video is too large! Maximum allowed size is 10MB.");
+                this.value = "";
+                if (previewContainer) previewContainer.style.display = "none";
+                modalPublishBtn.disabled = !modalTextarea.value.trim();
+                return;
+            }
+
+            if (previewContainer) {
                 const url = URL.createObjectURL(file);
                 previewContainer.style.display = "flex";
-                if (file.type.startsWith("video/")) {
+                if (isVideo) {
                     videoPreview.src = url;
                     videoPreview.style.display = "block";
                     imgPreview.style.display = "none";
@@ -208,12 +239,276 @@ document.addEventListener("DOMContentLoaded", () => {
                 loadPosts(1, false);
                 closeModal();
             } else {
-                modalPublishBtn.disabled = false;
+                modalPublishBtn.disabled = false; // let the user try again if there was an error
             }
         });
     }
 
-    // facebook share toggle 
+    // === GLOBAL CLICK EVENT LISTENER FOR POST INTERACTIONS ===
+    document.addEventListener("click", async (e) => {
+        // Handle clicks on post cards and their child elements
+        const target = e.target;
+        const postCard = target.closest(".post-card");
+        const postId = postCard?.dataset.postId;
+
+        if (target.closest(".view-single-post-trigger") && postId) {
+            e.stopPropagation();
+            fetch(`/posts/${postId}`).then(r => r.json()).then(d => {
+                if (d.success && d.post) showSinglePostBlurModal(d.post);
+            });
+            return;
+        }
+
+        // Share button functionality
+        const copyLinkBtn = target.closest(".copy-link-btn");
+        if (copyLinkBtn && postId) {
+            e.stopPropagation();
+            const url = `${window.location.origin}/feed.html?postId=${postId}`;
+            navigator.clipboard.writeText(url);
+            copyLinkBtn.innerHTML = `<i class="bi bi-check2"></i> Copied!`;
+            setTimeout(() => {
+                copyLinkBtn.innerHTML = `<i class="bi bi-link-45deg"></i> Copy link`;
+            }, 2000);
+            return;
+        }
+
+        const nativeShareBtn = target.closest(".native-share-btn");
+        if (nativeShareBtn && postId) {
+            e.stopPropagation();
+            const url = `${window.location.origin}/feed.html?postId=${postId}`;
+            if (navigator.share) {
+                navigator.share({ title: "Check out this post", url });
+            } else {
+                navigator.clipboard.writeText(url);
+                alert("Link copied to clipboard!");
+            }
+            return;
+        }
+
+        // Like button functionality
+        const likeBtn = target.closest(".stat-like");
+        if (likeBtn && postId) {
+            likeBtn.classList.toggle("liked");
+            const icon = likeBtn.querySelector("i"), countSpan = likeBtn.querySelector(".like-count");
+            let count = parseInt(countSpan.innerText) || 0;
+            const isLiked = likeBtn.classList.contains("liked");
+            icon.className = `bi ${isLiked ? 'bi-heart-fill pop-animation' : 'bi-heart'}`;
+            countSpan.innerText = isLiked ? count + 1 : Math.max(0, count - 1);
+            fetch(`/posts/${postId}/like`, {
+                method: "POST", headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ username: currentUser })
+            }).then(r => r.json()).then(d => {
+                if (d.success && typeof d.likes === "number") {
+                    // update all like counts for this post across the page
+                    document.querySelectorAll(`.post-card[data-post-id="${postId}"] .like-count`)
+                        .forEach(el => el.innerText = d.likes);
+                }
+            });
+            return;
+        }
+
+        // Toggle comments section visibility
+        if (target.closest(".stat-reply")) {
+            const section = postCard?.querySelector(".comments-section");
+            if (section) section.style.display = section.style.display === "none" ? "block" : "none";
+            return;
+        }
+
+        if (target.classList.contains("reply-btn") && postId) {
+            const input = target.previousElementSibling;
+            const text = input.value.trim();
+            if (!text) return;
+            const res = await fetch(`/posts/${postId}/comments`, {
+                method: "POST", headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    author: currentUser,
+                    authorProfilePic: localStorage.getItem("userProfilePic") || "", text
+                })
+            });
+            const data = await res.json();
+            if (data.success) {
+                target.closest(".comments-section").querySelector(".comments-list").insertAdjacentHTML("beforeend", `
+                    <div class="comment-item" data-comment-id="${data.comment._id}">
+                        ${getAvatarHTML(data.comment.authorProfilePic, data.comment.author, 32)}
+                        <div class="comment-bubble"><button class="delete-comment-btn"><i class="bi bi-trash3"></i></button>
+                        <div class="comment-header">${data.comment.author}</div><div class="comment-text">${text}</div></div>
+                    </div>`);
+                input.value = "";
+                target.disabled = true;
+                const replyCount = postCard.querySelector(".reply-count");
+                if (replyCount) replyCount.innerText = (parseInt(replyCount.innerText) || 0) + 1;
+            }
+            return;
+        }
+
+        // delete post or comment functionality
+        const deleteBtn = target.closest(".delete-post-btn, .delete-comment-btn");
+        if (deleteBtn) {
+            const isComment = deleteBtn.classList.contains("delete-comment-btn");
+            const item = deleteBtn.closest(isComment ? ".comment-item" : ".post-card");
+            const modal = document.getElementById("delete-confirm-modal");
+            if (modal) {
+                modal.classList.add("active");
+                const confirmBtn = document.getElementById("confirm-delete-btn");
+                const newConfirm = confirmBtn.cloneNode(true);
+                confirmBtn.parentNode.replaceChild(newConfirm, confirmBtn);
+                newConfirm.addEventListener("click", async () => {
+                    modal.classList.remove("active");
+                    if (isComment && postId) {
+                        await fetch(`/posts/${postId}/comments/${item.dataset.commentId}`, { method: "DELETE" });
+                        item.remove();
+                        const rc = postCard.querySelector(".reply-count");
+                        if (rc) rc.innerText = Math.max(0, (parseInt(rc.innerText) || 0) - 1);
+                    } else if (postId) {
+                        await fetch(`/posts/${postId}`, { method: "DELETE" });
+                        document.getElementById("single-post-blur-modal")?.remove();
+                        loadPosts(1, false);
+                    }
+                });
+                document.getElementById("cancel-delete-btn").onclick = () => modal.classList.remove("active");
+            }
+            return;
+        }
+
+        //  Edit post functionality
+        if (target.closest(".edit-post-btn") && postCard) {
+            currentPostBeingEdited = postCard;
+            editMediaCleared = false;
+            const editModal = document.getElementById("edit-modal-overlay");
+            const textarea = document.getElementById("edit-modal-textarea");
+            if (textarea) textarea.value = postCard.querySelector(".post-text")?.innerText || "";
+            const existingImg = postCard.querySelector("img.post-media-content");
+            const existingVid = postCard.querySelector("video.post-media-content");
+            const editPreviewContainer = document.getElementById("edit-modal-media-preview-container");
+            const editImgPreview = document.getElementById("edit-modal-media-preview");
+            const editVideoPreview = document.getElementById("edit-modal-video-preview");
+
+            if (editPreviewContainer && editImgPreview && editVideoPreview) {
+                editPreviewContainer.style.display = "none";
+                editImgPreview.style.display = "none";
+                editVideoPreview.style.display = "none";
+                if (existingImg) {
+                    editImgPreview.src = existingImg.src;
+                    editImgPreview.style.display = "block";
+                    editPreviewContainer.style.display = "flex";
+                } else if (existingVid) {
+                    editVideoPreview.src = existingVid.src;
+                    editVideoPreview.style.display = "block";
+                    editPreviewContainer.style.display = "flex";
+                }
+            }
+            editModal.classList.add("active");
+        }
+    });
+
+    // === EDIT POST MODAL FUNCTIONALITY ===
+    const editMediaInput = document.getElementById("edit-modal-media-upload");
+    const editPreviewContainer = document.getElementById("edit-modal-media-preview-container");
+    const editImgPreview = document.getElementById("edit-modal-media-preview");
+    const editVideoPreview = document.getElementById("edit-modal-video-preview");
+
+    // close edit modal and reset its state function
+    const closeEditModal = () => {
+        document.getElementById("edit-modal-overlay")?.classList.remove("active");
+        if (editMediaInput) editMediaInput.value = "";
+        if (editPreviewContainer) editPreviewContainer.style.display = "none";
+        editMediaCleared = false;
+    };
+
+    document.getElementById("edit-modal-image-btn")?.addEventListener("click", () => editMediaInput?.click());
+    document.getElementById("edit-modal-clear-media")?.addEventListener("click", () => {
+        if (editMediaInput) editMediaInput.value = "";
+        if (editPreviewContainer) editPreviewContainer.style.display = "none";
+        editMediaCleared = true;
+    });
+
+    if (editMediaInput) {
+        editMediaInput.addEventListener("change", function () {
+            const file = this.files[0];
+            if (!file) return;
+
+            // validate file type (image or video)
+            const isImage = file.type.startsWith("image/");
+            const isVideo = file.type.startsWith("video/");
+            if (!isImage && !isVideo) {
+                alert("Please select a valid image or video file.");
+                this.value = "";
+                if (editPreviewContainer) editPreviewContainer.style.display = "none";
+                return;
+            }
+
+            // validate file size (max 5MB for image, 10MB for video)
+            const maxImgSize = 5 * 1024 * 1024;
+            const maxVidSize = 10 * 1024 * 1024;
+            if (isImage && file.size > maxImgSize) {
+                alert("The selected image is too large! Maximum allowed size is 5MB.");
+                this.value = "";
+                if (editPreviewContainer) editPreviewContainer.style.display = "none";
+                return;
+            }
+            if (isVideo && file.size > maxVidSize) {
+                alert("The selected video is too large! Maximum allowed size is 10MB.");
+                this.value = "";
+                if (editPreviewContainer) editPreviewContainer.style.display = "none";
+                return;
+            }
+
+            if (editPreviewContainer) {
+                const url = URL.createObjectURL(file);
+                editPreviewContainer.style.display = "flex";
+                editMediaCleared = false;
+                if (isVideo) {
+                    editVideoPreview.src = url;
+                    editVideoPreview.style.display = "block";
+                    editImgPreview.style.display = "none";
+                } else {
+                    editImgPreview.src = url;
+                    editImgPreview.style.display = "block";
+                    editVideoPreview.style.display = "none";
+                }
+            }
+        });
+    }
+
+    document.getElementById("edit-modal-publish-btn")?.addEventListener("click", async () => {
+        if (!currentPostBeingEdited) return;
+        const postId = currentPostBeingEdited.dataset.postId;
+        const newText = document.getElementById("edit-modal-textarea").value.trim();
+        const newFile = editMediaInput?.files[0];
+
+        let finalMediaUrl = undefined, finalMediaType = undefined;
+        if (newFile) {
+            finalMediaUrl = await fileToDataURL(newFile);
+            finalMediaType = newFile.type.startsWith("video/") ? "video" : "image";
+        } else if (editMediaCleared) {
+            finalMediaUrl = "";
+            finalMediaType = "";
+        }
+
+        const payload = { content: newText };
+        if (finalMediaUrl !== undefined) payload.mediaUrl = finalMediaUrl;
+        if (finalMediaType !== undefined) payload.mediaType = finalMediaType;
+
+        const res = await fetch(`/posts/${postId}`, {
+            method: "PUT", headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        });
+        if (res.ok) {
+            closeEditModal();
+            document.getElementById("single-post-blur-modal")?.remove();
+            loadPosts(1, false);
+        }
+    });
+
+    document.getElementById("close-edit-modal-btn")?.addEventListener("click", closeEditModal);
+
+    document.addEventListener("input", (e) => {
+        if (e.target.classList.contains("comment-input")) {
+            e.target.nextElementSibling.disabled = !e.target.value.trim();
+        }
+    });
+
+    // Toggle facebook share button active state
     document.getElementById("share-facebook-btn")?.addEventListener("click", function () {
         this.classList.toggle("active");
     });

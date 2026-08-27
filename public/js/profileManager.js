@@ -597,6 +597,12 @@ document.addEventListener("DOMContentLoaded", () => {
         const fromVal = searchJoinedFromInput ? searchJoinedFromInput.value : "";
         const toVal = searchJoinedToInput ? searchJoinedToInput.value : "";
 
+        if (fromVal && toVal && new Date(fromVal) > new Date(toVal)) {
+            alert("Joined From date cannot be later than Joined To date.");
+            if (searchJoinedToInput) searchJoinedToInput.value = "";
+            return;
+        }
+
         const params = new URLSearchParams({
             username: usernameVal,
             email: emailVal,

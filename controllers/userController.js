@@ -181,6 +181,15 @@ export const searchUsers = async (req, res, next) => {
     try {
         const { username, email, joinedFrom, joinedTo } = req.query;
 
+        // validate date range order
+        if (joinedFrom && joinedTo) {
+            const startDate = new Date(joinedFrom);
+            const endDate = new Date(joinedTo);
+            if (!isNaN(startDate.getTime()) && !isNaN(endDate.getTime()) && startDate > endDate) {
+                return res.status(400).json({ success: false, error: 'From date cannot be later than To date' });
+            }
+        }
+
         // build database pre-filter for unencrypted createdAt range (we will use the mongo to filter down the user list as much as possible
         // so we will try to filter first by the unencrypted fields)
         const query = {};
