@@ -51,6 +51,12 @@ function checkPasswordsMatch() {
 
 // ==== GLOBAL ALERT MESSAGES HANDLER & FORM SYSTEM ====
 document.addEventListener("DOMContentLoaded", () => {
+    // Set max date for birthday picker to today to prevent future date selection
+    const birthdayInput = document.getElementById("birthday");
+    if (birthdayInput) {
+        birthdayInput.max = new Date().toISOString().split("T")[0];
+    }
+
     const params = new URLSearchParams(window.location.search);
     const error = params.get("error");
     const success = params.get("success");

@@ -138,6 +138,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (mediaInput) mediaInput.value = "";
         if (previewContainer) previewContainer.style.display = "none";
         if (modalPublishBtn) modalPublishBtn.disabled = true;
+        document.getElementById("share-facebook-btn")?.classList.remove("active");
     };
 
     document.getElementById("close-modal-btn")?.addEventListener("click", closeModal);
@@ -219,12 +220,15 @@ document.addEventListener("DOMContentLoaded", () => {
                 mediaUrl = await window.fileToDataURL(file);
                 mediaType = file.type.startsWith("video/") ? "video" : "image";
             }
+
+            const shareToFacebook = document.getElementById("share-facebook-btn")?.classList.contains("active") || false;
+
             const res = await fetch('/posts', {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     author: currentUser,
                     authorProfilePic: localStorage.getItem("userProfilePic") || "",
-                    content: modalTextarea.value.trim(), mediaUrl, mediaType
+                    content: modalTextarea.value.trim(), mediaUrl, mediaType, shareToFacebook
                 })
             });
 
@@ -236,8 +240,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
             // if response is ok, reload posts and close modal, else re-enable publish button
             if (res.ok) {
+                const data = await res.json();
                 loadPosts(1, false);
                 closeModal();
+                if (data.sharedToFacebook) {
+                    alert("Post published successfully and shared to Facebook!");
+                }
             } else {
                 modalPublishBtn.disabled = false; // let the user try again if there was an error
             }

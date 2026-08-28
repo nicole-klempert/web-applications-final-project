@@ -1,4 +1,4 @@
-﻿/* === Typograpy, Brand & Headers === */
+/* === Typograpy, Brand & Headers === */
 
 /* --- Logo --- */
 .brand-logo {
@@ -714,3 +714,13 @@ input[type="date"] {
         align-items: center;
         justify-content: center;
     }
+
+.search-results-list {
+    margin-top: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 290px; /* limits visible list height to approximately 5 users */
+    overflow-y: auto;  /* displays vertical scrollbar if results exceed max-height */
+    padding-right: 4px; /* prevents layout overlap with the scrollbar */
+}
