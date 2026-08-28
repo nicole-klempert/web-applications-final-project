@@ -35,6 +35,14 @@ export const signup = async (req, res) => {
             return sendResponse(req, res, 400, 'Passwords do not match', '/signup.html');
         }
 
+        // validate birthday is not in the future
+        if (birthday) {
+            const birthDate = new Date(birthday);
+            if (isNaN(birthDate.getTime()) || birthDate > new Date()) {
+                return sendResponse(req, res, 400, 'Birthday cannot be in the future', '/signup.html');
+            }
+        }
+
         // validate password strength: minimum 8 chars, 1 uppercase, 1 lowercase, 1 number, 1 symbol
         const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,}$/;
         if (!passwordRegex.test(password)) {
