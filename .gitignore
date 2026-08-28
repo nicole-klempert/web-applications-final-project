@@ -4,3 +4,10 @@ node_modules/
 # Environment variables & secrets
 .env
 .env.keys
+
+# OS metadata files
+.DS_Store
+.DS_Store?
+**/._*
+Thumbs.db
+

@@ -1,5 +1,6 @@
 import Post from '../models/postModel.js';
 import User from '../models/userModel.js';
+import { sharePost as shareToFacebookAPI } from '../services/facebookService.js';
 
 // GET /posts 
 export const getPosts = async (req, res, next) => {
@@ -112,7 +113,7 @@ export const getPostById = async (req, res, next) => {
 
 export const createPost = async (req, res, next) => {
     try {
-        const { author, authorProfilePic, content, mediaUrl, mediaType } = req.body;
+        const { author, authorProfilePic, content, mediaUrl, mediaType, shareToFacebook } = req.body;
         const newPost = new Post({
             author: author || "Anonymous",
             authorProfilePic: authorProfilePic || "",
@@ -124,7 +125,24 @@ export const createPost = async (req, res, next) => {
             comments: []
         });
         const savedPost = await newPost.save();
-        return res.status(201).json({ success: true, post: savedPost });
+
+        let sharedToFacebook = false;
+        let fbPostId = null;
+
+        if (shareToFacebook && content && content.trim() !== "") {
+            const fbResult = await shareToFacebookAPI(content.trim());
+            if (fbResult.success) {
+                sharedToFacebook = true;
+                fbPostId = fbResult.id;
+            }
+        }
+
+        return res.status(201).json({ 
+            success: true, 
+            post: savedPost, 
+            sharedToFacebook, 
+            fbPostId 
+        });
     } catch (error) {
         next(error);
     }
