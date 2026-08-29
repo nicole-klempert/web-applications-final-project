@@ -327,3 +327,5 @@
 .reply-btn:hover {
     background-color: var(--btn-primary-hover);
 }
+
+.post-group-link{color:var(--btn-primary);text-decoration:none;font-weight:600}.post-group-link:hover{text-decoration:underline}

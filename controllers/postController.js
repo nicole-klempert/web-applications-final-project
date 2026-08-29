@@ -1,6 +1,26 @@
 import Post from '../models/postModel.js';
 import User from '../models/userModel.js';
+import Group from '../models/groupModel.js';
 import { sharePost as shareToFacebookAPI } from '../services/facebookService.js';
+
+const normalizeLocation = location => {
+    if (!location) return undefined;
+    const latitude = Number(location.latitude), longitude = Number(location.longitude);
+    if (!Number.isFinite(latitude) || !Number.isFinite(longitude) || latitude < -90 || latitude > 90 || longitude < -180 || longitude > 180) return undefined;
+    return { name: String(location.name || '').trim(), address: String(location.address || '').trim(), latitude, longitude };
+};
+
+const accessiblePostQuery = async userId => {
+    const groups = userId ? await Group.find({ members: userId }).select('_id') : [];
+    return { $or: [{ group: null }, { group: { $exists: false } }, { group: { $in: groups.map(group => group._id) } }] };
+};
+
+const distanceInMeters = (a, b) => {
+    const toRadians = value => value * Math.PI / 180, R = 6371000;
+    const dLat = toRadians(b.latitude - a.latitude), dLng = toRadians(b.longitude - a.longitude), lat1 = toRadians(a.latitude), lat2 = toRadians(b.latitude);
+    const h = Math.sin(dLat / 2) ** 2 + Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLng / 2) ** 2;
+    return 2 * R * Math.atan2(Math.sqrt(h), Math.sqrt(1 - h));
+};
 
 // GET /posts 
 export const getPosts = async (req, res, next) => {
@@ -12,6 +32,11 @@ export const getPosts = async (req, res, next) => {
 
         // Ensure query.$and is initialized safely
         query.$and = [];
+
+        const currentUserId = req.session?.user?.id;
+        const memberGroups = currentUserId ? await Group.find({ members: currentUserId }).select('_id name') : [];
+        const memberGroupIds = memberGroups.map(group => group._id);
+        query.$and.push({ $or: [{ group: null }, { group: { $exists: false } }, { group: { $in: memberGroupIds } }] });
 
         // text search across content and author fields
         if (req.query.search && req.query.search.trim() !== "") {
@@ -30,7 +55,8 @@ export const getPosts = async (req, res, next) => {
         // filter by group if explicitly provided
         if (req.query.group && req.query.group.trim() !== "") {
             const groupRegex = new RegExp(req.query.group.trim(), "i");
-            const groupFilter = { group: { $regex: groupRegex } };
+            const matchingGroups = await Group.find({ name: { $regex: groupRegex } }).select('_id');
+            const groupFilter = { group: { $in: matchingGroups.map(group => group._id) } };
             query.$and = query.$and || [];
             query.$and.push(groupFilter);
         }
@@ -59,20 +85,20 @@ export const getPosts = async (req, res, next) => {
 
         // Feed Scope filtering (Friends + Groups Multi-select logic)
         const { feedScopes, currentUser } = req.query;
-        if (feedScopes && feedScopes !== 'all' && currentUser) {
+        if (feedScopes && feedScopes !== 'all') {
             const scopesArray = feedScopes.split(",");
-            const user = await User.findByUsername(currentUser);
             const scopeConditions = [];
 
-            if (scopesArray.includes('friends')) {
+            if (scopesArray.includes('friends') && currentUser) {
                 // currentUser's friends + currentUser itself
+                const user = await User.findByUsername(currentUser);
                 const authorsList = [...((user && user.friends) ? user.friends : []), currentUser];
                 scopeConditions.push({ author: { $in: authorsList } });
             }
 
             if (scopesArray.includes('groups')) {
                 // Placeholder for groups: expects a groupId
-                scopeConditions.push({ groupId: { $exists: true } });
+                scopeConditions.push({ group: { $in: memberGroupIds } });
             }
 
             if (scopeConditions.length > 0) {
@@ -87,7 +113,11 @@ export const getPosts = async (req, res, next) => {
         }
 
         const totalPosts = await Post.countDocuments(query);
-        const posts = await Post.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit);
+        const posts = await Post.find(query)
+            .populate('group', 'name')
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit);
 
         return res.status(200).json({
             success: true,
@@ -101,9 +131,51 @@ export const getPosts = async (req, res, next) => {
     }
 };
 
+// GET /posts/map
+export const getMapPosts = async (req, res, next) => {
+    try {
+        const access = await accessiblePostQuery(req.session?.user?.id);
+        const radius = Math.min(Math.max(Number(req.query.radius) || 500, 50), 5000);
+        let center = null;
+
+        if (req.query.postId) {
+            const selected = await Post.findOne({ _id: req.query.postId, ...access }).select('location');
+
+            if (!selected || !Number.isFinite(selected.location?.latitude) || !Number.isFinite(selected.location?.longitude)) {
+                return res.status(404).json({ success: false, error: 'Post location not found' });
+            }
+
+            center = {
+                latitude: selected.location.latitude,
+                longitude: selected.location.longitude
+            };
+        }
+
+        const posts = await Post.find({
+            ...access,
+            'location.latitude': { $ne: null },
+            'location.longitude': { $ne: null }
+        })
+            .populate('group', 'name')
+            .sort({ createdAt: -1 })
+            .limit(300);
+
+        const visible = center ? posts.filter(post => distanceInMeters(center, post.location) <= radius) : posts;
+
+        res.json({
+            success: true,
+            center,
+            posts: visible,
+            radius
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
 export const getPostById = async (req, res, next) => {
     try {
-        const post = await Post.findById(req.params.postId);
+        const post = await Post.findById(req.params.postId).populate('group', 'name');
         if (!post) return res.status(404).json({ success: false, error: 'Post not found' });
         return res.status(200).json({ success: true, post });
     } catch (error) {
@@ -113,14 +185,30 @@ export const getPostById = async (req, res, next) => {
 
 export const createPost = async (req, res, next) => {
     try {
-        const { author, authorProfilePic, content, mediaUrl, mediaType, shareToFacebook } = req.body;
+        const { authorProfilePic, content, mediaUrl, mediaType, shareToFacebook, groupId, location } = req.body;
+        let group = null;
+
+        if (groupId) {
+            group = await Group.findById(groupId);
+
+            if (!group) {
+                return res.status(404).json({ success: false, error: 'Group not found' });
+            }
+
+            if (!(group.members || []).some(member => String(member) === String(req.session.user.id))) {
+                return res.status(403).json({ success: false, error: 'Only group members can publish posts in this group' });
+            }
+        }
+
         const newPost = new Post({
-            author: author || "Anonymous",
+            author: req.session.user.username || "Anonymous",
             authorProfilePic: authorProfilePic || "",
             content: content || "",
             mediaUrl: mediaUrl || "",
             mediaType: mediaType || "",
             postType: mediaType || "text",
+            group: group ? group._id : null,
+            location: normalizeLocation(location),
             likedBy: [],
             comments: []
         });
@@ -137,11 +225,13 @@ export const createPost = async (req, res, next) => {
             }
         }
 
-        return res.status(201).json({ 
-            success: true, 
-            post: savedPost, 
-            sharedToFacebook, 
-            fbPostId 
+        await savedPost.populate('group', 'name');
+
+        return res.status(201).json({
+            success: true,
+            post: savedPost,
+            sharedToFacebook,
+            fbPostId
         });
     } catch (error) {
         next(error);
@@ -202,7 +292,7 @@ export const toggleLike = async (req, res, next) => {
 
 export const updatePost = async (req, res, next) => {
     try {
-        const { content, mediaUrl, mediaType, username } = req.body;
+        const { content, mediaUrl, mediaType, username, location } = req.body;
         const post = await Post.findById(req.params.postId);
         if (!post) return res.status(404).json({ success: false, error: "Post not found" });
 
@@ -218,6 +308,25 @@ export const updatePost = async (req, res, next) => {
             post.postType = mediaType || "text";
         }
 
+        if (Object.prototype.hasOwnProperty.call(req.body, "location")) {
+            if (location === null) {
+                post.location = {
+                    name: "",
+                    address: "",
+                    latitude: null,
+                    longitude: null
+                };
+            } else {
+                const normalizedLocation = normalizeLocation(location);
+
+                if (!normalizedLocation) {
+                    return res.status(400).json({ success: false, error: "Invalid post location" });
+                }
+
+                post.location = normalizedLocation;
+            }
+        }
+
         await post.save();
         return res.status(200).json({ success: true, post });
     } catch (error) {
@@ -227,15 +336,10 @@ export const updatePost = async (req, res, next) => {
 
 export const deletePost = async (req, res, next) => {
     try {
-        const { username } = req.body || req.query;
-        const post = await Post.findById(req.params.postId);
+        const post = req.post || await Post.findById(req.params.postId);
         if (!post) return res.status(404).json({ success: false, error: "Post not found" });
 
         // check ownership on the server side - return 403 if the user is not the owner
-        if (username && post.author.toLowerCase() !== username.toLowerCase()) {
-            return res.status(403).json({ success: false, error: "403 Forbidden: You are not authorized to delete this post" });
-        }
-
         await Post.findByIdAndDelete(req.params.postId);
         return res.status(200).json({ success: true });
     } catch (error) {

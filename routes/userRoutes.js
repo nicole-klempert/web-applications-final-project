@@ -1,6 +1,7 @@
 import express from 'express';
 import { getUserProfile, updateUserProfile, toggleFriend, searchUsers } from '../controllers/userController.js';
 import { isAuthenticated } from '../middleware/authMiddleware.js';
+import { getProfileStats } from '../controllers/profileStatsController.js';
 
 const router = express.Router();
 
@@ -9,6 +10,9 @@ router.use(isAuthenticated);
 
 // GET /users/search
 router.get('/search', searchUsers);
+
+// GET /users/:username/stats
+router.get('/:username/stats', getProfileStats);
 
 // GET /users/:username
 router.get('/:username', getUserProfile);

@@ -125,8 +125,36 @@ document.addEventListener("DOMContentLoaded", () => {
     const previewContainer = document.getElementById("modal-media-preview-container");
     const imgPreview = document.getElementById("modal-media-preview");
     const videoPreview = document.getElementById("modal-video-preview");
+    const postTargetSelect = document.getElementById("post-target-select");
+    let selectedPostLocation = null;
+    const postLocationPicker = window.PostLocationPicker?.createPicker({
+        buttonId: "modal-location-btn",
+        panelId: "modal-location-panel",
+        mapId: "modal-location-map",
+        searchInputId: "modal-location-search",
+        searchButtonId: "modal-location-search-btn",
+        clearButtonId: "modal-location-clear",
+        labelId: "modal-location-selected",
+        onChange: location => { selectedPostLocation = location; }
+    });
+    const loadMemberGroups = async () => {
+        if (!postTargetSelect) return;
+        try {
+            const response = await fetch("/groups?limit=50", { headers: { "Accept": "application/json" } });
+            const data = await response.json();
+            if (!response.ok || !data.success) return;
+            postTargetSelect.innerHTML = `<option value="">My Feed</option>`;
+            (data.groups || []).filter(group => group.isMember).forEach(group => {
+                const option = document.createElement("option");
+                option.value = group._id;
+                option.textContent = group.name;
+                postTargetSelect.appendChild(option);
+            });
+        } catch (error) { console.error("Failed to load user groups:", error); }
+    };
 
-    document.getElementById("trigger-modal-bar")?.addEventListener("click", () => {
+    document.getElementById("trigger-modal-bar")?.addEventListener("click", async () => {
+        await loadMemberGroups();
         modalOverlay?.classList.add("active");
         modalTextarea?.focus();
     });
@@ -139,6 +167,11 @@ document.addEventListener("DOMContentLoaded", () => {
         if (previewContainer) previewContainer.style.display = "none";
         if (modalPublishBtn) modalPublishBtn.disabled = true;
         document.getElementById("share-facebook-btn")?.classList.remove("active");
+        if (postTargetSelect) postTargetSelect.value = "";
+        postLocationPicker?.clear();
+        selectedPostLocation = null;
+        const locationPanel = document.getElementById("modal-location-panel");
+        if (locationPanel) locationPanel.hidden = true;
     };
 
     document.getElementById("close-modal-btn")?.addEventListener("click", closeModal);
@@ -228,7 +261,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 body: JSON.stringify({
                     author: currentUser,
                     authorProfilePic: localStorage.getItem("userProfilePic") || "",
-                    content: modalTextarea.value.trim(), mediaUrl, mediaType, shareToFacebook
+                    content: modalTextarea.value.trim(), mediaUrl, mediaType, shareToFacebook,
+                    ...(selectedPostLocation ? { location: selectedPostLocation } : {}),
+                    ...(postTargetSelect?.value ? { groupId: postTargetSelect.value } : {})
                 })
             });
 

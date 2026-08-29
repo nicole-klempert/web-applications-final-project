@@ -1,6 +1,6 @@
 import express from 'express';
-import { getPosts, getPostById, createPost, addComment, deleteComment, toggleLike, updatePost, deletePost } from '../controllers/postController.js';
-import { isAuthenticated, isPostOwner } from '../middleware/authMiddleware.js';
+import { getPosts, getMapPosts, getPostById, createPost, addComment, deleteComment, toggleLike, updatePost, deletePost } from '../controllers/postController.js';
+import { isAuthenticated, isPostOwner, canDeletePost } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
@@ -10,6 +10,9 @@ router.use(isAuthenticated);
 // routes for fetching all posts and creating a new post
 router.get('/', getPosts);
 router.post('/', createPost);
+
+// route for posts shown on the map
+router.get('/map', getMapPosts);
 
 // route for fetching a single post by its ID
 router.get('/:postId', getPostById);
@@ -23,6 +26,6 @@ router.post('/:postId/like', toggleLike);
 
 // routes for updating and deleting posts (restricted to the post owner)
 router.put('/:postId', isPostOwner, updatePost);
-router.delete('/:postId', isPostOwner, deletePost);
+router.delete('/:postId', canDeletePost, deletePost);
 
 export default router;

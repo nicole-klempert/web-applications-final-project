@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Group</title>
+
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/modals.css">
+    <link rel="stylesheet" href="css/avatars.css">
+    <link rel="stylesheet" href="css/posts.css">
+    <link rel="stylesheet" href="css/locationMap.css">
+    <link rel="stylesheet" href="css/groupStyle.css">
+</head>
+
+<body>
+    <div class="app-layout">
+        <nav class="side-nav">
+            <header>
+                <h1>~Name~</h1>
+            </header>
+
+            <div class="nav-links mt-4">
+                <a href="feed.html" class="nav-item">
+                    <i class="bi bi-house-door nav-icon"></i><span>Feed</span>
+                </a>
+                <a href="profile.html" class="nav-item">
+                    <i class="bi bi-person nav-icon"></i><span>Profile</span>
+                </a>
+                <a href="groups.html" class="nav-item active">
+                    <i class="bi bi-people-fill nav-icon"></i><span>Groups</span>
+                </a>
+                <a href="statistics.html" class="nav-item">
+                    <i class="bi bi-bar-chart nav-icon"></i><span>Statistics</span>
+                </a>
+                <a href="#" class="nav-item" id="dark-mode-toggle">
+                    <i class="bi bi-moon-stars nav-icon" id="dark-mode-icon"></i><span id="dark-mode-text">Dark Mode</span>
+                </a>
+            </div>
+
+            <button type="button" class="btn btn-primary logout-btn" id="logout-btn-trigger">Logout</button>
+
+            <div class="account-card mt-auto" role="button">
+                <div class="avatar avatar-purple" id="nav-user-avatar">US</div>
+                <div>
+                    <span class="name" id="nav-user-name">User Name</span>
+                    <span class="handle" id="nav-user-handle">@username</span>
+                </div>
+            </div>
+        </nav>
+
+        <main class="group-main">
+            <div id="group-loading" class="group-loading">Loading group...</div>
+
+            <div id="group-page" hidden>
+                <section class="group-hero">
+                    <div id="group-image" class="group-hero-image">
+                        <i class="bi bi-people-fill"></i>
+                    </div>
+
+                    <div class="group-hero-content">
+                        <div class="group-title-line">
+                            <h2 id="group-name"></h2>
+                            <span id="group-role" class="group-role"></span>
+                        </div>
+
+                        <p id="group-description"></p>
+
+                        <div class="group-meta">
+                            <span id="group-category"></span>
+                            <span id="group-owner"></span>
+                            <span id="group-members-count"></span>
+                        </div>
+
+                        <div class="group-actions">
+                            <button id="membership-btn" class="btn btn-primary"></button>
+                            <button id="edit-group-btn" class="btn btn-secondary" hidden>Edit Group</button>
+                            <button id="group-statistics-btn" class="btn btn-secondary" hidden>Statistics</button>
+                            <button id="delete-group-btn" class="btn btn-danger" hidden>Delete Group</button>
+                        </div>
+                    </div>
+                </section>
+
+                <div class="group-grid">
+                    <section>
+                        <div id="group-composer" class="group-panel" hidden>
+                            <h3>Create a group post</h3>
+
+                            <textarea id="group-post-text" class="group-input" rows="3"
+                                      placeholder="Share something with the group..."></textarea>
+
+                            <button type="button" id="group-location-btn" class="btn btn-secondary location-picker-toggle">
+                                <i class="bi bi-geo-alt"></i> Add Location
+                            </button>
+
+                            <div id="group-location-panel" class="location-picker-panel" hidden>
+                                <div class="location-search-row">
+                                    <input id="group-location-search" class="group-input" type="search"
+                                           placeholder="Search an address or place">
+                                    <button type="button" id="group-location-search-btn" class="btn btn-secondary">Search</button>
+                                </div>
+
+                                <div id="group-location-map" class="location-picker-map"></div>
+
+                                <div class="location-selected-row">
+                                    <span id="group-location-selected" class="location-selected-text">No location selected</span>
+                                    <button type="button" id="group-location-clear" class="btn btn-secondary" hidden>Clear</button>
+                                </div>
+                            </div>
+
+                            <input id="group-post-media" type="file" accept="image/*,video/*">
+                            <button id="group-post-publish" class="btn btn-primary">Post</button>
+                            <p id="group-post-error" class="group-error"></p>
+                        </div>
+
+                        <div class="group-panel">
+                            <h3>Group Posts</h3>
+                            <div id="group-posts" class="post-feed"></div>
+                        </div>
+                    </section>
+
+                    <aside>
+                        <div class="group-panel">
+                            <h3>Members</h3>
+                            <div id="group-members"></div>
+                        </div>
+
+                        <div id="admin-panel" class="group-panel" hidden>
+                            <h3>Admin Management</h3>
+                            <p>Only the owner can add or remove admins.</p>
+
+                            <div class="admin-add-row">
+                                <input id="admin-username" class="group-input" placeholder="Member username">
+                                <button id="add-admin-btn" class="btn btn-primary">Add Admin</button>
+                            </div>
+
+                            <p id="admin-error" class="group-error"></p>
+                        </div>
+                    </aside>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="edit-group-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Edit Group</h3>
+                <button id="close-edit-group" class="close-modal-btn">&times;</button>
+            </div>
+
+            <form id="edit-group-form">
+                <div class="modal-body group-edit-grid">
+                    <label class="input-label">Name *</label>
+                    <input id="edit-group-name" class="group-input" maxlength="80" required>
+
+                    <label class="input-label">Description</label>
+                    <textarea id="edit-group-description" class="group-input" maxlength="500" rows="3"></textarea>
+
+                    <label class="input-label">Category</label>
+                    <input id="edit-group-category" class="group-input">
+
+                    <label class="input-label">Image URL or Base64</label>
+                    <input id="edit-group-image" class="group-input">
+
+                    <label class="group-check">
+                        <input type="checkbox" id="edit-group-public"> Public group
+                    </label>
+
+                    <p id="edit-group-error" class="group-error"></p>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" id="cancel-edit-group" class="btn btn-secondary">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/global.js"></script>
+    <script src="js/postLocation.js"></script>
+    <script src="js/groupManager.js"></script>
+</body>
+</html>

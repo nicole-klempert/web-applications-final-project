@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="css/modals.css">
     <link rel="stylesheet" href="css/avatars.css">
     <link rel="stylesheet" href="css/posts.css">
+    <link rel="stylesheet" href="css/locationMap.css">
     <link rel="stylesheet" href="css/feedStyle.css">
 </head>
 
@@ -33,6 +34,9 @@
                 </a>
                 <a href="groups.html" class="nav-item">
                     <i class="bi bi-people-fill nav-icon"></i> <span>Groups</span>
+                </a>
+                <a href="statistics.html" class="nav-item">
+                    <i class="bi bi-bar-chart nav-icon"></i> <span>Statistics</span>
                 </a>
 
                 <!-- ID settings for icon and text swap in Dark Mode -->
@@ -155,7 +159,14 @@
                 <button id="close-modal-btn" class="close-modal-btn">&times;</button>
             </div>
             <div class="modal-body">
+                <div class="input-group post-target-group"><label for="post-target-select" class="input-label">Post to</label><select id="post-target-select" class="modal-input-box"><option value="">My Feed</option></select></div>
                 <textarea id="modal-textarea" class="modal-textarea-custom" placeholder="What's on your mind?" rows="4"></textarea>
+                <button type="button" id="modal-location-btn" class="media-trigger-btn location-picker-toggle"><i class="bi bi-geo-alt"></i> Add Location</button>
+                <div id="modal-location-panel" class="location-picker-panel" hidden>
+                    <div class="location-search-row"><input id="modal-location-search" class="modal-input-box" type="search" placeholder="Search an address or place"><button type="button" id="modal-location-search-btn" class="btn btn-secondary">Search</button></div>
+                    <div id="modal-location-map" class="location-picker-map"></div>
+                    <div class="location-selected-row"><span id="modal-location-selected" class="location-selected-text">No location selected</span><button type="button" id="modal-location-clear" class="btn btn-secondary" hidden>Clear</button></div>
+                </div>
 
                 <!-- media preview area -->
                 <input type="file" id="modal-media-upload" accept="image/*,video/*" style="display: none;">
@@ -188,6 +199,7 @@
     <script src="js/global.js"></script>
     <script src="js/newsApi.js"></script>
     <script src="js/filters.js"></script>
+    <script src="js/postLocation.js"></script>
     <script src="js/postsManager.js"></script>
 
 </body>

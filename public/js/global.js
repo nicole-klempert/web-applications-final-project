@@ -200,6 +200,12 @@ document.addEventListener("DOMContentLoaded", () => {
                         </div>
                         <div class="modal-body">
                             <textarea id="edit-modal-textarea" class="modal-textarea-custom" rows="4"></textarea>
+                            <button type="button" id="edit-modal-location-btn" class="media-trigger-btn location-picker-toggle"><i class="bi bi-geo-alt"></i> Edit Location</button>
+                            <div id="edit-modal-location-panel" class="location-picker-panel" hidden>
+                                <div class="location-search-row"><input id="edit-modal-location-search" class="modal-input-box" type="search" placeholder="Search an address or place"><button type="button" id="edit-modal-location-search-btn" class="btn btn-secondary">Search</button></div>
+                                <div id="edit-modal-location-map" class="location-picker-map"></div>
+                                <div class="location-selected-row"><span id="edit-modal-location-selected" class="location-selected-text">No location selected</span><button type="button" id="edit-modal-location-clear" class="btn btn-secondary" hidden>Clear</button></div>
+                            </div>
                             <input type="file" id="edit-modal-media-upload" accept="image/*,video/*" style="display: none;">
                             <div id="edit-modal-media-preview-container" class="modal-media-preview-container" style="display: none;">
                                 <img id="edit-modal-media-preview" class="modal-preview-media" src="" style="display: none;">
@@ -220,12 +226,21 @@ document.addEventListener("DOMContentLoaded", () => {
     };
     injectGlobalModals();
 
+    // add map link to navigation
+    document.querySelectorAll('.nav-links').forEach(nav=>{
+        if(nav.querySelector('a[href="map.html"]'))return;
+        const groupsLink=nav.querySelector('a[href="groups.html"]');
+        if(groupsLink)groupsLink.insertAdjacentHTML('afterend','<a href="map.html" class="nav-item"><i class="bi bi-geo-alt nav-icon"></i><span>Map</span></a>');
+    });
+
     // post card HTML generator 
     window.createPostCardHTML = (post, isNew = false) => {
         const currentUser = window.getCurrentUser();
         const isOwner = post.author && (post.author.trim().toLowerCase() === currentUser.toLowerCase());
         const isLiked = Array.isArray(post.likedBy) && post.likedBy.includes(currentUser);
         const timeAgo = window.formatTimeAgo(post.createdAt);
+        window.postLocationById = window.postLocationById || new Map();
+        if (post._id) window.postLocationById.set(String(post._id), post.location || null);
 
         // Media HTML (image or video)
         const mediaHTML = post.mediaUrl ? (post.mediaType === "video"
@@ -252,6 +267,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 <button class="delete-post-btn" title="Delete"><i class="bi bi-trash3"></i></button>
             </div>` : "";
 
+        const locationHTML = post.location && Number.isFinite(post.location.latitude) && Number.isFinite(post.location.longitude) ? `<a href="map.html?postId=${encodeURIComponent(post._id || '')}" class="post-location-link"><i class="bi bi-geo-alt-fill"></i> ${post.location.name || post.location.address || 'View location'}</a>` : "";
+
         // Final post card HTML
         return `
             <article class="post-card ${isNew ? 'new-item-highlight' : ''}" data-post-id="${post._id || ''}">
@@ -264,12 +281,13 @@ document.addEventListener("DOMContentLoaded", () => {
                             <a href="profile.html?user=${encodeURIComponent(post.author || 'User')}" class="post-author" style="text-decoration:none; color:inherit;">
                                 ${post.author || "User"}
                             </a>
-                            <span class="post-meta view-single-post-trigger" style="cursor:pointer;">@${(post.author || "user").toLowerCase().replace(/\s/g, '')} · ${timeAgo}</span>
+                            <span class="post-meta view-single-post-trigger" style="cursor:pointer;">@${(post.author || "user").toLowerCase().replace(/\s/g, '')} · ${timeAgo}${post.group && post.group.name ? ` · <a href="group.html?id=${post.group._id}" class="post-group-link">${post.group.name}</a>` : ""}</span>
                         </div>
                     </div>
                     ${actionsHTML}
                 </div>
                 <div class="post-text">${post.content || ""}</div>
+                ${locationHTML}
                 ${mediaHTML}
                 <div class="post-stats">
                     <span class="stat-reply"><i class="bi bi-chat"></i> <span class="reply-count">${(post.comments || []).length}</span></span>
@@ -497,6 +515,11 @@ document.addEventListener("DOMContentLoaded", () => {
             const editModal = document.getElementById("edit-modal-overlay");
             const textarea = document.getElementById("edit-modal-textarea");
             if (textarea) textarea.value = postCard.querySelector(".post-text")?.innerText || "";
+            const existingLocation = window.postLocationById?.get(String(postCard.dataset.postId)) || null;
+            editPostLocation = existingLocation;
+            editLocationPicker?.setLocation(existingLocation);
+            const editLocationPanel = document.getElementById("edit-modal-location-panel");
+            if (editLocationPanel) editLocationPanel.hidden = true;
 
             const existingImg = postCard.querySelector("img.post-media-content");
             const existingVid = postCard.querySelector("video.post-media-content");
@@ -525,11 +548,26 @@ document.addEventListener("DOMContentLoaded", () => {
     const editPreviewContainer = document.getElementById("edit-modal-media-preview-container");
     const editImgPreview = document.getElementById("edit-modal-media-preview");
     const editVideoPreview = document.getElementById("edit-modal-video-preview");
+    let editPostLocation = null;
+    const editLocationPicker = window.PostLocationPicker?.createPicker({
+        buttonId: "edit-modal-location-btn",
+        panelId: "edit-modal-location-panel",
+        mapId: "edit-modal-location-map",
+        searchInputId: "edit-modal-location-search",
+        searchButtonId: "edit-modal-location-search-btn",
+        clearButtonId: "edit-modal-location-clear",
+        labelId: "edit-modal-location-selected",
+        onChange: location => { editPostLocation = location; }
+    });
 
     const closeEditPostModal = () => {
         document.getElementById("edit-modal-overlay")?.classList.remove("active");
         if (editMediaInput) editMediaInput.value = "";
         if (editPreviewContainer) editPreviewContainer.style.display = "none";
+        editLocationPicker?.clear();
+        editPostLocation = null;
+        const editLocationPanel = document.getElementById("edit-modal-location-panel");
+        if (editLocationPanel) editLocationPanel.hidden = true;
         editMediaCleared = false;
     };
 
@@ -578,7 +616,7 @@ document.addEventListener("DOMContentLoaded", () => {
             finalMediaType = "";
         }
 
-        const payload = { content: newText, username: window.getCurrentUser() };
+        const payload = { content: newText, username: window.getCurrentUser(), location: editPostLocation };
         if (finalMediaUrl !== undefined) payload.mediaUrl = finalMediaUrl;
         if (finalMediaType !== undefined) payload.mediaType = finalMediaType;
 
