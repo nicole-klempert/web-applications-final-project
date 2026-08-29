@@ -1,7 +1,116 @@
 // load aggregation data and draw the charts
-document.addEventListener("DOMContentLoaded",async()=>{
-    const draw=(selector,data,emptyId)=>{const container=d3.select(selector);container.selectAll("*").remove();document.getElementById(emptyId).hidden=data.length>0;if(!data.length)return;const width=Math.max(520,container.node().clientWidth||700),height=360,margin={top:20,right:20,bottom:90,left:55};const svg=container.append("svg").attr("viewBox",`0 0 ${width} ${height}`);const x=d3.scaleBand().domain(data.map(d=>d.city)).range([margin.left,width-margin.right]).padding(.25),y=d3.scaleLinear().domain([0,d3.max(data,d=>d.count)||1]).nice().range([height-margin.bottom,margin.top]);svg.append("g").attr("transform",`translate(0,${height-margin.bottom})`).call(d3.axisBottom(x)).selectAll("text").attr("transform","rotate(-35)").style("text-anchor","end");svg.append("g").attr("transform",`translate(${margin.left},0)`).call(d3.axisLeft(y).ticks(6).tickFormat(d3.format("d")));const legend=svg.append("g").attr("class","chart-legend").attr("transform",`translate(${Math.max(margin.left,width-120)},${margin.top})`);legend.append("rect").attr("width",12).attr("height",12).attr("class","chart-bar");legend.append("text").attr("x",18).attr("y",10).text("Count");const tooltip=d3.select("body").append("div").attr("class","chart-tooltip").style("display","none");svg.selectAll("rect.chart-data-bar").data(data).enter().append("rect").attr("x",d=>x(d.city)).attr("y",d=>y(d.count)).attr("width",x.bandwidth()).attr("height",d=>y(0)-y(d.count)).attr("class","chart-bar chart-data-bar").on("mousemove",(event,d)=>tooltip.style("display","block").style("left",`${event.pageX+12}px`).style("top",`${event.pageY-20}px`).text(`${d.city}: ${d.count}`)).on("mouseleave",()=>tooltip.style("display","none"));};
-    try{const response=await fetch("/statistics/friends-by-city",{headers:{Accept:"application/json"}}),result=await response.json();if(!response.ok)throw new Error(result.error||"Could not load friend statistics");draw("#friends-chart",result.data||[],"friends-empty");}catch(error){console.error("Friend statistics load failed:",error);document.getElementById("friends-empty").hidden=false;}
-    const groupId=new URLSearchParams(window.location.search).get("groupId");if(!groupId)return;const card=document.getElementById("group-statistics-card"),errorBox=document.getElementById("group-statistics-error");
-    try{const response=await fetch(`/statistics/groups/${encodeURIComponent(groupId)}/members-by-city`,{headers:{Accept:"application/json"}}),result=await response.json();if(!response.ok){errorBox.textContent=result.error||"You are not allowed to view these group statistics.";errorBox.hidden=false;return;}card.hidden=false;document.getElementById("group-statistics-title").textContent=`${result.groupName} - Member Location Distribution`;draw("#group-chart",result.data||[],"group-empty");}catch(error){console.error("Group statistics load failed:",error);errorBox.textContent="Could not load group statistics.";errorBox.hidden=false;}
+document.addEventListener("DOMContentLoaded", async () => {
+    const draw = (selector, data, emptyId) => {
+        const container = d3.select(selector);
+        container.selectAll("*").remove();
+
+        document.getElementById(emptyId).hidden = data.length > 0;
+        if (!data.length) return;
+
+        const width = Math.max(520, container.node().clientWidth || 700);
+        const height = 360;
+        const margin = { top: 20, right: 20, bottom: 90, left: 55 };
+
+        const svg = container.append("svg").attr("viewBox", `0 0 ${width} ${height}`);
+
+        const x = d3.scaleBand()
+            .domain(data.map(d => d.city))
+            .range([margin.left, width - margin.right])
+            .padding(.25);
+
+        const y = d3.scaleLinear()
+            .domain([0, d3.max(data, d => d.count) || 1])
+            .nice()
+            .range([height - margin.bottom, margin.top]);
+
+        svg.append("g")
+            .attr("transform", `translate(0,${height - margin.bottom})`)
+            .call(d3.axisBottom(x))
+            .selectAll("text")
+            .attr("transform", "rotate(-35)")
+            .style("text-anchor", "end");
+
+        svg.append("g")
+            .attr("transform", `translate(${margin.left},0)`)
+            .call(d3.axisLeft(y).ticks(6).tickFormat(d3.format("d")));
+
+        const legend = svg.append("g")
+            .attr("class", "chart-legend")
+            .attr("transform", `translate(${Math.max(margin.left, width - 120)},${margin.top})`);
+
+        legend.append("rect")
+            .attr("width", 12)
+            .attr("height", 12)
+            .attr("class", "chart-bar");
+
+        legend.append("text")
+            .attr("x", 18)
+            .attr("y", 10)
+            .text("Count");
+
+        const tooltip = d3.select("body")
+            .append("div")
+            .attr("class", "chart-tooltip")
+            .style("display", "none");
+
+        svg.selectAll("rect.chart-data-bar")
+            .data(data)
+            .enter()
+            .append("rect")
+            .attr("x", d => x(d.city))
+            .attr("y", d => y(d.count))
+            .attr("width", x.bandwidth())
+            .attr("height", d => y(0) - y(d.count))
+            .attr("class", "chart-bar chart-data-bar")
+            .on("mousemove", (event, d) => tooltip
+                .style("display", "block")
+                .style("left", `${event.pageX + 12}px`)
+                .style("top", `${event.pageY - 20}px`)
+                .text(`${d.city}: ${d.count}`))
+            .on("mouseleave", () => tooltip.style("display", "none"));
+    };
+
+    try {
+        const response = await fetch("/statistics/friends-by-city", {
+            headers: { Accept: "application/json" }
+        });
+        const result = await response.json();
+
+        if (!response.ok) throw new Error(result.error || "Could not load friend statistics");
+
+        draw("#friends-chart", result.data || [], "friends-empty");
+    } catch (error) {
+        console.error("Friend statistics load failed:", error);
+        document.getElementById("friends-empty").hidden = false;
+    }
+
+    const groupId = new URLSearchParams(window.location.search).get("groupId");
+    if (!groupId) return;
+
+    const card = document.getElementById("group-statistics-card");
+    const errorBox = document.getElementById("group-statistics-error");
+
+    try {
+        const response = await fetch(
+            `/statistics/groups/${encodeURIComponent(groupId)}/members-by-city`,
+            { headers: { Accept: "application/json" } }
+        );
+        const result = await response.json();
+
+        if (!response.ok) {
+            errorBox.textContent = result.error || "You are not allowed to view these group statistics.";
+            errorBox.hidden = false;
+            return;
+        }
+
+        card.hidden = false;
+        document.getElementById("group-statistics-title").textContent =
+            `${result.groupName} - Member Location Distribution`;
+
+        draw("#group-chart", result.data || [], "group-empty");
+    } catch (error) {
+        console.error("Group statistics load failed:", error);
+        errorBox.textContent = "Could not load group statistics.";
+        errorBox.hidden = false;
+    }
 });

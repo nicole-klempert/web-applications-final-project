@@ -46,7 +46,7 @@ const postSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: 'Group',
         default: null,
-        index: true // idnex for future group filtering
+        index: true
     },
     // optional location selected when publishing a post
     location: {

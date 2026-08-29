@@ -1,6 +1,139 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="utf-8"><title>Groups</title><link href="css/bootstrap.min.css" rel="stylesheet"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"><link rel="stylesheet" href="css/variables.css"><link rel="stylesheet" href="css/layout.css"><link rel="stylesheet" href="css/components.css"><link rel="stylesheet" href="css/modals.css"><link rel="stylesheet" href="css/avatars.css"><link rel="stylesheet" href="css/groupsStyle.css"></head>
-<body><div class="app-layout"><nav class="side-nav"><header><h1>~Name~</h1></header><div class="nav-links mt-4"><a href="feed.html" class="nav-item"><i class="bi bi-house-door nav-icon"></i><span>Feed</span></a><a href="profile.html" class="nav-item"><i class="bi bi-person nav-icon"></i><span>Profile</span></a><a href="groups.html" class="nav-item active"><i class="bi bi-people-fill nav-icon"></i><span>Groups</span></a><a href="statistics.html" class="nav-item"><i class="bi bi-bar-chart nav-icon"></i><span>Statistics</span></a><a href="#" class="nav-item" id="dark-mode-toggle"><i class="bi bi-moon-stars nav-icon" id="dark-mode-icon"></i><span id="dark-mode-text">Dark Mode</span></a></div><button type="button" class="btn btn-primary logout-btn" id="logout-btn-trigger">Logout</button><div class="account-card mt-auto" role="button"><div class="avatar avatar-purple" id="nav-user-avatar">US</div><div><span class="name" id="nav-user-name">User Name</span><span class="handle" id="nav-user-handle">@username</span></div></div></nav>
-<main class="groups-main"><div class="groups-top"><div><h2>Groups</h2><p>Find communities or create your own.</p></div><button id="open-create-group" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Create Group</button></div><div class="groups-filters"><input id="group-search" type="search" placeholder="Search groups"><select id="group-category"><option value="">All categories</option><option>Technology</option><option>Sports</option><option>Music</option><option>Education</option><option>Gaming</option><option>Travel</option><option>Other</option></select></div><div id="groups-grid" class="groups-grid"></div><div id="groups-empty" class="groups-empty" hidden><i class="bi bi-people"></i><h3>No groups found</h3><p>Try changing the filters or create a new group.</p></div><button id="load-more-groups" class="btn btn-secondary load-more-groups" hidden>Load More</button></main></div>
-<div id="create-group-modal" class="modal-overlay"><div class="modal-content group-form-modal"><div class="modal-header"><h3>Create Group</h3><button id="close-create-group" class="close-modal-btn">&times;</button></div><form id="create-group-form"><div class="modal-body"><label class="input-label">Name *</label><input id="create-group-name" class="group-input" maxlength="80" required><label class="input-label">Description</label><textarea id="create-group-description" class="group-input" maxlength="500" rows="3"></textarea><label class="input-label">Category</label><select id="create-group-category" class="group-input"><option value="">Choose category</option><option>Technology</option><option>Sports</option><option>Music</option><option>Education</option><option>Gaming</option><option>Travel</option><option>Other</option></select><label class="input-label">Image URL or Base64</label><input id="create-group-image" class="group-input"><label class="group-check"><input type="checkbox" id="create-group-public" checked> Public group</label><p id="create-group-error" class="group-error"></p></div><div class="modal-footer"><button type="button" id="cancel-create-group" class="btn btn-secondary">Cancel</button><button type="submit" class="btn btn-primary">Create</button></div></form></div></div>
-<script src="js/global.js"></script><script src="js/groupsManager.js"></script></body></html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Groups</title>
+
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/modals.css">
+    <link rel="stylesheet" href="css/avatars.css">
+    <link rel="stylesheet" href="css/groupsStyle.css">
+</head>
+
+<body>
+    <div class="app-layout">
+        <nav class="side-nav">
+            <header>
+                <h1>~Name~</h1>
+            </header>
+
+            <div class="nav-links mt-4">
+                <a href="feed.html" class="nav-item">
+                    <i class="bi bi-house-door nav-icon"></i><span>Feed</span>
+                </a>
+                <a href="profile.html" class="nav-item">
+                    <i class="bi bi-person nav-icon"></i><span>Profile</span>
+                </a>
+                <a href="groups.html" class="nav-item active">
+                    <i class="bi bi-people-fill nav-icon"></i><span>Groups</span>
+                </a>
+                <a href="statistics.html" class="nav-item">
+                    <i class="bi bi-bar-chart nav-icon"></i><span>Statistics</span>
+                </a>
+                <a href="#" class="nav-item" id="dark-mode-toggle">
+                    <i class="bi bi-moon-stars nav-icon" id="dark-mode-icon"></i><span id="dark-mode-text">Dark Mode</span>
+                </a>
+            </div>
+
+            <button type="button" class="btn btn-primary logout-btn" id="logout-btn-trigger">Logout</button>
+
+            <div class="account-card mt-auto" role="button">
+                <div class="avatar avatar-purple" id="nav-user-avatar">US</div>
+                <div>
+                    <span class="name" id="nav-user-name">User Name</span>
+                    <span class="handle" id="nav-user-handle">@username</span>
+                </div>
+            </div>
+        </nav>
+
+        <main class="groups-main">
+            <div class="groups-top">
+                <div>
+                    <h2>Groups</h2>
+                    <p>Find communities or create your own.</p>
+                </div>
+                <button id="open-create-group" class="btn btn-primary">
+                    <i class="bi bi-plus-lg"></i> Create Group
+                </button>
+            </div>
+
+            <div class="groups-filters">
+                <input id="group-search" type="search" placeholder="Search groups">
+
+                <select id="group-category">
+                    <option value="">All categories</option>
+                    <option>Technology</option>
+                    <option>Sports</option>
+                    <option>Music</option>
+                    <option>Education</option>
+                    <option>Gaming</option>
+                    <option>Travel</option>
+                    <option>Other</option>
+                </select>
+            </div>
+
+            <div id="groups-grid" class="groups-grid"></div>
+
+            <div id="groups-empty" class="groups-empty" hidden>
+                <i class="bi bi-people"></i>
+                <h3>No groups found</h3>
+                <p>Try changing the filters or create a new group.</p>
+            </div>
+
+            <button id="load-more-groups" class="btn btn-secondary load-more-groups" hidden>Load More</button>
+        </main>
+    </div>
+
+    <div id="create-group-modal" class="modal-overlay">
+        <div class="modal-content group-form-modal">
+            <div class="modal-header">
+                <h3>Create Group</h3>
+                <button id="close-create-group" class="close-modal-btn">&times;</button>
+            </div>
+
+            <form id="create-group-form">
+                <div class="modal-body">
+                    <label class="input-label">Name *</label>
+                    <input id="create-group-name" class="group-input" maxlength="80" required>
+
+                    <label class="input-label">Description</label>
+                    <textarea id="create-group-description" class="group-input" maxlength="500" rows="3"></textarea>
+
+                    <label class="input-label">Category</label>
+                    <select id="create-group-category" class="group-input">
+                        <option value="">Choose category</option>
+                        <option>Technology</option>
+                        <option>Sports</option>
+                        <option>Music</option>
+                        <option>Education</option>
+                        <option>Gaming</option>
+                        <option>Travel</option>
+                        <option>Other</option>
+                    </select>
+
+                    <label class="input-label">Image URL or Base64</label>
+                    <input id="create-group-image" class="group-input">
+
+                    <label class="group-check">
+                        <input type="checkbox" id="create-group-public" checked> Public group
+                    </label>
+
+                    <p id="create-group-error" class="group-error"></p>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" id="cancel-create-group" class="btn btn-secondary">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Create</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/global.js"></script>
+    <script src="js/groupsManager.js"></script>
+</body>
+</html>
