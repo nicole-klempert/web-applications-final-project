@@ -239,3 +239,5 @@
         border-radius: 6px;
     }
 
+
+.post-target-group{margin-bottom:12px}.post-target-group select{width:100%;padding:10px;border:1px solid var(--border-color);border-radius:6px;background:var(--card-bg);color:var(--text-main)}

@@ -10,6 +10,9 @@ import postRoutes from './routes/postRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import newsRoutes from './routes/newsRoutes.js';
 import searchRoutes from './routes/searchRoutes.js';
+import groupRoutes from './routes/groupRouts.js';
+import statisticsRoutes from './routes/statisticsRoutes.js';
+import mapRoutes from './routes/mapRoutes.js';
 import connectDB from './config/db.js';
 
 // load environment variables
@@ -77,6 +80,15 @@ app.use('/users', userRoutes);
 
 // mount search routes
 app.use('/api/search', searchRoutes);
+
+// mount group routes
+app.use('/groups', groupRoutes);
+
+// mount statistics routes
+app.use('/statistics', statisticsRoutes);
+
+// mount map routes
+app.use('/map', mapRoutes);
 
 // mount external news routes
 app.use('/api/news', newsRoutes);

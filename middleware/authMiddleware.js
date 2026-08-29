@@ -1,4 +1,5 @@
 import Post from '../models/postModel.js';
+import Group from '../models/groupModel.js';
 
 /**
  * middleware to check if the user is authenticated.
@@ -51,9 +52,63 @@ export const isPostOwner = async (req, res, next) => {
     }
 };
 
+export const canDeletePost = async (req, res, next) => {
+    try {
+        const post = await Post.findById(req.params.postId);
+        if (!post) return res.status(404).json({ success: false, error: 'Post not found.' });
+        if ((post.author || '').toLowerCase() === (req.session.user.username || '').toLowerCase()) {
+            req.post = post;
+            return next();
+        }
+        if (post.group) {
+            const group = await Group.findById(post.group);
+            const userId = req.session.user.id;
+            if (group && (String(group.owner) === String(userId) || (group.admins || []).some(id => String(id) === String(userId)))) {
+                req.post = post;
+                return next();
+            }
+        }
+        return res.status(403).json({ success: false, error: '403 Forbidden: You are not authorized to delete this post.' });
+    } catch (error) {
+        console.error('Error in post delete authorization:', error);
+        return res.status(500).json({ success: false, error: 'Internal server authorization error.' });
+    }
+};
+
+const loadGroup = async (req, res) => {
+    const group = await Group.findById(req.params.groupId);
+    if (!group) {
+        res.status(404).json({ success: false, error: 'Group not found' });
+        return null;
+    }
+    return group;
+};
+
+export const isGroupAdmin = async (req, res, next) => {
+    try {
+        const group = await loadGroup(req, res);
+        if (!group) return;
+        const userId = req.session.user.id;
+        const isAllowed = String(group.owner) === String(userId) || (group.admins || []).some(id => String(id) === String(userId));
+        if (!isAllowed) return res.status(403).json({ success: false, error: 'Only the group owner or an admin can perform this action' });
+        req.group = group;
+        next();
+    } catch (error) {
+        return res.status(500).json({ success: false, error: 'Group authorization failed' });
+    }
+};
+
 /**
  * placeholder for group owner middleware (will be fully implemented when Group model is done).
  */
-export const isGroupOwner = (req, res, next) => {
-    next();
+export const isGroupOwner = async (req, res, next) => {
+    try {
+        const group = await loadGroup(req, res);
+        if (!group) return;
+        if (String(group.owner) !== String(req.session.user.id)) return res.status(403).json({ success: false, error: 'Only the group owner can perform this action' });
+        req.group = group;
+        next();
+    } catch (error) {
+        return res.status(500).json({ success: false, error: 'Group authorization failed' });
+    }
 };

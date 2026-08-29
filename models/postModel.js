@@ -43,9 +43,17 @@ const postSchema = new Schema({
     },
     // group id or name for future group filtering (optional)
     group: {
-        type: String,
-        default: "",
+        type: Schema.Types.ObjectId,
+        ref: 'Group',
+        default: null,
         index: true // idnex for future group filtering
+    },
+    // optional location selected when publishing a post
+    location: {
+        name: { type: String, default: "", trim: true },
+        address: { type: String, default: "", trim: true },
+        latitude: { type: Number, default: null, min: -90, max: 90 },
+        longitude: { type: Number, default: null, min: -180, max: 180 }
     },
     // post content - either text or media (image/video)
     content: {
