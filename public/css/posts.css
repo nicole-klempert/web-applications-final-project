@@ -1,4 +1,4 @@
-﻿/* === Post Cards Structure & Animations === */
+/* === Post Cards Structure & Animations === */
 .post-card {
     background-color: var(--card-bg);
     border: 1px solid var(--border-color);
@@ -327,5 +327,12 @@
 .reply-btn:hover {
     background-color: var(--btn-primary-hover);
 }
+.post-group-link {
+    color: var(--btn-primary);
+    text-decoration: none;
+    font-weight: 600;
+}
 
-.post-group-link{color:var(--btn-primary);text-decoration:none;font-weight:600}.post-group-link:hover{text-decoration:underline}
+    .post-group-link:hover {
+        text-decoration: underline;
+    }
