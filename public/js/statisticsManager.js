@@ -70,47 +70,53 @@ document.addEventListener("DOMContentLoaded", async () => {
             .on("mouseleave", () => tooltip.style("display", "none"));
     };
 
-    try {
-        const response = await fetch("/statistics/friends-by-city", {
-            headers: { Accept: "application/json" }
-        });
-        const result = await response.json();
-
-        if (!response.ok) throw new Error(result.error || "Could not load friend statistics");
-
-        draw("#friends-chart", result.data || [], "friends-empty");
-    } catch (error) {
-        console.error("Friend statistics load failed:", error);
-        document.getElementById("friends-empty").hidden = false;
-    }
-
     const groupId = new URLSearchParams(window.location.search).get("groupId");
-    if (!groupId) return;
 
-    const card = document.getElementById("group-statistics-card");
-    const errorBox = document.getElementById("group-statistics-error");
+    if (groupId) {
+        // Group Statistics Mode: Hide friends statistics card
+        const friendsCard = document.getElementById("friends-statistics-card");
+        if (friendsCard) friendsCard.hidden = true;
 
-    try {
-        const response = await fetch(
-            `/statistics/groups/${encodeURIComponent(groupId)}/members-by-city`,
-            { headers: { Accept: "application/json" } }
-        );
-        const result = await response.json();
+        const card = document.getElementById("group-statistics-card");
+        const errorBox = document.getElementById("group-statistics-error");
 
-        if (!response.ok) {
-            errorBox.textContent = result.error || "You are not allowed to view these group statistics.";
+        try {
+            const response = await fetch(
+                `/statistics/groups/${encodeURIComponent(groupId)}/members-by-city`,
+                { headers: { Accept: "application/json" } }
+            );
+            const result = await response.json();
+
+            if (!response.ok) {
+                errorBox.textContent = result.error || "You are not allowed to view these group statistics.";
+                errorBox.hidden = false;
+                return;
+            }
+
+            card.hidden = false;
+            document.getElementById("group-statistics-title").textContent =
+                `${result.groupName} - Member Location Distribution`;
+
+            draw("#group-chart", result.data || [], "group-empty");
+        } catch (error) {
+            console.error("Group statistics load failed:", error);
+            errorBox.textContent = "Could not load group statistics.";
             errorBox.hidden = false;
-            return;
         }
+    } else {
+        // Friends Statistics Mode: Load friends statistics card
+        try {
+            const response = await fetch("/statistics/friends-by-city", {
+                headers: { Accept: "application/json" }
+            });
+            const result = await response.json();
 
-        card.hidden = false;
-        document.getElementById("group-statistics-title").textContent =
-            `${result.groupName} - Member Location Distribution`;
+            if (!response.ok) throw new Error(result.error || "Could not load friend statistics");
 
-        draw("#group-chart", result.data || [], "group-empty");
-    } catch (error) {
-        console.error("Group statistics load failed:", error);
-        errorBox.textContent = "Could not load group statistics.";
-        errorBox.hidden = false;
+            draw("#friends-chart", result.data || [], "friends-empty");
+        } catch (error) {
+            console.error("Friend statistics load failed:", error);
+            document.getElementById("friends-empty").hidden = false;
+        }
     }
 });

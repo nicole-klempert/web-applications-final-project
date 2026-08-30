@@ -9,6 +9,7 @@ const groupSchema=new mongoose.Schema({
     owner:{type:mongoose.Schema.Types.ObjectId,ref:'User',required:true},
     admins:[{type:mongoose.Schema.Types.ObjectId,ref:'User'}],
     members:[{type:mongoose.Schema.Types.ObjectId,ref:'User'}],
+    joinRequests:[{type:mongoose.Schema.Types.ObjectId,ref:'User'}],
     isPublic:{type:Boolean,default:true}
 },{timestamps:true});
 const idOf=value=>value?String(value._id||value):'';

@@ -27,9 +27,16 @@ document.addEventListener("DOMContentLoaded", () => {
             ? '<span class="group-public-badge">Public</span>' 
             : '<span class="group-public-badge">Private</span>';
             
-        const actionButtonHTML = group.isOwner 
-            ? '' 
-            : `<button class="btn btn-secondary membership-btn" data-id="${group._id}" data-member="${group.isMember}">${group.isMember ? 'Leave' : 'Join'}</button>`;
+        let actionButtonHTML = '';
+        if (!group.isOwner) {
+            if (group.isMember) {
+                actionButtonHTML = `<button class="btn btn-secondary membership-btn" data-id="${group._id}" data-member="true">Leave</button>`;
+            } else if (group.isRequested) {
+                actionButtonHTML = `<button class="btn btn-secondary" disabled>Requested</button>`;
+            } else {
+                actionButtonHTML = `<button class="btn btn-secondary membership-btn" data-id="${group._id}" data-member="false">Join</button>`;
+            }
+        }
 
         return `
             <article class="group-card">

@@ -17,6 +17,7 @@ const toClient = (group, currentUserId) => {
     const ownerId = group.owner?._id || group.owner;
     const adminIds = (group.admins || []).map(value => value?._id || value);
     const memberIds = (group.members || []).map(value => value?._id || value);
+    const requestIds = (group.joinRequests || []).map(value => value?._id || value);
 
     return {
         _id: group._id,
@@ -30,17 +31,20 @@ const toClient = (group, currentUserId) => {
         owner: safeUser(group.owner),
         admins: (group.admins || []).map(safeUser).filter(Boolean),
         members: (group.members || []).map(safeUser).filter(Boolean),
+        joinRequests: (group.joinRequests || []).map(safeUser).filter(Boolean),
         memberCount: memberIds.length,
         isOwner: sameId(ownerId, currentUserId),
         isAdmin: adminIds.some(id => sameId(id, currentUserId)),
-        isMember: memberIds.some(id => sameId(id, currentUserId))
+        isMember: memberIds.some(id => sameId(id, currentUserId)),
+        isRequested: requestIds.some(id => sameId(id, currentUserId))
     };
 };
 
 const populatedGroup = id => Group.findById(id)
     .populate('owner')
     .populate('admins')
-    .populate('members');
+    .populate('members')
+    .populate('joinRequests');
 
 // get groups with filters and pagination
 export const getGroups = async (req, res, next) => {
@@ -49,26 +53,19 @@ export const getGroups = async (req, res, next) => {
         const limit = Math.min(Math.max(parseInt(req.query.limit) || 6, 1), 50);
         const skip = (page - 1) * limit;
 
-        const query = {
-            $and: [{
-                $or: [
-                    { isPublic: { $ne: false } },
-                    { members: req.session.user.id }
-                ]
-            }]
-        };
+        const query = {};
 
         if (req.query.search?.trim()) {
             const regex = new RegExp(req.query.search.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
-            query.$and.push({ $or: [{ name: regex }, { description: regex }] });
+            query.$or = [{ name: regex }, { description: regex }];
         }
 
         if (req.query.category?.trim()) {
-            query.$and.push({ category: req.query.category.trim() });
+            query.category = req.query.category.trim();
         }
 
         if (req.query.publicOnly === 'true') {
-            query.$and.push({ isPublic: { $ne: false } });
+            query.isPublic = { $ne: false };
         }
 
         const totalGroups = await Group.countDocuments(query);
@@ -170,14 +167,25 @@ export const joinGroup = async (req, res, next) => {
 
         if (!group) return res.status(404).json({ success: false, error: 'Group not found' });
 
-        if (!group.members.some(member => sameId(member, userId))) {
-            group.members.push(userId);
+        if (group.isPublic !== false) {
+            // Public group: join immediately
+            if (!group.members.some(member => sameId(member, userId))) {
+                group.members.push(userId);
+            }
+            await group.save();
+            await User.findByIdAndUpdate(userId, { $addToSet: { joinedGroups: group._id } });
+            return res.json({ success: true, status: 'joined' });
+        } else {
+            // Private group: add to request list
+            if (group.members.some(member => sameId(member, userId))) {
+                return res.status(400).json({ success: false, error: 'You are already a member of this group' });
+            }
+            if (!group.joinRequests.some(reqId => sameId(reqId, userId))) {
+                group.joinRequests.push(userId);
+            }
+            await group.save();
+            return res.json({ success: true, status: 'requested' });
         }
-
-        await group.save();
-        await User.findByIdAndUpdate(userId, { $addToSet: { joinedGroups: group._id } });
-
-        res.json({ success: true });
     } catch (error) {
         next(error);
     }
@@ -350,6 +358,44 @@ export const deleteGroup = async (req, res, next) => {
         await Group.deleteOne({ _id: groupId });
 
         res.json({ success: true, deletedPosts: deletedPosts.deletedCount });
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const approveRequest = async (req, res, next) => {
+    try {
+        const group = req.group;
+        const { userId } = req.params;
+
+        // remove from joinRequests if present
+        group.joinRequests = (group.joinRequests || []).filter(id => String(id._id || id) !== String(userId));
+
+        // add to members if not present
+        if (!group.members.some(id => String(id._id || id) === String(userId))) {
+            group.members.push(userId);
+        }
+
+        await group.save();
+        await User.findByIdAndUpdate(userId, { $addToSet: { joinedGroups: group._id } });
+
+        res.json({ success: true });
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const rejectRequest = async (req, res, next) => {
+    try {
+        const group = req.group;
+        const { userId } = req.params;
+
+        // remove from joinRequests
+        group.joinRequests = (group.joinRequests || []).filter(id => String(id._id || id) !== String(userId));
+
+        await group.save();
+
+        res.json({ success: true });
     } catch (error) {
         next(error);
     }

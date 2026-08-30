@@ -88,7 +88,16 @@ document.addEventListener("DOMContentLoaded", () => {
         // Membership actions
         const membership = document.getElementById("membership-btn");
         membership.hidden = group.isOwner;
-        membership.textContent = group.isMember ? "Leave Group" : "Join Group";
+        if (group.isMember) {
+            membership.textContent = "Leave Group";
+            membership.disabled = false;
+        } else if (group.isRequested) {
+            membership.textContent = "Requested";
+            membership.disabled = true;
+        } else {
+            membership.textContent = "Join Group";
+            membership.disabled = false;
+        }
 
         // Admin panel toggle visibility
         document.getElementById("edit-group-btn").hidden = !isManager();
@@ -96,6 +105,23 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("delete-group-btn").hidden = !isManager();
         document.getElementById("group-composer").hidden = !group.isMember;
         document.getElementById("admin-panel").hidden = !group.isOwner;
+
+        // Render Join Requests panel if manager
+        const requestsPanel = document.getElementById("join-requests-panel");
+        if (isManager() && group.isPrivateContentHidden !== true && group.joinRequests && group.joinRequests.length > 0) {
+            requestsPanel.hidden = false;
+            document.getElementById("group-join-requests").innerHTML = group.joinRequests.map(req => `
+                <div class="group-member">
+                    <span>${req.username}</span>
+                    <div class="request-actions">
+                        <button class="mini-btn accept-request-btn" data-userid="${req._id}">Approve</button>
+                        <button class="mini-btn reject-request-btn" data-userid="${req._id}">Reject</button>
+                    </div>
+                </div>
+            `).join("");
+        } else {
+            requestsPanel.hidden = true;
+        }
 
         // Render member cards
         document.getElementById("group-members").innerHTML = (group.members || []).map(member => {
@@ -123,6 +149,16 @@ document.addEventListener("DOMContentLoaded", () => {
      */
     const loadPosts = async () => {
         const container = document.getElementById("group-posts");
+        if (group.isPrivateContentHidden) {
+            container.innerHTML = `
+                <div class="private-group-notice">
+                    <i class="bi bi-lock"></i>
+                    <h3>This Group is Private</h3>
+                    <p>Join the group to see its posts and members.</p>
+                </div>`;
+            return;
+        }
+
         const res = await fetch(`/posts?group=${encodeURIComponent(group.name)}&limit=50`, {
             headers: { Accept: "application/json" }
         });
@@ -168,7 +204,12 @@ document.addEventListener("DOMContentLoaded", () => {
         const data = await res.json();
 
         if (!res.ok) return alert(data.error || "Action failed");
-        await loadGroup();
+        
+        if (action === "leave") {
+            window.location.href = "groups.html";
+        } else {
+            await loadGroup();
+        }
     };
 
     // Publish post to group handler
@@ -317,6 +358,32 @@ document.addEventListener("DOMContentLoaded", () => {
         const deletePost = e.target.closest(".delete-post-btn");
         const like = e.target.closest(".like-btn");
         const commentBtn = e.target.closest(".comment-submit-btn");
+        const acceptReq = e.target.closest(".accept-request-btn");
+        const rejectReq = e.target.closest(".reject-request-btn");
+
+        if (acceptReq) {
+            const userId = acceptReq.dataset.userid;
+            const res = await fetch(`/groups/${groupId}/requests/${userId}/approve`, {
+                method: "POST",
+                headers: { Accept: "application/json" }
+            });
+            const data = await res.json();
+            if (!res.ok) return alert(data.error || "Could not approve request");
+            await loadGroup();
+            return;
+        }
+
+        if (rejectReq) {
+            const userId = rejectReq.dataset.userid;
+            const res = await fetch(`/groups/${groupId}/requests/${userId}/reject`, {
+                method: "POST",
+                headers: { Accept: "application/json" }
+            });
+            const data = await res.json();
+            if (!res.ok) return alert(data.error || "Could not reject request");
+            await loadGroup();
+            return;
+        }
 
         if (removeMember) {
             if (!confirm("Remove this member?")) return;
