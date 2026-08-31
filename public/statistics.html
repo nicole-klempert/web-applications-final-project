@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="utf-8">
-    <title>Statistics</title>
+    <title>The Watchers Network</title>
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="css/variables.css">
@@ -12,11 +13,12 @@
     <link rel="stylesheet" href="css/avatars.css">
     <link rel="stylesheet" href="css/statistics.css">
 </head>
+
 <body>
     <div class="app-layout">
         <nav class="side-nav">
             <header>
-                <h1>~Name~</h1>
+                <h1>The Watchers</h1>
             </header>
             <div class="nav-links mt-4">
                 <a href="feed.html" class="nav-item">
@@ -52,7 +54,7 @@
         <main class="statistics-main">
             <h2>Statistics</h2>
             <p class="statistics-intro">Live data from MongoDB using aggregation queries.</p>
-            <section class="chart-card">
+            <section id="friends-statistics-card" class="chart-card">
                 <h3>Friends Location Distribution</h3>
                 <p>City of residence of your friends based on their profile.</p>
                 <div id="friends-chart" class="chart"></div>
@@ -71,4 +73,5 @@
     <script src="js/global.js"></script>
     <script src="js/statisticsManager.js"></script>
 </body>
+
 </html>

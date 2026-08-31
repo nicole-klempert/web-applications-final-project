@@ -336,3 +336,21 @@
     .post-group-link:hover {
         text-decoration: underline;
     }
+
+.private-group-notice {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-muted);
+}
+
+.private-group-notice i {
+    font-size: 3rem;
+    margin-bottom: 12px;
+    display: block;
+    color: var(--btn-primary);
+}
+
+.private-group-notice h3 {
+    margin-bottom: 8px;
+    color: var(--text-main);
+}
