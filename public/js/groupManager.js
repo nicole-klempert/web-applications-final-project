@@ -69,8 +69,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // Group Header Image
         const image = document.getElementById("group-image");
-        image.innerHTML = group.image 
-            ? `<img src="${group.image}" alt="${group.name}">` 
+        image.innerHTML = group.image
+            ? `<img src="${group.image}" alt="${group.name}">`
             : '<i class="bi bi-people-fill"></i>';
 
         // Set text properties
@@ -163,14 +163,14 @@ document.addEventListener("DOMContentLoaded", () => {
             headers: { Accept: "application/json" }
         });
         const data = await res.json();
-        
+
         if (!data.success) return;
 
-        container.innerHTML = data.posts.length 
-            ? data.posts.map(post => window.createPostCardHTML 
-                ? window.createPostCardHTML(post) 
+        container.innerHTML = data.posts.length
+            ? data.posts.map(post => window.createPostCardHTML
+                ? window.createPostCardHTML(post)
                 : `<article class="post-card" data-post-id="${post._id}"><strong>${post.author}</strong><p>${post.content || ""}</p></article>`
-              ).join("") 
+            ).join("")
             : '<p class="group-empty">No posts in this group yet.</p>';
 
         // Inject deletion controls for manager roles
@@ -189,6 +189,8 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     };
 
+    window.reloadPostsFeed = loadPosts;
+
     // Navigation statistics page
     document.getElementById("group-statistics-btn").onclick = () => {
         window.location.href = `statistics.html?groupId=${encodeURIComponent(groupId)}`;
@@ -204,7 +206,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const data = await res.json();
 
         if (!res.ok) return alert(data.error || "Action failed");
-        
+
         if (action === "leave") {
             window.location.href = "groups.html";
         } else {
@@ -315,7 +317,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Delete group handler
     document.getElementById("delete-group-btn").onclick = async () => {
         if (!confirm(`Delete ${group.name}? All group posts will also be deleted.`)) return;
-        
+
         const res = await fetch(`/groups/${groupId}`, {
             method: "DELETE",
             headers: { Accept: "application/json" }
@@ -330,7 +332,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("add-admin-btn").onclick = async () => {
         const input = document.getElementById("admin-username");
         const error = document.getElementById("admin-error");
-        
+
         const res = await fetch(`/groups/${groupId}/admins`, {
             method: "POST",
             headers: {

@@ -517,7 +517,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if (textarea) textarea.value = postCard.querySelector(".post-text")?.innerText || "";
             const existingLocation = window.postLocationById?.get(String(postCard.dataset.postId)) || null;
             editPostLocation = existingLocation;
-            editLocationPicker?.setLocation(existingLocation);
+            getEditLocationPicker()?.setLocation(existingLocation);
             const editLocationPanel = document.getElementById("edit-modal-location-panel");
             if (editLocationPanel) editLocationPanel.hidden = true;
 
@@ -549,22 +549,29 @@ document.addEventListener("DOMContentLoaded", () => {
     const editImgPreview = document.getElementById("edit-modal-media-preview");
     const editVideoPreview = document.getElementById("edit-modal-video-preview");
     let editPostLocation = null;
-    const editLocationPicker = window.PostLocationPicker?.createPicker({
-        buttonId: "edit-modal-location-btn",
-        panelId: "edit-modal-location-panel",
-        mapId: "edit-modal-location-map",
-        searchInputId: "edit-modal-location-search",
-        searchButtonId: "edit-modal-location-search-btn",
-        clearButtonId: "edit-modal-location-clear",
-        labelId: "edit-modal-location-selected",
-        onChange: location => { editPostLocation = location; }
-    });
+    let editLocationPicker = null;
+
+    const getEditLocationPicker = () => {
+        if (!editLocationPicker && window.PostLocationPicker) {
+            editLocationPicker = window.PostLocationPicker.createPicker({
+                buttonId: "edit-modal-location-btn",
+                panelId: "edit-modal-location-panel",
+                mapId: "edit-modal-location-map",
+                searchInputId: "edit-modal-location-search",
+                searchButtonId: "edit-modal-location-search-btn",
+                clearButtonId: "edit-modal-location-clear",
+                labelId: "edit-modal-location-selected",
+                onChange: location => { editPostLocation = location; }
+            });
+        }
+        return editLocationPicker;
+    };
 
     const closeEditPostModal = () => {
         document.getElementById("edit-modal-overlay")?.classList.remove("active");
         if (editMediaInput) editMediaInput.value = "";
         if (editPreviewContainer) editPreviewContainer.style.display = "none";
-        editLocationPicker?.clear();
+        getEditLocationPicker()?.clear();
         editPostLocation = null;
         const editLocationPanel = document.getElementById("edit-modal-location-panel");
         if (editLocationPanel) editLocationPanel.hidden = true;
