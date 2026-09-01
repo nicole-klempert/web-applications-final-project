@@ -541,12 +541,14 @@ document.addEventListener("DOMContentLoaded", () => {
         const fromVal = searchJoinedFromInput ? searchJoinedFromInput.value : "";
         const toVal = searchJoinedToInput ? searchJoinedToInput.value : "";
 
+        // Validate that the "Joined From" date is not later than the "Joined To" date
         if (fromVal && toVal && new Date(fromVal) > new Date(toVal)) {
             alert("Joined From date cannot be later than Joined To date.");
             if (searchJoinedToInput) searchJoinedToInput.value = "";
             return;
         }
 
+        // Construct query parameters for the API request
         const params = new URLSearchParams({
             username: usernameVal,
             joinedFrom: fromVal,
@@ -554,20 +556,27 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         try {
+            // Fetch search results from the server
             const res = await fetch(`/users/search?${params}`);
             const data = await res.json();
+
+            // Render results if the request was successful
             if (data.success) {
                 displaySearchResults(data.users || []);
             } else {
                 searchResultsContainer.innerHTML = `<div class="text-center text-muted p-2 small">Error loading results.</div>`;
             }
         } catch (err) {
+            // Handle network or parsing errors
             console.error("User search error:", err);
             searchResultsContainer.innerHTML = `<div class="text-center text-muted p-2 small">Error connecting to server.</div>`;
         }
     };
 
+    // Trigger search when the search button is clicked
     searchBtn?.addEventListener("click", fetchSearchResults);
+
+    // Clear all search inputs and empty the results container on reset
     resetSearchBtn?.addEventListener("click", () => {
         if (searchUsernameInput) searchUsernameInput.value = "";
         if (searchEmailInput) searchEmailInput.value = "";
@@ -576,14 +585,19 @@ document.addEventListener("DOMContentLoaded", () => {
         if (searchResultsContainer) searchResultsContainer.innerHTML = "";
     });
 
+    // Implement debounce mechanism to prevent excessive API calls while typing 
     let debounceTimeout = null;
     const handleSearchInput = () => {
         clearTimeout(debounceTimeout);
+        // wait for 300ms of inactivity before triggering the search
         debounceTimeout = setTimeout(fetchSearchResults, 300);
     };
 
+    // attach debounced search to text input fields
     searchUsernameInput?.addEventListener("input", handleSearchInput);
     searchEmailInput?.addEventListener("input", handleSearchInput);
+
+    // Trigger search immediately when date filters are changed
     searchJoinedFromInput?.addEventListener("change", fetchSearchResults);
     searchJoinedToInput?.addEventListener("change", fetchSearchResults);
 
