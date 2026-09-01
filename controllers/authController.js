@@ -63,7 +63,7 @@ export const signup = async (req, res) => {
 
         // create and save new user (virtual fields trigger encryption automatically)
         const newUser = new User({
-            username,
+            username: username.trim().toLowerCase(),
             email,
             password,
             birthday,
