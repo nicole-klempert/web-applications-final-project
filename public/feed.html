@@ -156,24 +156,41 @@
                 <h3>Create a Post</h3>
                 <button id="close-modal-btn" class="close-modal-btn">&times;</button>
             </div>
+
             <div class="modal-body">
-                <div class="input-group post-target-group"><label for="post-target-select" class="input-label">Post to</label><select id="post-target-select" class="modal-input-box"><option value="">My Feed</option></select></div>
+                <div class="input-group post-target-group">
+                    <label for="post-target-select" class="input-label">Post to</label>
+                    <select id="post-target-select" class="modal-input-box">
+                        <option value="">My Feed</option>
+                    </select>
+                </div>
+
                 <textarea id="modal-textarea" class="modal-textarea-custom" placeholder="What's on your mind?" rows="4"></textarea>
-                <button type="button" id="modal-location-btn" class="media-trigger-btn location-picker-toggle"><i class="bi bi-geo-alt"></i> Add Location</button>
+
                 <div id="modal-location-panel" class="location-picker-panel" hidden>
-                    <div class="location-search-row"><input id="modal-location-search" class="modal-input-box" type="search" placeholder="Search an address or place"><button type="button" id="modal-location-search-btn" class="btn btn-secondary">Search</button></div>
+                    <div class="location-search-row">
+                        <input id="modal-location-search" class="modal-input-box" type="search" placeholder="Search an address or place">
+                        <button type="button" id="modal-location-search-btn" class="btn btn-secondary">Search</button>
+                    </div>
+
                     <div id="modal-location-map" class="location-picker-map"></div>
-                    <div class="location-selected-row"><span id="modal-location-selected" class="location-selected-text">No location selected</span><button type="button" id="modal-location-clear" class="btn btn-secondary" hidden>Clear</button></div>
+
+                    <div class="location-selected-row">
+                        <span id="modal-location-selected" class="location-selected-text">No location selected</span>
+                        <button type="button" id="modal-location-clear" class="btn btn-secondary" hidden>Clear</button>
+                    </div>
                 </div>
 
                 <!-- media preview area -->
                 <input type="file" id="modal-media-upload" accept="image/*,video/*" style="display: none;">
+
                 <div id="modal-media-preview-container" class="modal-media-preview-container" style="display: none;">
                     <img id="modal-media-preview" class="modal-preview-media" src="" style="display: none;">
                     <video id="modal-video-preview" class="modal-preview-media" controls style="display: none;"></video>
                     <button id="modal-clear-media" class="clear-media-btn">&times;</button>
                 </div>
             </div>
+
             <div class="modal-footer">
                 <!-- Grouping buttons together on the left -->
                 <div class="modal-action-group">
@@ -181,10 +198,16 @@
                     <button type="button" class="fb-toggle-btn mb-0" id="share-facebook-btn">
                         <i class="bi bi-facebook"></i> Share
                     </button>
+
+                    <button type="button" id="modal-location-btn" class="media-trigger-btn location-picker-toggle">
+                        <i class="bi bi-geo-alt"></i> Add Location
+                    </button>
+
                     <button id="modal-image-btn" class="media-trigger-btn">
                         <i class="bi bi-image"></i> Add Media
                     </button>
                 </div>
+
                 <button id="modal-publish-btn" class="publish-btn" disabled>Post</button>
             </div>
         </div>
@@ -199,7 +222,6 @@
     <script src="js/newsApi.js"></script>
     <script src="js/filters.js"></script>
     <script src="js/postsManager.js"></script>
-
 </body>
 
 </html>

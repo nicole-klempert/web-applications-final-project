@@ -1,7 +1,7 @@
 .group-main {
-    margin-left: var(--sidebar-width, 260px);
-    padding: 30px;
-    width: min(100%, 1100px);
+    flex: 1;
+    padding: 40px;
+    min-width: 0;
     min-height: 100vh;
 }
 
@@ -183,3 +183,76 @@
         grid-template-columns: 1fr;
     }
 }
+
+/* join requests */
+.pending-request-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    background: var(--bg-hover-light);
+    padding: 8px;
+    border-radius: 8px;
+}
+
+.friend-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.friend-name-link {
+    color: var(--text-main);
+    font-weight: 600;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+    .friend-name-link:hover {
+        color: var(--btn-primary);
+    }
+
+.admin-search-box {
+    margin-bottom: 10px;
+}
+
+.admin-search-result {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    cursor: default;
+}
+
+.admin-search-user {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--text-main);
+    text-decoration: none;
+    min-width: 0;
+}
+
+    .admin-search-user:hover .name {
+        color: var(--btn-primary);
+    }
+
+.group-remove-member-btn {
+    position: static;
+    top: auto;
+    right: auto;
+}
+
+.remove-admin {
+    background: #e93446;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-weight: 600;
+}
+
+    .remove-admin:hover {
+        background: #d92d3f;
+        color: white;
+    }

@@ -2,12 +2,13 @@
 document.addEventListener("DOMContentLoaded", () => {
     const grid = document.getElementById("groups-grid");
     const empty = document.getElementById("groups-empty");
-    const loadMore = document.getElementById("load-more-groups");
+    const sentinel = document.getElementById("groups-scroll-sentinel");
     const modal = document.getElementById("create-group-modal");
     const form = document.getElementById("create-group-form");
 
     let page = 1;
     let loading = false;
+    let hasMore = true;
 
     // Build search query params
     const params = () => new URLSearchParams({
@@ -19,14 +20,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Template for rendering a group card
     const card = group => {
-        const imgHTML = group.image 
-            ? `<img class="group-card-image" src="${group.image}" alt="${group.name}">` 
+        const imgHTML = group.image
+            ? `<img class="group-card-image" src="${group.image}" alt="${group.name}">`
             : `<div class="group-card-image group-card-placeholder"><i class="bi bi-people-fill"></i></div>`;
-        
-        const badgeHTML = group.isPublic 
-            ? '<span class="group-public-badge">Public</span>' 
+
+        const badgeHTML = group.isPublic
+            ? '<span class="group-public-badge">Public</span>'
             : '<span class="group-public-badge">Private</span>';
-            
+
         let actionButtonHTML = '';
         if (!group.isOwner) {
             if (group.isMember) {
@@ -66,10 +67,13 @@ document.addEventListener("DOMContentLoaded", () => {
      */
     const load = async (reset = false) => {
         if (loading) return;
+        if (!reset && !hasMore) return;
+
         loading = true;
 
         if (reset) {
             page = 1;
+            hasMore = true;
             grid.innerHTML = "";
         }
 
@@ -78,18 +82,22 @@ document.addEventListener("DOMContentLoaded", () => {
                 headers: { Accept: "application/json" }
             });
             const data = await res.json();
-            
+
             if (!data.success) return;
 
             grid.insertAdjacentHTML("beforeend", data.groups.map(card).join(""));
             empty.hidden = grid.children.length > 0;
-            loadMore.hidden = !data.hasMore;
+            hasMore = data.hasMore;
 
             if (data.hasMore) {
                 page = data.currentPage + 1;
             }
         } finally {
             loading = false;
+
+            if (hasMore && sentinel.getBoundingClientRect().top <= window.innerHeight + 300) {
+                setTimeout(() => load(false), 0);
+            }
         }
     };
 
@@ -102,9 +110,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Reset pagination on category change
     document.getElementById("group-category").addEventListener("change", () => load(true));
-    
-    // Load more handler
-    loadMore.addEventListener("click", () => load(false));
+
+    // Automatically load more groups when reaching the bottom
+    const observer = new IntersectionObserver(entries => {
+        if (entries[0].isIntersecting && hasMore && !loading) {
+            load(false);
+        }
+    }, {
+        rootMargin: "300px 0px"
+    });
+
+    observer.observe(sentinel);
 
     // Handle join/leave button clicks
     document.addEventListener("click", async e => {
@@ -126,8 +142,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const close = () => modal.classList.remove("active");
     document.getElementById("open-create-group").onclick = () => modal.classList.add("active");
     document.getElementById("close-create-group").onclick = close;
-    document.getElementById("cancel-create-group").onclick = close;
-    
+
     modal.addEventListener("click", e => {
         if (e.target === modal) close();
     });
@@ -169,7 +184,7 @@ document.addEventListener("DOMContentLoaded", () => {
         form.reset();
         document.getElementById("create-group-public").checked = true;
         close();
-        
+
         // Redirect to single group page
         window.location.href = `group.html?id=${data.group._id}`;
     });

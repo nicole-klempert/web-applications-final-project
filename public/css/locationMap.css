@@ -54,9 +54,9 @@
     }
 
 .map-main {
-    margin-left: var(--sidebar-width, 260px);
-    padding: 28px;
-    width: calc(100% - var(--sidebar-width, 260px));
+    flex: 1;
+    padding: 40px;
+    min-width: 0;
     min-height: 100vh;
 }
 
@@ -109,8 +109,6 @@
 
 @media (max-width: 900px) {
     .map-main {
-        margin-left: 0;
-        width: 100%;
         padding: 18px;
     }
 
