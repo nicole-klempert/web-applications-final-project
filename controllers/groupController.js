@@ -7,6 +7,26 @@ import Post from '../models/postModel.js';
 // group helpers
 const sameId = (a, b) => Boolean(a && b && String(a._id || a) === String(b._id || b));
 
+const deleteGroupWithPosts = async group => {
+    await Post.deleteMany({ group: group._id });
+
+    await User.updateMany(
+        { $or: [{ joinedGroups: group._id }, { managedGroups: group._id }] },
+        { $pull: { joinedGroups: group._id, managedGroups: group._id } }
+    );
+
+    await Group.deleteOne({ _id: group._id });
+};
+
+const deleteGroupIfEmpty = async group => {
+    if ((group.members || []).length === 0 || (group.admins || []).length === 0) {
+        await deleteGroupWithPosts(group);
+        return true;
+    }
+
+    return false;
+};
+
 const safeUser = user => user ? {
     _id: user._id,
     username: user.username || 'User',
@@ -205,17 +225,21 @@ export const leaveGroup = async (req, res, next) => {
         group.members = group.members.filter(member => !sameId(member, userId));
         group.admins = group.admins.filter(admin => !sameId(admin, userId));
 
-        await group.save();
         await User.findByIdAndUpdate(userId, {
             $pull: { joinedGroups: group._id, managedGroups: group._id }
         });
 
-        res.json({ success: true });
+        const groupDeleted = await deleteGroupIfEmpty(group);
+
+        if (!groupDeleted) {
+            await group.save();
+        }
+
+        res.json({ success: true, groupDeleted });
     } catch (error) {
         next(error);
     }
 };
-
 // group admin management
 export const addAdmin = async (req, res, next) => {
     try {
@@ -260,10 +284,15 @@ export const removeAdmin = async (req, res, next) => {
 
         group.admins = group.admins.filter(admin => !sameId(admin, user._id));
 
-        await group.save();
         await User.findByIdAndUpdate(user._id, { $pull: { managedGroups: group._id } });
 
-        res.json({ success: true });
+        const groupDeleted = await deleteGroupIfEmpty(group);
+
+        if (!groupDeleted) {
+            await group.save();
+        }
+
+        res.json({ success: true, groupDeleted });
     } catch (error) {
         next(error);
     }
@@ -333,31 +362,32 @@ export const removeMember = async (req, res, next) => {
         group.members = group.members.filter(member => !sameId(member, targetId));
         group.admins = group.admins.filter(admin => !sameId(admin, targetId));
 
-        await group.save();
         await User.findByIdAndUpdate(targetId, {
             $pull: { joinedGroups: group._id, managedGroups: group._id }
         });
 
-        res.json({ success: true });
+        const groupDeleted = await deleteGroupIfEmpty(group);
+
+        if (!groupDeleted) {
+            await group.save();
+        }
+
+        res.json({ success: true, groupDeleted });
     } catch (error) {
         next(error);
     }
 };
 
 // delete the group and its related posts
+// delete the group and its related posts
 export const deleteGroup = async (req, res, next) => {
     try {
-        const groupId = req.group._id;
-        const deletedPosts = await Post.deleteMany({ group: groupId });
+        const group = req.group;
+        const deletedPosts = await Post.countDocuments({ group: group._id });
 
-        await User.updateMany(
-            { $or: [{ joinedGroups: groupId }, { managedGroups: groupId }] },
-            { $pull: { joinedGroups: groupId, managedGroups: groupId } }
-        );
+        await deleteGroupWithPosts(group);
 
-        await Group.deleteOne({ _id: groupId });
-
-        res.json({ success: true, deletedPosts: deletedPosts.deletedCount });
+        res.json({ success: true, deletedPosts });
     } catch (error) {
         next(error);
     }

@@ -1,5 +1,6 @@
 import User from '../models/userModel.js';
 import Post from '../models/postModel.js';
+import Group from '../models/groupModel.js';
 import { decrypt } from '../utils/cryptoUtils.js';
 
 // GET /users/:username
@@ -100,6 +101,7 @@ export const updateUserProfile = async (req, res) => {
                 { arrayFilters: [{ "elem.author": new RegExp('^' + username.trim() + '$', 'i') }], strict: false }
             );
         }
+
         await user.save();
 
         return res.status(200).json({
@@ -261,8 +263,9 @@ export const deleteUser = async (req, res) => {
         if (!user) return res.status(404).json({ success: false, error: 'User not found' });
 
         const targetUsername = user.username;
+        const userId = user._id;
 
-        // delete all posts authored by this user (case-insensitive match)
+        // delete all posts authored by this user
         await Post.deleteMany({ author: new RegExp('^' + targetUsername + '$', 'i') });
 
         // remove this user from everyone else's friends lists and friend requests
@@ -276,8 +279,43 @@ export const deleteUser = async (req, res) => {
             }
         );
 
+        // update all groups related to the deleted user
+        const groups = await Group.find({
+            $or: [
+                { members: userId },
+                { admins: userId },
+                { owner: userId },
+                { joinRequests: userId }
+            ]
+        });
+
+        for (const group of groups) {
+            group.members = (group.members || []).filter(member => String(member) !== String(userId));
+            group.admins = (group.admins || []).filter(admin => String(admin) !== String(userId));
+            group.joinRequests = (group.joinRequests || []).filter(request => String(request) !== String(userId));
+
+            // transfer ownership to another admin if possible
+            if (String(group.owner) === String(userId)) {
+                group.owner = group.admins.length > 0 ? group.admins[0] : null;
+            }
+
+            // delete the group if it no longer has members or admins
+            if (group.members.length === 0 || group.admins.length === 0) {
+                await Post.deleteMany({ group: group._id });
+
+                await User.updateMany(
+                    { $or: [{ joinedGroups: group._id }, { managedGroups: group._id }] },
+                    { $pull: { joinedGroups: group._id, managedGroups: group._id } }
+                );
+
+                await Group.deleteOne({ _id: group._id });
+            } else {
+                await group.save();
+            }
+        }
+
         // delete the user itself
-        await User.deleteOne({ _id: user._id });
+        await User.deleteOne({ _id: userId });
 
         return res.status(200).json({ success: true, message: "User and posts deleted" });
     } catch (error) {
