@@ -51,24 +51,28 @@
                 </div>
             </div>
         </nav>
+
         <main class="statistics-main">
             <h2>Statistics</h2>
-            <p class="statistics-intro">Live data from MongoDB using aggregation queries.</p>
+
             <section id="friends-statistics-card" class="chart-card">
                 <h3>Friends Location Distribution</h3>
                 <p>City of residence of your friends based on their profile.</p>
                 <div id="friends-chart" class="chart"></div>
                 <div id="friends-empty" class="chart-empty" hidden>No friend location data available.</div>
             </section>
+
             <section id="group-statistics-card" class="chart-card" hidden>
                 <h3 id="group-statistics-title">Group Members Location Distribution</h3>
                 <p>City of residence of the group's members based on their profile.</p>
                 <div id="group-chart" class="chart"></div>
                 <div id="group-empty" class="chart-empty" hidden>No group member location data available.</div>
             </section>
+
             <div id="group-statistics-error" class="chart-card chart-empty" hidden></div>
         </main>
     </div>
+
     <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
     <script src="js/global.js"></script>
     <script src="js/statisticsManager.js"></script>

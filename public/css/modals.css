@@ -327,3 +327,24 @@
 .mb-0 {
     margin-bottom: 0 !important;
 }
+
+.modal-action-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+    .modal-action-group .fb-toggle-btn,
+    .modal-action-group .media-trigger-btn {
+        height: 48px;
+        margin: 0;
+        padding: 0 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        white-space: nowrap;
+    }
+
+.modal-footer {
+    align-items: center;
+}

@@ -15,6 +15,7 @@
     <link rel="stylesheet" href="css/posts.css">
     <link rel="stylesheet" href="css/locationMap.css">
     <link rel="stylesheet" href="css/groupStyle.css">
+    <link rel="stylesheet" href="css/feedStyle.css">
 </head>
 
 <body>
@@ -38,8 +39,7 @@
                     <i class="bi bi-bar-chart nav-icon"></i><span>Statistics</span>
                 </a>
                 <a href="#" class="nav-item" id="dark-mode-toggle">
-                    <i class="bi bi-moon-stars nav-icon" id="dark-mode-icon"></i><span id="dark-mode-text">Dark
-                        Mode</span>
+                    <i class="bi bi-moon-stars nav-icon" id="dark-mode-icon"></i><span id="dark-mode-text">Dark Mode</span>
                 </a>
             </div>
 
@@ -88,39 +88,14 @@
 
                 <div class="group-grid">
                     <section>
-                        <div id="group-composer" class="group-panel" hidden>
-                            <h3>Create a group post</h3>
-
-                            <textarea id="group-post-text" class="group-input" rows="3"
-                                placeholder="Share something with the group..."></textarea>
-
-                            <button type="button" id="group-location-btn"
-                                class="btn btn-secondary location-picker-toggle">
-                                <i class="bi bi-geo-alt"></i> Add Location
-                            </button>
-
-                            <div id="group-location-panel" class="location-picker-panel" hidden>
-                                <div class="location-search-row">
-                                    <input id="group-location-search" class="group-input" type="search"
-                                        placeholder="Search an address or place">
-                                    <button type="button" id="group-location-search-btn"
-                                        class="btn btn-secondary">Search</button>
-                                </div>
-
-                                <div id="group-location-map" class="location-picker-map"></div>
-
-                                <div class="location-selected-row">
-                                    <span id="group-location-selected" class="location-selected-text">No location
-                                        selected</span>
-                                    <button type="button" id="group-location-clear" class="btn btn-secondary"
-                                        hidden>Clear</button>
-                                </div>
+                        <section id="group-composer" class="composer-placeholder" role="button" hidden>
+                            <div class="placeholder-text-box">What's on your mind?</div>
+                            <div class="composer-icons-group">
+                                <i class="bi bi-image" title="Add Photo"></i>
+                                <i class="bi bi-play-btn" title="Add Video"></i>
+                                <i class="bi bi-emoji-smile" title="Add Emoji"></i>
                             </div>
-
-                            <input id="group-post-media" type="file" accept="image/*,video/*">
-                            <button id="group-post-publish" class="btn btn-primary">Post</button>
-                            <p id="group-post-error" class="group-error"></p>
-                        </div>
+                        </section>
 
                         <div class="group-panel">
                             <h3>Group Posts</h3>
@@ -129,31 +104,85 @@
                     </section>
 
                     <aside>
-                        <div class="group-panel">
-                            <h3>Members</h3>
-                            <div id="group-members"></div>
-                        </div>
-
                         <div id="join-requests-panel" class="group-panel" hidden>
                             <h3>Join Requests</h3>
                             <div id="group-join-requests"></div>
+                        </div>
+
+                        <div class="group-panel">
+                            <h3>Members</h3>
+                            <div id="group-members"></div>
                         </div>
 
                         <div id="admin-panel" class="group-panel" hidden>
                             <h3>Admin Management</h3>
                             <p>Only the owner can add or remove admins.</p>
 
-                            <div class="admin-add-row">
-                                <input id="admin-username" class="group-input" placeholder="Member username">
-                                <button id="add-admin-btn" class="btn btn-primary">Add Admin</button>
-                            </div>
+                            <label class="search-box admin-search-box">
+                                <span><i class="bi bi-person"></i></span>
+                                <input type="search" id="admin-username" placeholder="Search group members...">
+                            </label>
 
+                            <div id="admin-search-results" class="search-results-list"></div>
                             <p id="admin-error" class="group-error"></p>
                         </div>
                     </aside>
                 </div>
             </div>
         </main>
+    </div>
+
+    <!-- popup for creating a group post -->
+    <div id="group-post-modal-overlay" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Create a Post</h3>
+                <button id="group-post-close-modal-btn" class="close-modal-btn">&times;</button>
+            </div>
+
+            <div class="modal-body">
+                <textarea id="group-post-text" class="modal-textarea-custom" placeholder="What's on your mind?" rows="4"></textarea>
+
+                <div id="group-location-panel" class="location-picker-panel" hidden>
+                    <div class="location-search-row">
+                        <input id="group-location-search" class="modal-input-box" type="search" placeholder="Search an address or place">
+                        <button type="button" id="group-location-search-btn" class="btn btn-secondary">Search</button>
+                    </div>
+
+                    <div id="group-location-map" class="location-picker-map"></div>
+
+                    <div class="location-selected-row">
+                        <span id="group-location-selected" class="location-selected-text">No location selected</span>
+                        <button type="button" id="group-location-clear" class="btn btn-secondary" hidden>Clear</button>
+                    </div>
+                </div>
+
+                <!-- media preview area -->
+                <input type="file" id="group-post-media" accept="image/*,video/*" style="display: none;">
+
+                <div id="group-media-preview-container" class="modal-media-preview-container" style="display: none;">
+                    <img id="group-media-preview" class="modal-preview-media" src="" style="display: none;">
+                    <video id="group-video-preview" class="modal-preview-media" controls style="display: none;"></video>
+                    <button id="group-clear-media" class="clear-media-btn">&times;</button>
+                </div>
+
+                <p id="group-post-error" class="group-error"></p>
+            </div>
+
+            <div class="modal-footer">
+                <div class="modal-action-group">
+                    <button type="button" id="group-location-btn" class="media-trigger-btn location-picker-toggle">
+                        <i class="bi bi-geo-alt"></i> Add Location
+                    </button>
+
+                    <button id="group-media-btn" class="media-trigger-btn">
+                        <i class="bi bi-image"></i> Add Media
+                    </button>
+                </div>
+
+                <button id="group-post-publish" class="publish-btn" disabled>Post</button>
+            </div>
+        </div>
     </div>
 
     <div id="edit-group-modal" class="modal-overlay">
