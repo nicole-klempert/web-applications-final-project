@@ -26,6 +26,8 @@ router.post('/:postId/like', toggleLike);
 
 // routes for updating and deleting posts (restricted to the post owner)
 router.put('/:postId', isPostOwner, updatePost);
+
+// route for deleting a post (restricted to the post owner)
 router.delete('/:postId', canDeletePost, deletePost);
 
 export default router;

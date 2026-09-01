@@ -13,6 +13,8 @@ export const fetchTodaySchedule = async (country) => {
         if (!response.ok) {
             throw new Error(`TVMaze API responded with status: ${response.status}`);
         }
+
+        // parsing the response to JSON
         const data = await response.json();
         return data;
     } catch (error) {

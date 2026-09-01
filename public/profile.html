@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8" />
     <title>The Watchers Network</title>
-
+    <!-- import stylesheets -->
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="css/variables.css">
@@ -25,6 +25,7 @@
                 <h1>The Watchers</h1>
             </header>
 
+            <!--navigation bar on the left side-->
             <div class="nav-links mt-4">
                 <a href="feed.html" class="nav-item">
                     <i class="bi bi-house-door nav-icon"></i> <span>Feed</span>
@@ -47,6 +48,7 @@
 
             <button type="button" class="btn btn-primary logout-btn" id="logout-btn-trigger">Logout</button>
 
+            <!-- Account Card of the logged-in user -->
             <div class="account-card mt-auto" role="button" tabindex="0">
                 <div class="avatar avatar-purple" id="nav-user-avatar">US</div>
                 <div>
@@ -76,6 +78,7 @@
                             <i class="bi bi-geo-alt-fill"></i> <span id="profile-city">No city specified</span>
                         </p>
 
+                        <!-- Profile Statistics -->
                         <div class="profile-stats-row">
                             <span><strong id="profile-posts-count" class="profile-stat-value">0</strong> Posts</span>
                             <span><strong id="profile-friends-count" class="profile-stat-value">0</strong> Friends</span>
@@ -88,6 +91,7 @@
 
             <h3 class="profile-section-title">User Posts</h3>
 
+            <!-- User Posts Feed - all feed items -->
             <section class="post-feed" id="user-posts-container">
             </section>
             <section id="profile-groups-section" class="profile-groups-section">

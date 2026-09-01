@@ -28,6 +28,8 @@ document.addEventListener("DOMContentLoaded", () => {
         // Update avatar elements in the sidebar and other relevant places
         document.querySelectorAll("#nav-user-avatar, .account-card .avatar, .composer-placeholder .avatar").forEach(avatarEl => {
             avatarEl.innerHTML = "";
+
+            // If a valid new profile picture URL is provided, use it; otherwise, show initials
             if (newPic && newPic.trim() !== "" && newPic !== "undefined" && newPic !== "null") {
                 avatarEl.className = "avatar";
                 avatarEl.style.backgroundImage = `url('${newPic}')`;
@@ -43,6 +45,8 @@ document.addEventListener("DOMContentLoaded", () => {
         // Update name and handle in sidebar
         const userNameDisplay = document.getElementById("nav-user-name") || document.querySelector(".account-card .name");
         const userHandleDisplay = document.getElementById("nav-user-handle") || document.querySelector(".account-card .handle");
+
+        // Update the displayed username and handle based on the provided username or the current user
         if (userNameDisplay) userNameDisplay.textContent = username || window.getCurrentUser();
         if (userHandleDisplay && username) userHandleDisplay.textContent = "@" + username.toLowerCase().replace(/\s/g, '');
     };
@@ -54,6 +58,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const isMe = authorName && authorName.trim().toLowerCase() === currentUser.toLowerCase();
         const picToUse = (isMe && myPic && myPic !== "undefined" && myPic !== "null") ? myPic : dbPic;
 
+        // If a valid profile picture URL is available, use it; otherwise, show initials
         if (picToUse && picToUse !== "undefined" && picToUse !== "null") {
             return `<div class="avatar" style="width:${size}px; height:${size}px; background-image: url('${picToUse}'); background-size: cover; background-position: center;"></div>`;
         }
@@ -64,6 +69,7 @@ document.addEventListener("DOMContentLoaded", () => {
     window.initImageCropper = (config) => {
         const { triggerId, fileInputId, livePreviewId, placeholderId, hideModalId, onCropApply } = config;
 
+        // Get references to the necessary DOM elements
         const trigger = document.getElementById(triggerId);
         const fileInput = document.getElementById(fileInputId);
         const livePreview = document.getElementById(livePreviewId);
@@ -78,11 +84,13 @@ document.addEventListener("DOMContentLoaded", () => {
         const newCancelBtn = cancelBtn.cloneNode(true); cancelBtn.parentNode.replaceChild(newCancelBtn, cancelBtn); cancelBtn = newCancelBtn;
         const newSaveBtn = saveBtn.cloneNode(true); saveBtn.parentNode.replaceChild(newSaveBtn, saveBtn); saveBtn = newSaveBtn;
 
+        // Ensure all required elements are present
         if (!trigger || !fileInput || !cropModal || !canvas) return;
 
         const ctx = canvas.getContext("2d");
         let img = new Image(), imgX = 0, imgY = 0, scale = 1, isDragging = false, startX = 0, startY = 0;
 
+        // Draw the image on the canvas with the current position and scale
         const draw = () => {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.save();
@@ -94,12 +102,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
         trigger.addEventListener("click", () => fileInput.click());
 
+        // Handle file selection and load the image for cropping
         fileInput.addEventListener("change", (e) => {
             const file = e.target.files[0];
             if (!file) return;
             const reader = new FileReader();
+
+            // Load the selected image file and set it as the source for the image object
             reader.onload = (event) => {
                 img.onload = () => {
+
+                    // Calculate the initial scale to fit the image within the canvas
                     scale = Math.max(canvas.width / img.width, canvas.height / img.height);
                     if (slider) { slider.min = (scale * 0.4).toFixed(4); slider.max = (scale * 3).toFixed(4); slider.value = scale; }
                     imgX = 0; imgY = 0; draw();
@@ -111,17 +124,23 @@ document.addEventListener("DOMContentLoaded", () => {
             reader.readAsDataURL(file);
         });
 
+        // add event listeners for dragging and zooming the image on the canvas
         canvas.addEventListener("mousedown", (e) => { isDragging = true; startX = e.clientX - imgX; startY = e.clientY - imgY; });
         window.addEventListener("mousemove", (e) => { if (!isDragging) return; imgX = e.clientX - startX; imgY = e.clientY - startY; draw(); });
         window.addEventListener("mouseup", () => { isDragging = false; });
+
+        // if the slider exists, add an input event listener to update the scale and redraw the image
         if (slider) slider.addEventListener("input", (e) => { scale = parseFloat(e.target.value); draw(); });
 
+        // if the cancel button exists, add a click event listener to close the crop modal and reset the file input
         cancelBtn.addEventListener("click", () => {
             cropModal.classList.remove("active");
             fileInput.value = "";
             if (hideModalId) document.getElementById(hideModalId)?.classList.add("active");
         });
 
+        // click event listener for the save button
+        // When the save button is clicked, create a smaller canvas to generate a cropped version of the image
         saveBtn.addEventListener("click", () => {
             const smallCanvas = document.createElement("canvas");
             smallCanvas.width = 120; smallCanvas.height = 120;
@@ -129,17 +148,22 @@ document.addEventListener("DOMContentLoaded", () => {
             smallCtx.drawImage(canvas, 0, 0, 120, 120);
 
             const base64 = smallCanvas.toDataURL("image/jpeg", 0.75);
+
+            // if the live preview element exists, set its source to the base64 data URL and display it
             if (livePreview) { livePreview.src = base64; livePreview.style.display = "block"; }
             if (placeholder) placeholder.style.display = "none";
             if (trigger) trigger.style.borderStyle = "solid";
 
+            // Update the profile picture in localStorage and sync the sidebar avatars
             cropModal.classList.remove("active");
             if (hideModalId) document.getElementById(hideModalId)?.classList.add("active");
             if (typeof onCropApply === "function") onCropApply(base64);
         });
     };
 
+    // Inject global modals into the DOM if they don't already exist
     const injectGlobalModals = () => {
+
         // Logout Confirmation Modal
         if (!document.getElementById("logout-confirm-modal")) {
             document.body.insertAdjacentHTML("beforeend", `
@@ -153,6 +177,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 </div>
             `);
         }
+
         // Delete Confirmation Modal
         if (!document.getElementById("delete-confirm-modal")) {
             document.body.insertAdjacentHTML("beforeend", `
@@ -166,6 +191,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 </div>
             `);
         }
+
         // Crop Modal (for profile pic.)
         if (!document.getElementById("crop-modal")) {
             document.body.insertAdjacentHTML("beforeend", `
@@ -189,6 +215,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 </div>
             `);
         }
+
         // Edit Post Modal
         if (!document.getElementById("edit-modal-overlay")) {
             document.body.insertAdjacentHTML("beforeend", `
@@ -235,11 +262,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // post card HTML generator 
     window.createPostCardHTML = (post, isNew = false) => {
+
+        // get current all relevant data for the post card
         const currentUser = window.getCurrentUser();
         const isOwner = post.author && (post.author.trim().toLowerCase() === currentUser.toLowerCase());
         const isLiked = Array.isArray(post.likedBy) && post.likedBy.includes(currentUser);
         const timeAgo = window.formatTimeAgo(post.createdAt);
         window.postLocationById = window.postLocationById || new Map();
+
+        // if the post has an ID, store its location in the global map for later retrieval
         if (post._id) window.postLocationById.set(String(post._id), post.location || null);
 
         // Media HTML (image or video)
@@ -247,6 +278,7 @@ document.addEventListener("DOMContentLoaded", () => {
             ? `<video src="${post.mediaUrl}" controls preload="metadata" class="post-media-content"></video>`
             : `<img src="${post.mediaUrl}" alt="media" loading="lazy" class="post-media-content" />`) : "";
 
+        // Comments HTML
         const commentsHTML = (post.comments || []).map(c => {
             const isCommOwner = c.author && (c.author.trim().toLowerCase() === currentUser.toLowerCase());
             return `
@@ -310,7 +342,7 @@ document.addEventListener("DOMContentLoaded", () => {
             </article>`;
     };
 
-    // = theme toggle = 
+    // theme toggle - dark/light mode
     const darkModeToggle = document.getElementById("dark-mode-toggle");
     const body = document.body;
 
@@ -319,6 +351,8 @@ document.addEventListener("DOMContentLoaded", () => {
         const isDark = body.classList.contains("dark-mode");
         const icon = document.getElementById("dark-mode-icon");
         const text = document.getElementById("dark-mode-text");
+
+        // if the icon and text elements exist, update their class names and inner text based on the current dark mode state
         if (icon && text) {
             icon.className = isDark ? "bi bi-sun-fill nav-icon" : "bi bi-moon-stars nav-icon";
             text.innerText = isDark ? "Light Mode" : "Dark Mode";
@@ -331,16 +365,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Toggle dark mode on button click
     darkModeToggle?.addEventListener("click", (e) => {
+
+        // Prevent the default action of the button click
         e.preventDefault();
         body.classList.toggle("dark-mode");
         updateDarkModeUI();
         localStorage.setItem("darkMode", body.classList.contains("dark-mode") ? "enabled" : "disabled");
     });
 
-    // = back to top button =
+    // back to top button
     const backToTopBtn = document.getElementById("back-to-top");
+
+    // Show or hide the back-to-top button based on scroll position and handle click to scroll to top
     if (backToTopBtn) {
         window.addEventListener("scroll", () => {
+
+            // if the user has scrolled down more than 250 pixels, show the back-to-top button; otherwise, hide it
             if ((window.scrollY || document.documentElement.scrollTop) > 250) backToTopBtn.classList.add("show");
             else backToTopBtn.classList.remove("show");
         });
@@ -350,9 +390,11 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // = logout modal =
+    // logout modal - popup confirmation
     const logoutBtnTrigger = document.getElementById("logout-btn-trigger");
     const logoutModal = document.getElementById("logout-confirm-modal");
+    // if the logout button trigger and logout modal exist, 
+// add event listeners for opening the modal, canceling logout, and confirming logout
     if (logoutBtnTrigger && logoutModal) {
         logoutBtnTrigger.addEventListener("click", (e) => {
             e.preventDefault();
@@ -371,6 +413,8 @@ document.addEventListener("DOMContentLoaded", () => {
         const user = window.getCurrentUser();
         if (user) window.location.href = `profile.html?user=${encodeURIComponent(user)}`;
     };
+
+    //  add click event listeners to navigate to the user's profile
     document.querySelector(".account-card")?.addEventListener("click", navigateToMyProfile);
     document.getElementById("nav-user-avatar")?.addEventListener("click", (e) => {
         e.stopPropagation();
@@ -384,6 +428,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let currentPostBeingEdited = null;
     let editMediaCleared = false;
 
+    // Handle all click events on the document for post interactions
     document.addEventListener("click", async (e) => {
         const target = e.target;
         const postCard = target.closest(".post-card");
@@ -393,6 +438,7 @@ document.addEventListener("DOMContentLoaded", () => {
         // Single Post View
         if (target.closest(".view-single-post-trigger") && postId) {
             e.stopPropagation();
+            // If the function to show the single post modal is defined, fetch the post data and display it in the modal
             if (typeof window.showSinglePostBlurModal === "function") {
                 fetch(`/posts/${postId}`).then(r => r.json()).then(d => {
                     if (d.success && d.post) window.showSinglePostBlurModal(d.post);
@@ -401,7 +447,7 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        // Share Link
+        // Share Link - Copy to Clipboard
         if (target.closest(".copy-link-btn") && postId) {
             e.stopPropagation();
             const btn = target.closest(".copy-link-btn");
@@ -411,7 +457,7 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        // Native Share
+        // Native Share - if supported, use the Web Share API; otherwise, fallback to copying the link
         if (target.closest(".native-share-btn") && postId) {
             e.stopPropagation();
             const url = `${window.location.origin}/feed.html?postId=${postId}`;
@@ -419,9 +465,11 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        // Like Button
+        // Like Button - toggle like state and update count
         const likeBtn = target.closest(".stat-like");
         if (likeBtn && postId) {
+
+            // Toggle the "liked" class on the like button and update the icon and count
             likeBtn.classList.toggle("liked");
             const icon = likeBtn.querySelector("i"), countSpan = likeBtn.querySelector(".like-count");
             let count = parseInt(countSpan.innerText) || 0;
@@ -430,6 +478,7 @@ document.addEventListener("DOMContentLoaded", () => {
             icon.className = `bi ${isLiked ? 'bi-heart-fill pop-animation' : 'bi-heart'}`;
             countSpan.innerText = isLiked ? count + 1 : Math.max(0, count - 1);
 
+            // fetch the like/unlike action from the server and update the like count based on the response
             fetch(`/posts/${postId}/like`, {
                 method: "POST", headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ username: currentUser })
@@ -442,7 +491,7 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        // Toggle Comments
+        // Toggle Comments - show or hide the comments section when the reply icon is clicked
         if (target.closest(".stat-reply")) {
             const section = postCard?.querySelector(".comments-section");
             if (section) section.style.display = section.style.display === "none" ? "block" : "none";
@@ -455,12 +504,14 @@ document.addEventListener("DOMContentLoaded", () => {
             const text = input.value.trim();
             if (!text) return;
 
+            // fetch the comment submission to the server and update the comments list if successful
             const res = await fetch(`/posts/${postId}/comments`, {
                 method: "POST", headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ author: currentUser, authorProfilePic: localStorage.getItem("userProfilePic") || "", text })
             });
             const data = await res.json();
 
+            // if the comment submission is successful, append the new comment to the comments list and update the reply count
             if (data.success) {
                 target.closest(".comments-section").querySelector(".comments-list").insertAdjacentHTML("beforeend", `
                     <div class="comment-item" data-comment-id="${data.comment._id}">
@@ -478,19 +529,26 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // Delete Post / Comment
         const deleteBtn = target.closest(".delete-post-btn, .delete-comment-btn");
+
+        // If a delete button is clicked, show the delete confirmation modal and handle the deletion of the post or comment
         if (deleteBtn) {
             const isComment = deleteBtn.classList.contains("delete-comment-btn");
             const item = deleteBtn.closest(isComment ? ".comment-item" : ".post-card");
             const modal = document.getElementById("delete-confirm-modal");
 
+            // if the delete confirmation modal exists, show it and set up the confirm button to handle the deletion of the post or comment
             if (modal) {
                 modal.classList.add("active");
                 const confirmBtn = document.getElementById("confirm-delete-btn");
                 const newConfirm = confirmBtn.cloneNode(true);
                 confirmBtn.parentNode.replaceChild(newConfirm, confirmBtn);
 
+                // add an event listener to the new confirm button to handle the deletion of the post or comment when clicked
                 newConfirm.addEventListener("click", async () => {
                     modal.classList.remove("active");
+
+                    // If it's a comment, send a DELETE request to remove the comment; 
+                    // if it's a post, send a DELETE request to remove the post
                     if (isComment && postId) {
                         await fetch(`/posts/${postId}/comments/${item.dataset.commentId}`, { method: "DELETE" });
                         item.remove();
@@ -512,8 +570,12 @@ document.addEventListener("DOMContentLoaded", () => {
             currentPostBeingEdited = postCard;
             editMediaCleared = false;
 
+            // add the existing post content to the edit modal textarea and set up the location picker with the existing location if available
             const editModal = document.getElementById("edit-modal-overlay");
             const textarea = document.getElementById("edit-modal-textarea");
+
+            // if the edit modal and textarea exist,
+            // add the existing post content to the textarea and set up the location picker with the existing location if available
             if (textarea) textarea.value = postCard.querySelector(".post-text")?.innerText || "";
             const existingLocation = window.postLocationById?.get(String(postCard.dataset.postId)) || null;
             editPostLocation = existingLocation;
@@ -521,17 +583,20 @@ document.addEventListener("DOMContentLoaded", () => {
             const editLocationPanel = document.getElementById("edit-modal-location-panel");
             if (editLocationPanel) editLocationPanel.hidden = true;
 
+            // save the existing media (image or video) in the edit modal preview if available
             const existingImg = postCard.querySelector("img.post-media-content");
             const existingVid = postCard.querySelector("video.post-media-content");
             const editPreviewContainer = document.getElementById("edit-modal-media-preview-container");
             const editImgPreview = document.getElementById("edit-modal-media-preview");
             const editVideoPreview = document.getElementById("edit-modal-video-preview");
 
+            // if the edit modal preview container and media elements exist, hide them initially and show the existing media if available
             if (editPreviewContainer && editImgPreview && editVideoPreview) {
                 editPreviewContainer.style.display = "none";
                 editImgPreview.style.display = "none";
                 editVideoPreview.style.display = "none";
 
+                // if there is an existing image or video, show it in the edit modal preview
                 if (existingImg || existingVid) {
                     const activePreview = existingImg ? editImgPreview : editVideoPreview;
                     activePreview.src = (existingImg || existingVid).src;
@@ -551,7 +616,10 @@ document.addEventListener("DOMContentLoaded", () => {
     let editPostLocation = null;
     let editLocationPicker = null;
 
+    // Function to get or create the location picker for the edit post modal
     const getEditLocationPicker = () => {
+
+        // if the location picker doesn't exist and the PostLocationPicker is available, create a new picker with the specified configuration
         if (!editLocationPicker && window.PostLocationPicker) {
             editLocationPicker = window.PostLocationPicker.createPicker({
                 buttonId: "edit-modal-location-btn",
@@ -567,7 +635,10 @@ document.addEventListener("DOMContentLoaded", () => {
         return editLocationPicker;
     };
 
+    // Function to close the edit post modal and reset its state
     const closeEditPostModal = () => {
+
+        // Reset the current post being edited and clear the edit modal state
         document.getElementById("edit-modal-overlay")?.classList.remove("active");
         if (editMediaInput) editMediaInput.value = "";
         if (editPreviewContainer) editPreviewContainer.style.display = "none";
@@ -578,15 +649,17 @@ document.addEventListener("DOMContentLoaded", () => {
         editMediaCleared = false;
     };
 
-       
+    // Event listener for the "Change Media" button in the edit post modal to trigger the file input click
     document.getElementById("edit-modal-image-btn")?.addEventListener("click", () => editMediaInput?.click());
 
+    // Event listener for the "Clear Media" button in the edit post modal to clear the selected media and hide the preview
     document.getElementById("edit-modal-clear-media")?.addEventListener("click", () => {
         if (editMediaInput) editMediaInput.value = "";
         if (editPreviewContainer) editPreviewContainer.style.display = "none";
         editMediaCleared = true;
     });
 
+    // if the edit media input exists, add an event listener to handle file selection and update the preview accordingly
     if (editMediaInput) {
         editMediaInput.addEventListener("change", function () {
             const file = this.files[0];
@@ -608,6 +681,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    // event listener for the "Save Changes" button in the edit post modal to submit the edited post data to the server
     document.getElementById("edit-modal-publish-btn")?.addEventListener("click", async () => {
         if (!currentPostBeingEdited) return;
         const postId = currentPostBeingEdited.dataset.postId;

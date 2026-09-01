@@ -76,17 +76,25 @@ document.addEventListener("DOMContentLoaded", () => {
         const activeFilter = document.querySelector(".filter-option.selected");
         let displayText = activeFilter ? activeFilter.innerText : "All Posts";
 
-        // if auth
+        // if author or group inputs have values, append them to the display text
         if (authorInput && authorInput.value.trim()) {
             displayText += ` • Author: ${authorInput.value.trim()}`;
         }
+
+        // if group input has a value, append it to the display text
         if (groupInput && groupInput.value.trim()) {
             displayText += ` • Group: ${groupInput.value.trim()}`;
         }
+
+        // if date inputs have values, append them to the display text
         if (dateStartInput && dateStartInput.value && dateEndInput && dateEndInput.value) {
             displayText += ` • ${dateStartInput.value} to ${dateEndInput.value}`;
+
+            // else if only one of the date inputs has a value, append that to the display text
         } else if (dateStartInput && dateStartInput.value) {
             displayText += ` • From ${dateStartInput.value}`;
+
+            // else if only the end date input has a value, append that to the display text
         } else if (dateEndInput && dateEndInput.value) {
             displayText += ` • Until ${dateEndInput.value}`;
         }
@@ -99,6 +107,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const startVal = dateStartInput ? dateStartInput.value : "";
         const endVal = dateEndInput ? dateEndInput.value : "";
 
+        // validate that the start date is not later than the end date
         if (startVal && endVal && new Date(startVal) > new Date(endVal)) {
             alert("Filter Start date cannot be later than End date.");
             if (dateEndInput) dateEndInput.value = "";
@@ -106,6 +115,8 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         updateFilterDisplayUI();
+
+        // if a global function to reload the posts feed exists, call it
         if (typeof window.reloadPostsFeed === "function") {
             window.reloadPostsFeed();
         }
@@ -115,10 +126,12 @@ document.addEventListener("DOMContentLoaded", () => {
     if (filterBox) {
         const filterSelected = filterBox.querySelector(".filter-selected");
 
+        // toggle the filter dropdown when the selected filter is clicked
         filterSelected.addEventListener("click", () => {
             filterBox.classList.toggle("open");
         });
 
+        // handle filter option selection and update the active filter type
         filterOptions.forEach(option => {
             option.addEventListener("click", (e) => {
                 e.preventDefault();
@@ -130,15 +143,19 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         });
 
+        // prevent the date inputs from closing the filter dropdown when clicked and trigger reload on change
         if (dateStartInput) {
             dateStartInput.addEventListener("click", (e) => e.stopPropagation());
             dateStartInput.addEventListener("change", triggerReload);
         }
+
+        //  prevent the date inputs from closing the filter dropdown when clicked and trigger reload on change
         if (dateEndInput) {
             dateEndInput.addEventListener("click", (e) => e.stopPropagation());
             dateEndInput.addEventListener("change", triggerReload);
         }
 
+        // close the filter dropdown if a click occurs outside of it
         document.addEventListener("click", (e) => {
             if (!filterBox.contains(e.target)) {
                 filterBox.classList.remove("open");
@@ -147,7 +164,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // filter reset button logic
         document.addEventListener("click", (e) => {
+
+            // check if the clicked element is the reset button
             if (e.target.id === "reset-filters-btn") {
+                // reset all filter inputs and selections to their default states
                 if (searchInput) searchInput.value = "";
                 if (authorInput) authorInput.value = "";
                 if (groupInput) groupInput.value = "";
@@ -161,6 +181,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    // debounce function to limit the frequency of reloads during rapid input changes
     const triggerDebouncedReload = () => {
         clearTimeout(searchTimeout);
         searchTimeout = setTimeout(() => {
@@ -172,9 +193,13 @@ document.addEventListener("DOMContentLoaded", () => {
     if (searchInput) {
         searchInput.addEventListener("input", triggerDebouncedReload);
     }
+
+    // text input author filter logic with debounce to reduce reload frequency
     if (authorInput) {
         authorInput.addEventListener("input", triggerDebouncedReload);
     }
+
+    // text input group filter logic with debounce to reduce reload frequency
     if (groupInput) {
         groupInput.addEventListener("input", triggerDebouncedReload);
     }
