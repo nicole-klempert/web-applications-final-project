@@ -176,11 +176,11 @@ export const toggleFriend = async (req, res) => {
 };
 
 // GET /users/search
-// searches users by username, email, and joined date range (using in-memory decryption filter due to encryption)
+// searches users by username, and joined date range (using in-memory decryption filter due to encryption)
 // In the ram of the node.js and not in mongo because it has the decryption key
 export const searchUsers = async (req, res, next) => {
     try {
-        const { username, email, joinedFrom, joinedTo } = req.query;
+        const { username, joinedFrom, joinedTo } = req.query;
 
         // validate date range order
         if (joinedFrom && joinedTo) {
@@ -191,9 +191,14 @@ export const searchUsers = async (req, res, next) => {
             }
         }
 
-        // build database pre-filter for unencrypted createdAt range (we will use the mongo to filter down the user list as much as possible
-        // so we will try to filter first by the unencrypted fields)
         const query = {};
+
+        // filter by username using regex for case-insensitive partial match
+        if (username && username.trim() !== "") {
+            query.username = { $regex: username.trim(), $options: 'i' };
+        }
+
+        // search by joined date range (createdAt field)
         if (joinedFrom || joinedTo) {
             query.createdAt = {};
             if (joinedFrom) {
@@ -212,39 +217,11 @@ export const searchUsers = async (req, res, next) => {
         }
 
         const users = await User.find(query);
-
-        // perform in-memory decryption (in the ram of the node.js and not in mongo because it has the decryption key) filtering on virtual fields
-        // Exclude stale user records that failed to decrypt under the current ENCRYPTION_KEY
-        // To avoid triggering the virtual getters' console.error, we test decryption on raw fields silently
-        let filteredUsers = [];
-        for (const u of users) {
-            try {
-                if (u.usernameEncrypted) decrypt(u.usernameEncrypted);
-                if (u.emailEncrypted) decrypt(u.emailEncrypted);
-                filteredUsers.push(u);
-            } catch (err) {
-                // silently skip stale record
-            }
-        }
-
-        if (username && username.trim() !== "") {
-            const usernameTerm = username.trim().toLowerCase();
-            filteredUsers = filteredUsers.filter(u =>
-                u.username && u.username.toLowerCase().includes(usernameTerm)
-            );
-        }
-
-        if (email && email.trim() !== "") {
-            const emailTerm = email.trim().toLowerCase();
-            filteredUsers = filteredUsers.filter(u =>
-                u.email && u.email.toLowerCase().includes(emailTerm)
-            );
-        }
+        let filteredUsers = users;
 
         // map to non-sensitive response format
         const responseData = filteredUsers.map(u => ({
             username: u.username,
-            email: u.email,
             profilePicture: u.profilePicture || "",
             createdAt: u.createdAt
         }));
@@ -283,14 +260,28 @@ export const deleteUser = async (req, res) => {
         const user = await User.findByUsername(username);
         if (!user) return res.status(404).json({ success: false, error: 'User not found' });
 
+        const targetUsername = user.username;
+
         // delete all posts authored by this user (case-insensitive match)
-        await Post.deleteMany({ author: new RegExp('^' + username + '$', 'i') });
+        await Post.deleteMany({ author: new RegExp('^' + targetUsername + '$', 'i') });
+
+        // remove this user from everyone else's friends lists and friend requests
+        await User.updateMany(
+            {},
+            {
+                $pull: {
+                    friends: targetUsername,
+                    friendRequests: targetUsername
+                }
+            }
+        );
 
         // delete the user itself
         await User.deleteOne({ _id: user._id });
 
         return res.status(200).json({ success: true, message: "User and posts deleted" });
     } catch (error) {
+        console.error('Error deleting user:', error);
         return res.status(500).json({ success: false, error: 'Failed to delete user' });
     }
 };
