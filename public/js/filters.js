@@ -15,6 +15,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // --- Handling Multi-Select Top Tabs (All / Friends / Groups) ---
     const scopeTabs = document.querySelectorAll("#feed-scope-tabs .tab");
+
+    // Initialize the active state based on the default selection
     if (scopeTabs.length > 0) {
         scopeTabs.forEach(tab => {
             tab.addEventListener("click", () => {
@@ -68,10 +70,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // update the filter display text based on current selections
     const updateFilterDisplayUI = () => {
+
+        // if no filter display element, exit early
         if (!filterTextDisplay) return;
         const activeFilter = document.querySelector(".filter-option.selected");
         let displayText = activeFilter ? activeFilter.innerText : "All Posts";
 
+        // if auth
         if (authorInput && authorInput.value.trim()) {
             displayText += ` • Author: ${authorInput.value.trim()}`;
         }

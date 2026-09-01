@@ -21,6 +21,8 @@
         margin-bottom: 20px;
     }
 
+/* --- Crop Viewport Wrapper --- */
+/* for containing the crop viewport - aka the area where the image is cropped */
 .crop-viewport-wrapper {
     display: flex;
     justify-content: center;
@@ -28,6 +30,7 @@
     margin-bottom: 20px;
 }
 
+/* crop canvas container - for profile photo cropping */
 #crop-canvas {
     border-radius: 50%;
     border: 3px solid var(--btn-primary);
@@ -64,6 +67,7 @@
     .crop-modal-actions .btn {
         margin-top: 0 !important;
     }
+
 /* === Modals & Popups === */
 .confirm-modal-content {
     background: var(--card-bg);
@@ -92,6 +96,7 @@
 
 
 /* --- popup model --- */
+/* all styles related to popups (for the semi-transparent background, content position, buttons, etc.) */
 .modal-overlay {
     position: fixed;
     top: 0;
@@ -149,6 +154,7 @@
 }
 
 /* --- media model --- */
+/* all styles related to media previews in modals (aka image and video previews) */
 .modal-media-preview-container {
     position: relative;
     margin-top: 10px;
@@ -215,6 +221,7 @@
     }
 
 /* --- social integration styling --- */
+/* styles for social media sharing toggles */
 .social-share-toggle {
     display: flex;
     align-items: center;
@@ -287,6 +294,7 @@
         }
 
 /* === Dynamic States & Animations === */
+/* spin animation for loading indicators (aka spinner for loading states) */
 @keyframes spin {
     100% {
         transform: rotate(360deg);

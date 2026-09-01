@@ -9,6 +9,7 @@ export const getNews = async (req, res, next) => {
         // get data from frontend, US as deafult
         const country = req.query.country || 'US';
 
+        // fetch the schedule for today
         const schedule = await fetchTodaySchedule(country);
 
         // take the top 10 shows

@@ -153,6 +153,8 @@
         font-size: 0.8rem;
         display: block;
     }
+
+
 /* sidebar search and filtering layouts */
 .sidebar-search-fields {
     display: flex;
@@ -165,6 +167,8 @@
         margin-bottom: 0;
     }
 
+
+/* --- Search Inputs Container --- */
 .search-inputs-container {
     padding: 10px;
     display: flex;
@@ -245,6 +249,8 @@
     }
 
 
+ /* --- Post Target Group --- */
+ /* post target group styles  (for filtering posts by target audience) */
 .post-target-group {
     margin-bottom: 12px;
 }

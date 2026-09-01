@@ -3,11 +3,13 @@ import User from '../models/userModel.js';
 // for ajax requests, or redirect for fallback form posts (so that the page doesnt reload when there is an input mistake)
 const sendResponse = (req, res, status, errorMsg, redirectUrl, extraData = {}) => {
     if (req.headers.accept && req.headers.accept.includes('application/json')) {
+        // send JSON response for AJAX requests
         if (status >= 400) {
             return res.status(status).json({ error: errorMsg });
         }
         return res.json({ success: true, redirect: redirectUrl, ...extraData });
     } else {
+        // redirect for fallback form posts
         if (status >= 400) {
             const separator = redirectUrl.includes('?') ? '&' : '?';
             return res.redirect(`${redirectUrl}${separator}error=${encodeURIComponent(errorMsg)}`);
@@ -19,6 +21,7 @@ const sendResponse = (req, res, status, errorMsg, redirectUrl, extraData = {}) =
 // POST /signup endpoint
 export const signup = async (req, res) => {
     try {
+        // destructure and rename fields from req.body
         const {
             'new-username': username,
             email,
@@ -72,11 +75,14 @@ export const signup = async (req, res) => {
             profilePicture
         });
 
+        // save the new user to the database, log and send success response
         await newUser.save();
         console.log(`[Signup Success] Created secure user: "${username}"`);
 
         return sendResponse(req, res, 200, null, '/login.html?success=Account created successfully! Please log in.');
     } catch (error) {
+
+        // log the error for debugging purposes
         console.error('Error during registration:', error);
         return sendResponse(req, res, 500, 'Registration failed. Please try again.', '/signup.html');
     }
@@ -85,11 +91,13 @@ export const signup = async (req, res) => {
 // POST /login endpoint
 export const login = async (req, res) => {
     try {
+        // destructure username and password from request body
         const { username, password } = req.body;
 
         // query database using blind index static helper
         const user = await User.findByUsername(username);
 
+        // if user not found, send error response
         if (!user) {
             console.log(`[Login Failed] Username not found: "${username}"`);
             return sendResponse(req, res, 400, 'Invalid username or password', '/login.html');
@@ -128,6 +136,7 @@ export const login = async (req, res) => {
 // POST /forgot-password endpoint
 export const forgotPassword = async (req, res) => {
     try {
+        // destructure and rename fields from req.body
         const {
             username,
             'recovery-question': recoveryQuestion,
@@ -136,6 +145,7 @@ export const forgotPassword = async (req, res) => {
             'confirm-new-password': confirmNewPassword
         } = req.body;
 
+        // check if new passwords match
         if (newPassword !== confirmNewPassword) {
             return sendResponse(req, res, 400, 'Passwords do not match', '/forgot-password.html');
         }
@@ -157,6 +167,7 @@ export const forgotPassword = async (req, res) => {
         const isQuestionMatch = user.recoveryQuestion === recoveryQuestion;
         const isAnswerMatch = user.recoveryAnswer.toLowerCase().trim() === recoveryAnswer.toLowerCase().trim();
 
+        // if either the question or answer does not match, send error response
         if (!isQuestionMatch || !isAnswerMatch) {
             console.log(`[Password Reset Failed] Recovery answers mismatch for user: "${username}"`);
             return sendResponse(req, res, 400, 'Invalid username or recovery details', '/forgot-password.html');
