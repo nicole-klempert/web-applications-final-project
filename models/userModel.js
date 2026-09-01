@@ -3,17 +3,14 @@ import bcrypt from 'bcryptjs';
 import { encrypt, decrypt, generateBlindIndex } from '../utils/cryptoUtils.js';
 
 const userSchema = new mongoose.Schema({
-    // the encrypted username (iv:tag:ciphertext)
-    usernameEncrypted: {
-        type: String,
-        required: true
-    },
-    // the hash of the username, used for querying and uniqueness
-    usernameHash: {
+    // username - saved in plaintext for display purposes
+    username: {
         type: String,
         required: true,
         unique: true,
-        index: true
+        index: true,
+        trim: true,
+        lowercase: true
     },
     // the encrypted email (iv:tag:ciphertext)
     emailEncrypted: {
@@ -93,25 +90,6 @@ const userSchema = new mongoose.Schema({
 });
 
 // --- Virtual properties (Getter/Setter) ---
-
-// username virtual field
-userSchema.virtual('username')
-  .get(function () {
-    if (!this.usernameEncrypted) return '';
-    try {
-      return decrypt(this.usernameEncrypted);
-    } catch (err) {
-      console.error('Error decrypting username:', err.message);
-      return '[Decryption Error]';
-    }
-  })
-  .set(function (plaintextUsername) {
-    if (plaintextUsername) {
-      const normalized = plaintextUsername.toLowerCase().trim();
-      this.usernameEncrypted = encrypt(normalized);
-      this.usernameHash = generateBlindIndex(normalized);
-    }
-  });
 
 // email virtual field
 userSchema.virtual('email')
@@ -215,8 +193,7 @@ userSchema.pre('save', async function (next) {
  */
 userSchema.statics.findByUsername = function (username) {
   if (!username) return null;
-  const hash = generateBlindIndex(username.toLowerCase().trim());
-  return this.findOne({ usernameHash: hash });
+  return this.findOne({ username: username.trim().toLowerCase() });
 };
 
 /**
