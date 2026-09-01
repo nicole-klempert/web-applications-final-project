@@ -20,29 +20,50 @@
             <header>
                 <h1>The Watchers</h1>
             </header>
+
             <div class="nav-links mt-4">
-                <a href="feed.html" class="nav-item"><i class="bi bi-house-door nav-icon"></i><span>Feed</span></a>
-                <a href="profile.html" class="nav-item"><i class="bi bi-person nav-icon"></i><span>Profile</span></a>
-                <a href="groups.html" class="nav-item"><i class="bi bi-people nav-icon"></i><span>Groups</span></a>
-                <a href="map.html" class="nav-item active"><i
-                        class="bi bi-geo-alt-fill nav-icon"></i><span>Map</span></a>
-                <a href="statistics.html" class="nav-item"><i
-                        class="bi bi-bar-chart nav-icon"></i><span>Statistics</span></a>
-                <a href="#" class="nav-item" id="dark-mode-toggle"><i class="bi bi-moon-stars nav-icon"
-                        id="dark-mode-icon"></i><span id="dark-mode-text">Dark Mode</span></a>
+                <a href="feed.html" class="nav-item">
+                    <i class="bi bi-house-door nav-icon"></i><span>Feed</span>
+                </a>
+
+                <a href="profile.html" class="nav-item">
+                    <i class="bi bi-person nav-icon"></i><span>Profile</span>
+                </a>
+
+                <a href="groups.html" class="nav-item">
+                    <i class="bi bi-people nav-icon"></i><span>Groups</span>
+                </a>
+
+                <a href="map.html" class="nav-item active">
+                    <i class="bi bi-geo-alt-fill nav-icon"></i><span>Map</span>
+                </a>
+
+                <a href="statistics.html" class="nav-item">
+                    <i class="bi bi-bar-chart nav-icon"></i><span>Statistics</span>
+                </a>
+
+                <a href="#" class="nav-item" id="dark-mode-toggle">
+                    <i class="bi bi-moon-stars nav-icon" id="dark-mode-icon"></i><span id="dark-mode-text">Dark Mode</span>
+                </a>
             </div>
+
             <button type="button" class="btn btn-primary logout-btn" id="logout-btn-trigger">Logout</button>
+
             <div class="account-card mt-auto">
                 <div class="avatar avatar-purple" id="nav-user-avatar">US</div>
-                <div><span class="name" id="nav-user-name">User Name</span><span class="handle"
-                        id="nav-user-handle">@username</span></div>
+                <div>
+                    <span class="name" id="nav-user-name">User Name</span>
+                    <span class="handle" id="nav-user-handle">@username</span>
+                </div>
             </div>
         </nav>
+
         <main class="map-main">
-            <h2>Post Map</h2>
-            <p id="map-description">Posts with a published location that you are allowed to view.</p>
+            <h2>Posts Map</h2>
+
             <div class="map-page-grid">
                 <div id="posts-map" class="community-map"></div>
+
                 <aside class="map-posts-panel">
                     <h3 id="map-posts-title">Posts on the map</h3>
                     <div id="map-posts-list"></div>
@@ -50,9 +71,15 @@
             </div>
         </main>
     </div>
+
     <script src="js/postLocation.js"></script>
     <script src="js/global.js"></script>
     <script src="js/mapManager.js"></script>
+
+    <footer class="site-footer">
+        <p>&copy; 2026 Web Application Project - Shahaf Abraham, Nicole Klempert & Lior Shif</p>
+    </footer>
+
 </body>
 
 </html>

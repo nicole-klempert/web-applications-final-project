@@ -36,8 +36,7 @@
                     <i class="bi bi-bar-chart nav-icon"></i><span>Statistics</span>
                 </a>
                 <a href="#" class="nav-item" id="dark-mode-toggle">
-                    <i class="bi bi-moon-stars nav-icon" id="dark-mode-icon"></i><span id="dark-mode-text">Dark
-                        Mode</span>
+                    <i class="bi bi-moon-stars nav-icon" id="dark-mode-icon"></i><span id="dark-mode-text">Dark Mode</span>
                 </a>
             </div>
 
@@ -54,13 +53,15 @@
 
         <main class="groups-main">
             <div class="groups-top">
-                <div>
-                    <h2>Groups</h2>
+                <h2>Groups</h2>
+
+                <div class="groups-top-row">
                     <p>Find communities or create your own.</p>
+
+                    <button id="open-create-group" class="btn btn-primary create-group-btn">
+                        <i class="bi bi-plus-lg"></i> Create Group
+                    </button>
                 </div>
-                <button id="open-create-group" class="btn btn-primary">
-                    <i class="bi bi-plus-lg"></i> Create Group
-                </button>
             </div>
 
             <div class="groups-filters">
@@ -89,7 +90,7 @@
                 <p>Try changing the filters or create a new group.</p>
             </div>
 
-            <button id="load-more-groups" class="btn btn-secondary load-more-groups" hidden>Load More</button>
+            <div id="groups-scroll-sentinel" class="groups-scroll-sentinel"></div>
         </main>
     </div>
 
@@ -134,7 +135,6 @@
                 </div>
 
                 <div class="modal-footer">
-                    <button type="button" id="cancel-create-group" class="btn btn-secondary">Cancel</button>
                     <button type="submit" class="btn btn-primary">Create</button>
                 </div>
             </form>
@@ -143,6 +143,11 @@
 
     <script src="js/global.js"></script>
     <script src="js/groupsManager.js"></script>
+
+    <footer class="site-footer">
+        <p>&copy; 2026 Web Application Project - Shahaf Abraham, Nicole Klempert & Lior Shif</p>
+    </footer>
+
 </body>
 
 </html>

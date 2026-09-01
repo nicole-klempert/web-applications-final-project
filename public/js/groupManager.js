@@ -112,7 +112,23 @@ document.addEventListener("DOMContentLoaded", () => {
             renderGroup();
             await loadPosts();
         } catch (error) {
-            document.getElementById("group-loading").textContent = error.message;
+            const loading = document.getElementById("group-loading");
+
+            loading.innerHTML = `
+        <div class="empty-state-box">
+            <div class="empty-state-icon-wrapper">
+                <i class="bi bi-lock"></i>
+            </div>
+            <h3>Private Group</h3>
+            <p>This group is private. Join the group to view its content.</p>
+            <button id="reset-filters-btn" type="button">
+                <i class="bi bi-arrow-left" style="margin-right: 6px;"></i> Back to Groups
+            </button>
+        </div>`;
+
+            document.getElementById("reset-filters-btn").onclick = () => {
+                window.location.href = "groups.html";
+            };
         }
     };
 
