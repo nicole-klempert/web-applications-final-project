@@ -118,6 +118,11 @@
         color: var(--text-main) !important;
     }
 
+#dynamic-news-container {
+    column-count: 2; 
+    column-gap: 12px;
+    padding: 8px; 
+}
 .news-item {
     display: block;
     padding: 12px 16px;
