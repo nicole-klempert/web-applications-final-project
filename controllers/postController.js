@@ -11,7 +11,12 @@ const normalizeLocation = location => {
 };
 
 const accessiblePostQuery = async userId => {
-    const groups = userId ? await Group.find({ members: userId }).select('_id') : [];
+    // take all public groups and groups where the user is a member, and return posts that are either in those groups or have no group
+    const groupQuery = userId
+        ? { $or: [{ members: userId }, { isPublic: { $ne: false } }] }
+        : { isPublic: { $ne: false } };
+
+    const groups = await Group.find(groupQuery).select('_id');
     return { $or: [{ group: null }, { group: { $exists: false } }, { group: { $in: groups.map(group => group._id) } }] };
 };
 
@@ -32,11 +37,23 @@ export const getPosts = async (req, res, next) => {
 
         // Ensure query.$and is initialized safely
         query.$and = [];
-
         const currentUserId = req.session?.user?.id;
+
+        // save the groups where the current user is a member for filtering later
         const memberGroups = currentUserId ? await Group.find({ members: currentUserId }).select('_id name') : [];
         const memberGroupIds = memberGroups.map(group => group._id);
-        query.$and.push({ $or: [{ group: null }, { group: { $exists: false } }, { group: { $in: memberGroupIds } }] });
+
+        // filter posts based on accessible groups (public or member)
+        const accessibleGroupsQuery = currentUserId
+            ? { $or: [{ members: currentUserId }, { isPublic: { $ne: false } }] }
+            : { isPublic: { $ne: false } };
+
+        // Find accessible groups and get their IDs
+        const accessibleGroups = await Group.find(accessibleGroupsQuery).select('_id');
+        const accessibleGroupIds = accessibleGroups.map(group => group._id);
+
+        // Add a filter to the query to include posts that are either not associated with any group or belong to accessible groups
+        query.$and.push({ $or: [{ group: null }, { group: { $exists: false } }, { group: { $in: accessibleGroupIds } }] });
 
         // text search across content and author fields
         if (req.query.search && req.query.search.trim() !== "") {
