@@ -37,7 +37,6 @@ export const getPosts = async (req, res, next) => {
 
         // Ensure query.$and is initialized safely
         query.$and = [];
-
         const currentUserId = req.session?.user?.id;
 
         // save the groups where the current user is a member for filtering later
