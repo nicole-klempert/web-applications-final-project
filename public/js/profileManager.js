@@ -486,7 +486,6 @@ document.addEventListener("DOMContentLoaded", () => {
                     ${avatarHTML}
                     <div>
                         <span class="name">${user.username} ${isMe ? '<span class="text-primary small">(You)</span>' : ''}</span>
-                        <span class="handle">${user.email}</span>
                     </div>
                 </a>
             `;
@@ -500,7 +499,6 @@ document.addEventListener("DOMContentLoaded", () => {
         searchResultsContainer.innerHTML = `<div class="text-center text-muted p-2 small"><span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Searching...</div>`;
 
         const usernameVal = searchUsernameInput ? searchUsernameInput.value.trim() : "";
-        const emailVal = searchEmailInput ? searchEmailInput.value.trim() : "";
         const fromVal = searchJoinedFromInput ? searchJoinedFromInput.value : "";
         const toVal = searchJoinedToInput ? searchJoinedToInput.value : "";
 
@@ -512,7 +510,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const params = new URLSearchParams({
             username: usernameVal,
-            email: emailVal,
             joinedFrom: fromVal,
             joinedTo: toVal
         });

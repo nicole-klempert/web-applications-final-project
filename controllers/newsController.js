@@ -11,8 +11,8 @@ export const getNews = async (req, res, next) => {
 
         const schedule = await fetchTodaySchedule(country);
 
-        // take the top 4 shows
-        const topShows = schedule.slice(0, 4);
+        // take the top 10 shows
+        const topShows = schedule.slice(0, 10);
 
         return res.status(200).json(topShows);
     } catch (error) {
