@@ -5,7 +5,7 @@
 <head>
     <meta charset="utf-8" />
     <title>The Watchers Network</title>
-
+    <!-- import stylesheets -->
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="css/variables.css">
@@ -16,8 +16,10 @@
 </head>
 
 <body>
+    <!-- main content -->
     <main class="login-container">
         <section class="brand-section">
+            <!-- floating posters - imports the picture from the web by URL -->
             <div class="floating-posters-container">
                 <div class="floating-poster poster-1">
                     <img src="https://m.media-amazon.com/images/M/MV5BMjhlNTk4MTAtY2E2Yi00M2Y1LThiNGEtZWUzMGM3MmJlZmRmXkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg"
@@ -61,11 +63,12 @@
                         </div>
                     </div>
                     <span class="avatar-helper-text">Add Profile Photo (Optional)</span>
-
+                    <!-- input for selecting profile picture -->
                     <input type="file" id="profile-picture-input" accept="image/*" style="display: none;">
                     <input type="hidden" id="cropped-profile-data" name="profile-picture">
                 </div>
 
+                <!-- input all required fields -->
                 <div class="input-group">
                     <label for="new-username" class="input-label">Username</label>
                     <input type="text" id="new-username" name="new-username" placeholder="Select your username"

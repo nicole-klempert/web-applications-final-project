@@ -11,11 +11,14 @@ async function fetchNews() {
 
         // fetch from backend proxy route instead of directly querying external api
         const response = await fetch(`/api/news?country=${countryCode}`);
+
+        // check if response is ok and throw error if not
         if (!response.ok) throw new Error("Network response was not ok");
         const shows = await response.json();
 
         newsContainer.innerHTML = ''; // clear loading state
 
+        // for each show, create a news item and append to the container
         shows.forEach(item => {
             const showName = item.show.name;
             const network = item.show.network ? item.show.network.name : "Streaming";

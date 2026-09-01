@@ -1,7 +1,9 @@
 document.addEventListener("DOMContentLoaded", () => {
     // === authentication guard ===
+    // Retrieve the logged-in user from local storage
     const currentUser = (localStorage.getItem("loggedInUser") || "").trim();
     if (!currentUser) {
+        // Redirect to login page if no user is found in the session
         sessionStorage.setItem("authAlert", "You must be logged in to view this page.");
         window.location.replace("login.html");
         return;
@@ -14,29 +16,36 @@ document.addEventListener("DOMContentLoaded", () => {
     const postFeed = document.querySelector(".post-feed");
     let currentPage = 1;
     let hasMorePosts = false;
-    let isLoading = false;
+    let isLoading = false; // Flag to prevent multiple simultaneous fetch requests
 
     // === fetch posts function ===
     const loadPosts = async (page = 1, append = false) => {
         if (!postFeed || isLoading) return;
         isLoading = true;
 
+        // Retrieve active filters from global function if available, otherwise apply default empty filters
         const filters = window.getPostFilters ? window.getPostFilters() : { search: "", startDate: "", endDate: "", type: "all" };
         const params = new URLSearchParams({ page, limit: 5, ...filters });
 
         try {
             const res = await fetch(`/posts?${params}`);
             const data = await res.json();
+
             // if data exists process it and show posts, else show empty state
             if (data.success) {
+
+                // Check if the current user has a post with a profile picture in the fetched data
+                // If the local storage is missing the picture, update it based on the post data
                 const myPostWithPic = (data.posts || []).find(p => p.author && p.author.trim().toLowerCase() === currentUser.toLowerCase() && p.authorProfilePic && p.authorProfilePic.trim() !== "");
                 if (myPostWithPic && (!localStorage.getItem("userProfilePic") || localStorage.getItem("userProfilePic").trim() === "")) {
                     localStorage.setItem("userProfilePic", myPostWithPic.authorProfilePic);
                     window.syncSidebarAvatars(myPostWithPic.authorProfilePic, currentUser);
                 }
 
+                // Clear the feed container if we are not appending (e.g., initial load or applying new filters)
                 if (!append) postFeed.innerHTML = "";
 
+                // Render empty state UI if no posts match the criteria
                 if (data.posts.length === 0 && !append) {
                     postFeed.innerHTML = `
                         <div class="empty-state-box">
@@ -50,6 +59,7 @@ document.addEventListener("DOMContentLoaded", () => {
                             </button>
                         </div>`;
 
+                    // Attach event listener to reset all filter inputs and reload the default feed
                     document.getElementById("reset-filters-btn")?.addEventListener("click", () => {
                         const searchEl = document.getElementById("feed-search-input");
                         const startEl = document.getElementById("filter-date-start");
@@ -63,36 +73,44 @@ document.addEventListener("DOMContentLoaded", () => {
                         loadPosts(1, false);
                     });
                 } else {
+
+                    // Inject post HTML into the feed container for each post received
                     data.posts.forEach(p => postFeed.insertAdjacentHTML("beforeend", window.createPostCardHTML(p)));
                 }
 
+                // Update pagination state variables
                 hasMorePosts = data.hasMore || false;
                 currentPage = data.currentPage || 1;
 
                 // --- Infinite Scroll Logic ---
                 document.getElementById("infinite-scroll-trigger")?.remove();
                 if (hasMorePosts) {
+
+                    // Add an invisible trigger element at the bottom of the feed
                     postFeed.insertAdjacentHTML("afterend", `<div id="infinite-scroll-trigger" class="infinite-scroll-trigger"></div>`);
                     const trigger = document.getElementById("infinite-scroll-trigger");
+
+                    // Initialize IntersectionObserver to detect when the user scrolls to the bottom
                     const observer = new IntersectionObserver((entries) => {
                         if (entries[0].isIntersecting && !isLoading) {
-                            observer.disconnect();
-                            loadPosts(currentPage + 1, true);
+                            observer.disconnect(); // Stop observing once triggered to prevent duplicate calls
+                            loadPosts(currentPage + 1, true); // Fetch next page and append
                         }
-                    }, { rootMargin: "200px" });
+                    }, { rootMargin: "200px" }); // Trigger 200px before the element enters the viewport
                     observer.observe(trigger);
                 }
             }
         } catch (err) {
             console.error("Fetch error:", err);
         } finally {
-            isLoading = false;
+            isLoading = false; // Release the loading lock regardless of success or failure
         }
     };
 
     window.reloadPostsFeed = () => loadPosts(1, false);
 
     // === show single post blur modal ===
+    // dynamically creates and opens a modal displaying a specific post with a blurred background
     const showSinglePostBlurModal = (post) => {
         document.getElementById("single-post-blur-modal")?.remove();
         document.body.insertAdjacentHTML("beforeend", `
@@ -106,14 +124,17 @@ document.addEventListener("DOMContentLoaded", () => {
         const m = document.getElementById("single-post-blur-modal");
         const close = () => {
             m.remove();
+            // clean up the URL query parameters without reloading the page
             if (window.history.replaceState) window.history.replaceState({}, document.title, window.location.pathname);
         };
         document.getElementById("close-blur-modal-btn").addEventListener("click", close);
         m.addEventListener("click", (e) => { if (e.target === m) close(); });
     };
 
+    // Initial load of the post feed
     loadPosts(1, false);
 
+    // Check if the URL contains a specific 'postId' parameter (e.g., navigated from a shared link)
     const urlPostId = new URLSearchParams(window.location.search).get("postId");
     if (urlPostId) fetch(`/posts/${urlPostId}`).then(r => r.json()).then(d => { if (d.success && d.post) showSinglePostBlurModal(d.post); });
 
@@ -126,6 +147,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const imgPreview = document.getElementById("modal-media-preview");
     const videoPreview = document.getElementById("modal-video-preview");
     const postTargetSelect = document.getElementById("post-target-select");
+
+    // Initialize the external location picker tool for the post creation modal
     let selectedPostLocation = null;
     const postLocationPicker = window.PostLocationPicker?.createPicker({
         buttonId: "modal-location-btn",
@@ -137,6 +160,8 @@ document.addEventListener("DOMContentLoaded", () => {
         labelId: "modal-location-selected",
         onChange: location => { selectedPostLocation = location; }
     });
+
+    // Fetch groups the current user is a member of to populate the "Post to" dropdown options
     const loadMemberGroups = async () => {
         if (!postTargetSelect) return;
         try {
@@ -153,6 +178,7 @@ document.addEventListener("DOMContentLoaded", () => {
         } catch (error) { console.error("Failed to load user groups:", error); }
     };
 
+    // Open the create post modal and populate dropdowns when the placeholder is clicked
     document.getElementById("trigger-modal-bar")?.addEventListener("click", async () => {
         await loadMemberGroups();
         modalOverlay?.classList.add("active");
@@ -225,6 +251,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 return;
             }
 
+            // Generate a local object URL to render the media preview immediately
             if (previewContainer) {
                 const url = URL.createObjectURL(file);
                 previewContainer.style.display = "flex";
@@ -237,7 +264,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     imgPreview.style.display = "block";
                     videoPreview.style.display = "none";
                 }
-                modalPublishBtn.disabled = false;
+                modalPublishBtn.disabled = false; // Enable publish button now that media is attached
             }
         });
     }
@@ -245,17 +272,22 @@ document.addEventListener("DOMContentLoaded", () => {
     // publish button logic: send post data to server
     if (modalPublishBtn) {
         modalPublishBtn.addEventListener("click", async () => {
-            modalPublishBtn.disabled = true;
+            modalPublishBtn.disabled = true; // Prevent double-clicks
 
+            // Process media file if one exists
             const file = mediaInput?.files[0];
             let mediaUrl = "", mediaType = "";
             if (file) {
+
+                // Convert file to Base64 string for database storage
                 mediaUrl = await window.fileToDataURL(file);
                 mediaType = file.type.startsWith("video/") ? "video" : "image";
             }
 
+            // Check if the user toggled the Facebook share button
             const shareToFacebook = document.getElementById("share-facebook-btn")?.classList.contains("active") || false;
 
+            // Construct the API payload, conditionally merging location and group data if present
             const res = await fetch('/posts', {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

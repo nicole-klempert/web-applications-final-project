@@ -17,6 +17,7 @@ export const sharePost = async (message) => {
         };
     }
 
+    // Real API call to Facebook Graph API
     try {
         const response = await fetch('https://graph.facebook.com/v18.0/me/feed', {
             method: 'POST',
@@ -29,7 +30,10 @@ export const sharePost = async (message) => {
             })
         });
 
+        // Check for HTTP errors
         const data = await response.json();
+
+        // Check for Graph API errors
         if (!response.ok) {
             console.error('Facebook API: Error - Graph API returned error:', data.error);
             return { success: false, error: data.error?.message || 'Graph API error' };

@@ -10,6 +10,8 @@ const KEY_LENGTH = 32; // 256 bits
 
 // validate that the encryption key is set and valid
 const hexKey = process.env.ENCRYPTION_KEY;
+
+// if the key is not set or not a valid 64-character hex string, throw an error
 if (!hexKey || hexKey.length !== KEY_LENGTH * 2) {
     throw new Error(`ENCRYPTION_KEY must be a 64-character hex string (32 bytes). Current length: ${hexKey ? hexKey.length : 0}`);
 }
@@ -27,6 +29,8 @@ if (!BLIND_INDEX_SALT) {
  * @returns {string} the encrypted text formatted as "iv:authTag:ciphertext".
  */
 export function encrypt(text) {
+
+    // if its not valid string, throw an error
     if (typeof text !== 'string') {
         throw new TypeError('plaintext must be a string.');
     }
@@ -54,11 +58,14 @@ export function encrypt(text) {
  * @returns {string} the decrypted plaintext.
  */
 export function decrypt(encryptedText) {
+    // if the input is not a string, throw an error
     if (typeof encryptedText !== 'string') {
         throw new TypeError('encrypted text must be a string.');
     }
 
     const parts = encryptedText.split(':');
+
+    // if the encrypted text does not have exactly three parts, throw an error
     if (parts.length !== 3) {
         throw new Error('Invalid encrypted text format. Expected "iv:authTag:ciphertext".');
     }
@@ -89,6 +96,8 @@ export function decrypt(encryptedText) {
  * @returns {string} the index hash in hex format.
  */
 export function generateBlindIndex(text) {
+
+    // if the input is not a string, return an empty string
     if (typeof text !== 'string') {
         return '';
     }

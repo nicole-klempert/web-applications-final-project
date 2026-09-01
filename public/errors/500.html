@@ -11,86 +11,27 @@
     <link rel="stylesheet" href="/css/variables.css">
     <link rel="stylesheet" href="/css/layout.css">
     <link rel="stylesheet" href="/css/components.css">
-    <style>
-        /* error page layout and centering */
-        .error-page-container {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            background-color: var(--bg-color);
-            padding: 20px;
-            text-align: center;
-        }
-
-        /* styled container card */
-        .error-card {
-            background-color: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 40px;
-            max-width: 500px;
-            width: 100%;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-        }
-
-        /* 500 display text */
-        .error-code {
-            font-size: 7rem;
-            font-weight: 800;
-            color: var(--btn-primary);
-            line-height: 1;
-            margin-bottom: 20px;
-            text-shadow: 2px 2px 4px rgba(99, 102, 241, 0.2);
-        }
-
-        /* title of the error */
-        .error-title {
-            font-size: 1.8rem;
-            font-weight: 700;
-            color: var(--text-main);
-            margin-bottom: 15px;
-        }
-
-        /* description text */
-        .error-desc {
-            color: var(--text-muted);
-            margin-bottom: 30px;
-            font-size: 1rem;
-            line-height: 1.6;
-        }
-
-        /* action button to go back home */
-        .btn-home {
-            background-color: var(--btn-primary) !important;
-            border-color: var(--btn-primary) !important;
-            color: #ffffff !important;
-            font-weight: 600;
-            padding: 10px 24px;
-            border-radius: 8px;
-            transition: background-color 0.2s ease, transform 0.2s ease;
-            text-decoration: none;
-            display: inline-block;
-        }
-
-        .btn-home:hover {
-            background-color: var(--btn-primary-hover) !important;
-            border-color: var(--btn-primary-hover) !important;
-            transform: translateY(-2px);
-        }
-    </style>
+    <link rel="stylesheet" href="/css/errorsStyle.css">
 </head>
 
 <body>
+    <!-- Main error page content -->
     <div class="error-page-container">
         <div class="error-card">
             <div class="error-code">500</div>
             <h1 class="error-title">Server Error</h1>
-            <p class="error-desc">Oops! Something went wrong on our server. We are working to resolve the issue as
-                quickly as possible.</p>
+            <p class="error-desc">
+                Oops! Something went wrong on our server. We are working to resolve the issue as
+                quickly as possible.
+            </p>
             <a href="/feed.html" class="btn btn-home">Go Back to Feed</a>
         </div>
     </div>
+
+    <footer class="site-footer">
+        <p>&copy; 2026 Web Application Project - Shahaf Abraham, Nicole Klempert & Lior Shif</p>
+    </footer>
+
 </body>
 
 </html>

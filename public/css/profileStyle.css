@@ -24,6 +24,7 @@
 .profile-title-row {
     display: flex;
     align-items: center;
+    /* justify-content - for distributing items along the main axis */
     justify-content: space-between;
     gap: 12px;
     margin-bottom: 8px;

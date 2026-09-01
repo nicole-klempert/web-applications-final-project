@@ -13,6 +13,7 @@
     flex-shrink: 0;
 }
 
+/* Avatar color variations */
 .avatar-muted {
     background: linear-gradient(#8dc9a4 50%, #349158 50%);
 }
@@ -34,6 +35,7 @@
     width: 100%;
 }
 
+/* Avatar Preview Circle - displayed when an avatar is uploaded */
 .avatar-preview-circle {
     width: 80px;
     height: 80px;
@@ -50,12 +52,14 @@
     box-shadow: 0 2px 8px rgba(99, 102, 241, 0.1);
 }
 
+/* Hover effect for the avatar preview circle  */
     .avatar-preview-circle:hover {
         border-style: solid;
         transform: scale(1.04);
         box-shadow: 0 4px 12px rgba(99, 102, 241, 0.22);
     }
 
+    /* avatar placeholder content - if no avatar is uploaded */
 .avatar-placeholder-content {
     display: flex;
     align-items: center;
@@ -64,6 +68,7 @@
     user-select: none;
 }
 
+/* avatar placeholder icon */
     .avatar-placeholder-content i {
         font-size: 1.8rem;
     }
@@ -76,6 +81,7 @@
     display: block;
 }
 
+/* helper text for the avatar (e.g., "Click to upload avatar") */
 .avatar-helper-text {
     font-size: 0.85rem;
     font-weight: 700;
@@ -83,6 +89,7 @@
     margin-top: 8px;
 }
 
+/* hover overlay for the avatar preview circle */
 .avatar-hover-overlay {
     position: absolute;
     top: 0;
@@ -99,6 +106,7 @@
     transition: opacity 0.2s ease;
 }
 
+/* Hover effect for the avatar preview circle */
 .avatar-preview-circle:hover .avatar-hover-overlay {
     opacity: 1;
 }
@@ -111,6 +119,7 @@
     gap: 12px !important;
 }
 
+/* avatar link styles (e.g., for linking to user profiles) */
     .author-info-group a {
         display: inline-flex;
         align-items: center;
@@ -124,6 +133,7 @@
     font-size: 2rem !important;
 }
 
+/* small avatar size (e.g., for compact displays) */
 .avatar-sm {
     width: 30px !important;
     height: 30px !important;

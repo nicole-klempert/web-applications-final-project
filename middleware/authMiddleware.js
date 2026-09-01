@@ -52,22 +52,34 @@ export const isPostOwner = async (req, res, next) => {
     }
 };
 
+// middleware to check if the logged-in user can delete the post.
 export const canDeletePost = async (req, res, next) => {
     try {
+
+        // find the post in the database
         const post = await Post.findById(req.params.postId);
+
+        // if the post doesn't exist, return a 404 error
         if (!post) return res.status(404).json({ success: false, error: 'Post not found.' });
+
+        // check if the logged-in user is the author of the post (not case sensitive)
         if ((post.author || '').toLowerCase() === (req.session.user.username || '').toLowerCase()) {
             req.post = post;
             return next();
         }
+
+        // if the post is associated with a group, check if the logged-in user is the group owner or an admin
         if (post.group) {
             const group = await Group.findById(post.group);
             const userId = req.session.user.id;
+
+            // check if the logged-in user is the group owner or an admin
             if (group && (String(group.owner) === String(userId) || (group.admins || []).some(id => String(id) === String(userId)))) {
                 req.post = post;
                 return next();
             }
         }
+
         return res.status(403).json({ success: false, error: '403 Forbidden: You are not authorized to delete this post.' });
     } catch (error) {
         console.error('Error in post delete authorization:', error);
@@ -75,8 +87,13 @@ export const canDeletePost = async (req, res, next) => {
     }
 };
 
+// helper function to load a group by ID and handle errors
 const loadGroup = async (req, res) => {
+
+    // find the group in the database
     const group = await Group.findById(req.params.groupId);
+
+    // if the group doesn't exist, return a 404 error
     if (!group) {
         res.status(404).json({ success: false, error: 'Group not found' });
         return null;
@@ -84,30 +101,46 @@ const loadGroup = async (req, res) => {
     return group;
 };
 
+// middleware to check if the logged-in user is the owner or an admin of the group.
 export const isGroupAdmin = async (req, res, next) => {
     try {
+
+        // load the group using the helper function
         const group = await loadGroup(req, res);
+
+        // if the group doesn't exist, the helper function will handle the response
         if (!group) return;
+
         const userId = req.session.user.id;
+
+        // check if the logged-in user is the group owner or an admin
         const isAllowed = String(group.owner) === String(userId) || (group.admins || []).some(id => String(id) === String(userId));
+
+        // if the user is not allowed, return a 403 error
         if (!isAllowed) return res.status(403).json({ success: false, error: 'Only the group owner or an admin can perform this action' });
         req.group = group;
         next();
+
     } catch (error) {
         return res.status(500).json({ success: false, error: 'Group authorization failed' });
     }
 };
 
-/**
- * placeholder for group owner middleware (will be fully implemented when Group model is done).
- */
+// middleware to check if the logged-in user is the owner of the group.
 export const isGroupOwner = async (req, res, next) => {
     try {
+
+        // load the group using the helper function
         const group = await loadGroup(req, res);
+
+        // if the group doesn't exist, the helper function will handle the response
         if (!group) return;
+
+        // check if the logged-in user is the group owner
         if (String(group.owner) !== String(req.session.user.id)) return res.status(403).json({ success: false, error: 'Only the group owner can perform this action' });
         req.group = group;
         next();
+
     } catch (error) {
         return res.status(500).json({ success: false, error: 'Group authorization failed' });
     }

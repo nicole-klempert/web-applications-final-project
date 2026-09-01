@@ -74,6 +74,7 @@
     z-index: 1;
 }
 
+/* Floating Poster Styles (for the floating elements in the brand section) */
 .floating-poster {
     position: absolute;
     width: 140px;
@@ -128,7 +129,7 @@
     animation: float-6 13s ease-in-out infinite;
 }
 
-/* Animations Keyframes */
+/* Animations Keyframes - for floating posters, determine their movement */
 @keyframes float-1 {
 
     0%,

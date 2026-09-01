@@ -1,3 +1,4 @@
+// listen for DOMContentLoaded to ensure the DOM is fully loaded before executing the script
 document.addEventListener("DOMContentLoaded", () => {
     const currentUser = (localStorage.getItem("loggedInUser") || "").trim();
     if (!currentUser) {
@@ -25,7 +26,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const postsCountEl = document.getElementById("profile-posts-count");
     const editCityInput = document.getElementById("edit-city-input");
 
-    // Edit Profile & Crop Elements
+    // Edit Profile
     const editModal = document.getElementById("edit-profile-modal");
     const editBioInput = document.getElementById("edit-bio-input");
     const editProfileFileInput = document.getElementById("edit-profile-file-input");
@@ -33,11 +34,13 @@ document.addEventListener("DOMContentLoaded", () => {
     const editAvatarPlaceholder = document.getElementById("edit-avatar-placeholder");
     const editAvatarTrigger = document.getElementById("edit-avatar-trigger");
 
+    // Crop Modal Elements
     const cropModal = document.getElementById("crop-modal");
     const canvas = document.getElementById("crop-canvas");
     const ctx = canvas.getContext("2d");
     const zoomSlider = document.getElementById("zoom-slider");
 
+    // profile data and cropped image state
     let profileData = null;
     let finalCroppedBase64 = "";
 
@@ -50,6 +53,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // --- sidebar avatar click navigation ---
     const accountCard = document.querySelector(".account-card");
+    // if the account card exists, make it clickable to navigate to my profile
     if (accountCard) {
         accountCard.style.cursor = "pointer";
         accountCard.addEventListener("click", navigateToMyProfile);
@@ -57,6 +61,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // --- nav avatar click navigation ---
     const navAvatar = document.getElementById("nav-user-avatar");
+    // if the nav avatar exists, make it clickable to navigate to my profile
     if (navAvatar) {
         navAvatar.style.cursor = "pointer";
         navAvatar.addEventListener("click", (e) => {
@@ -71,13 +76,16 @@ document.addEventListener("DOMContentLoaded", () => {
             // Fetch the profile data from the server
             const res = await fetch(`/users/${encodeURIComponent(profileUsername)}?currentUser=${encodeURIComponent(currentUser)}`);
             const data = await res.json();
-            
+
+            // if the fetch is successful, update the profileData and render the UI
             if (data.success) {
                 profileData = data.user;
 
                 // if it's my profile, sync the profile picture with localStorage and sidebar avatars
                 if (isMyProfile) {
                     const localPic = localStorage.getItem("userProfilePic") || "";
+
+                    // prioritize the server profile picture if available, otherwise use the localStorage one
                     if (profileData.profilePicture && profileData.profilePicture.trim() !== "" && profileData.profilePicture !== "undefined" && profileData.profilePicture !== "null") {
                         localStorage.setItem("userProfilePic", profileData.profilePicture);
                         window.syncSidebarAvatars(profileData.profilePicture, currentUser);
@@ -141,6 +149,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // Render the action button based on whether it's my profile or someone else's
         actionBtn.style.display = "block";
+
         // if it's my profile, show "Edit Profile"
         if (isMyProfile) {
             actionBtn.innerText = "Edit Profile";
@@ -150,6 +159,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 finalCroppedBase64 = picToUse || "";
                 editBioInput.value = profileData.bio || "";
                 editCityInput.value = profileData.city || "";
+
+                // if there's a cropped image, show it in the live preview; otherwise, show the placeholder
                 if (finalCroppedBase64) {
                     editAvatarLivePreview.src = finalCroppedBase64;
                     editAvatarLivePreview.style.display = "block";
@@ -160,11 +171,15 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
                 editModal.classList.add("active");
             };
+
            // if it's someone else's, show "Add Friend" or "Remove Friend" based on friendship status
         } else {
             const isFriend = profileData.friends && profileData.friends.some(f => f.username.toLowerCase() === currentUser.toLowerCase());
             const hasSentRequest = profileData.hasSentRequest;
 
+            // if the user is already a friend, show "Remove Friend";
+            // if a request has been sent, show "Sent";
+            // otherwise, show "Add Friend"
             if (isFriend) {
                 actionBtn.innerHTML = '<i class="bi bi-person-dash"></i> Remove Friend';
                 actionBtn.className = "btn btn-secondary btn-sm";
@@ -196,6 +211,7 @@ document.addEventListener("DOMContentLoaded", () => {
         modal.querySelector("p").innerText = `Are you sure you want to remove ${targetUser} from your friends list?`;
         modal.classList.add("active");
 
+        // Clone the confirm button to remove any previous event listeners
         const confirmBtn = document.getElementById("confirm-delete-btn");
         const newConfirmBtn = confirmBtn.cloneNode(true);
         confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
@@ -237,6 +253,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // --- render friends list ---
     const renderFriendsList = () => {
+
+        // get the friends list container and ensure it exists
         const container = document.getElementById("friends-list-container");
         if (!container) return;
 
@@ -247,6 +265,7 @@ document.addEventListener("DOMContentLoaded", () => {
             html += `<div class="pending-requests-container">
                         <h4 class="section-header-sm"><i class="bi bi-person-exclamation"></i> Pending Requests</h4>`;
 
+            // map through the friend requests and create HTML for each request
             html += profileData.friendRequests.map(reqUser => `
                 <div class="pending-request-item">
                     <div class="friend-info">
@@ -265,7 +284,7 @@ document.addEventListener("DOMContentLoaded", () => {
         // active friends section
         html += `<h4 class="section-header-sm"><i class="bi bi-people"></i> All Friends</h4>`;
 
-        // if no friends, show empty state
+        // if no friends, show empty state else render the list of friends
         if (!profileData.friends || profileData.friends.length === 0) {
             html += `
                 <div class="empty-state-box empty-state-flat">
@@ -299,12 +318,15 @@ document.addEventListener("DOMContentLoaded", () => {
     // event delegation for friend buttons
     document.addEventListener("click", (e) => {
         const acceptBtn = e.target.closest(".accept-request-btn");
+        // if the accept button is clicked, call toggleFriendStatus with 'accept' action
         if (acceptBtn) return toggleFriendStatus('accept', acceptBtn.dataset.user);
 
         const rejectBtn = e.target.closest(".reject-request-btn");
+        // if the reject button is clicked, call toggleFriendStatus with 'reject' action
         if (rejectBtn) return toggleFriendStatus('reject', rejectBtn.dataset.user);
 
         const removeBtn = e.target.closest(".remove-friend-btn");
+        // if the remove button is clicked, show the remove friend modal
         if (removeBtn) return showRemoveFriendModal(removeBtn.dataset.user);
     });
 
@@ -318,22 +340,26 @@ document.addEventListener("DOMContentLoaded", () => {
             if (data.success) {
                 const userPosts = (data.posts || []).filter(p => p.author && p.author.toLowerCase() === profileUsername.toLowerCase());
 
+                // if the posts count element exists, update it with the number of posts authored by the user
                 if (postsCountEl) {
                     postsCountEl.innerText = userPosts.length;
                 }
 
                 // if the profile picture is missing, try to find a post with a valid authorProfilePic and use it as the profile picture
                 const postWithPic = userPosts.find(p => p.authorProfilePic && p.authorProfilePic.trim() !== "" && p.authorProfilePic !== "undefined");
+
+                // if a post with a valid authorProfilePic is found and the profile picture is missing,
+                // update the profile picture and re - render the profile UI
                 if (postWithPic && (!profileData.profilePicture || profileData.profilePicture.trim() === "" || profileData.profilePicture === "undefined")) {
                     profileData.profilePicture = postWithPic.authorProfilePic;
                     renderProfileUI(); // update the profile UI with the new profile picture
                 }
 
+                // if no posts are found for the user, display a message indicating that there are no posts
                 if (userPosts.length === 0) {
                     userPostsContainer.innerHTML = `<div style="text-align: center; padding: 40px; color: var(--text-muted);">No posts found from this user.</div>`;
                     return;
                 }
-
 
                 // clear existing posts and render the fetched posts
                 userPostsContainer.innerHTML = "";
@@ -348,6 +374,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     };
 
+    // show loading state while fetching posts
     window.reloadPostsFeed = loadUserPosts;
 
     // --- Initialize Universal Image Cropper ---
@@ -371,6 +398,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // send the updated profile data to the server
         try {
+
+            // send the updated profile data to the server
             const res = await fetch(`/users/${encodeURIComponent(currentUser)}`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
@@ -380,6 +409,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
             // if the update was successful, update localStorage and sidebar avatars, then reload profile data
             if (data.success) {
+
+                // if a new cropped image is available, store it in localStorage and sync sidebar avatars;
+                // otherwise, remove the profile picture from localStorage and sync sidebar avatars with an empty string
                 if (finalCroppedBase64) {
                     localStorage.setItem("userProfilePic", finalCroppedBase64);
                     window.syncSidebarAvatars(finalCroppedBase64, currentUser);
@@ -405,6 +437,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // --- delete account logic ---
     const deleteAccountBtn = document.getElementById("delete-account-btn");
+
+    // if the delete account button exists, add a click event listener to show the delete confirmation modal
     if (deleteAccountBtn) {
         deleteAccountBtn.addEventListener("click", () => {
             const modal = document.getElementById("delete-confirm-modal");
@@ -423,6 +457,7 @@ document.addEventListener("DOMContentLoaded", () => {
             newConfirmBtn.addEventListener("click", async () => {
                 modal.classList.remove("active");
                 try {
+                    // send a DELETE request to the server to delete the account
                     const res = await fetch(`/users/${encodeURIComponent(currentUser)}`, {
                         method: 'DELETE',
                         headers: { 'Content-Type': 'application/json' },
@@ -448,8 +483,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-
-
     // === USER SEARCH ===
     const searchBtn = document.getElementById("searchBtn");
     const resetSearchBtn = document.getElementById("resetSearchBtn");
@@ -459,7 +492,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const searchJoinedToInput = document.getElementById("searchJoinedTo");
     const searchResultsContainer = document.getElementById("searchResultsContainer");
 
+    //  --- display search results ---
     const displaySearchResults = (users) => {
+        // if there are no users found, display a message indicating that no users were found
         if (!searchResultsContainer) return;
         searchResultsContainer.innerHTML = "";
 
@@ -468,12 +503,14 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
+        // if users are found, create an account card for each user and display it in the search results container
         users.forEach(user => {
             const isMe = user.username.trim().toLowerCase() === currentUser.trim().toLowerCase();
             const profileLink = `profile.html?user=${encodeURIComponent(user.username)}`;
 
             // Build avatar HTML
             let avatarHTML = "";
+            // if the user has a valid profile picture, use it; otherwise, use initials
             if (user.profilePicture && user.profilePicture.trim() !== "" && user.profilePicture !== "undefined" && user.profilePicture !== "null") {
                 avatarHTML = `<img src="${user.profilePicture}" class="avatar" alt="avatar" />`;
             } else {
@@ -481,6 +518,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 avatarHTML = `<div class="avatar avatar-purple">${initials}</div>`;
             }
 
+            // Build the account card HTML for the user and insert it into the search results container
             const itemHTML = `
                 <a href="${profileLink}" class="account-card">
                     ${avatarHTML}
@@ -493,6 +531,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     };
 
+    // --- fetch search results ---
     const fetchSearchResults = async () => {
         if (!searchResultsContainer) return;
         // Use Bootstrap
@@ -502,12 +541,14 @@ document.addEventListener("DOMContentLoaded", () => {
         const fromVal = searchJoinedFromInput ? searchJoinedFromInput.value : "";
         const toVal = searchJoinedToInput ? searchJoinedToInput.value : "";
 
+        // Validate that the "Joined From" date is not later than the "Joined To" date
         if (fromVal && toVal && new Date(fromVal) > new Date(toVal)) {
             alert("Joined From date cannot be later than Joined To date.");
             if (searchJoinedToInput) searchJoinedToInput.value = "";
             return;
         }
 
+        // Construct query parameters for the API request
         const params = new URLSearchParams({
             username: usernameVal,
             joinedFrom: fromVal,
@@ -515,20 +556,27 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         try {
+            // Fetch search results from the server
             const res = await fetch(`/users/search?${params}`);
             const data = await res.json();
+
+            // Render results if the request was successful
             if (data.success) {
                 displaySearchResults(data.users || []);
             } else {
                 searchResultsContainer.innerHTML = `<div class="text-center text-muted p-2 small">Error loading results.</div>`;
             }
         } catch (err) {
+            // Handle network or parsing errors
             console.error("User search error:", err);
             searchResultsContainer.innerHTML = `<div class="text-center text-muted p-2 small">Error connecting to server.</div>`;
         }
     };
 
+    // Trigger search when the search button is clicked
     searchBtn?.addEventListener("click", fetchSearchResults);
+
+    // Clear all search inputs and empty the results container on reset
     resetSearchBtn?.addEventListener("click", () => {
         if (searchUsernameInput) searchUsernameInput.value = "";
         if (searchEmailInput) searchEmailInput.value = "";
@@ -537,14 +585,19 @@ document.addEventListener("DOMContentLoaded", () => {
         if (searchResultsContainer) searchResultsContainer.innerHTML = "";
     });
 
+    // Implement debounce mechanism to prevent excessive API calls while typing 
     let debounceTimeout = null;
     const handleSearchInput = () => {
         clearTimeout(debounceTimeout);
+        // wait for 300ms of inactivity before triggering the search
         debounceTimeout = setTimeout(fetchSearchResults, 300);
     };
 
+    // attach debounced search to text input fields
     searchUsernameInput?.addEventListener("input", handleSearchInput);
     searchEmailInput?.addEventListener("input", handleSearchInput);
+
+    // Trigger search immediately when date filters are changed
     searchJoinedFromInput?.addEventListener("change", fetchSearchResults);
     searchJoinedToInput?.addEventListener("change", fetchSearchResults);
 

@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import { encrypt, decrypt, generateBlindIndex } from '../utils/cryptoUtils.js';
 
 const userSchema = new mongoose.Schema({
+
     // username - saved in plaintext for display purposes
     username: {
         type: String,
@@ -12,37 +13,44 @@ const userSchema = new mongoose.Schema({
         trim: true,
         lowercase: true
     },
+
     // the encrypted email (iv:tag:ciphertext)
     emailEncrypted: {
         type: String,
         required: true
     },
+
     // the hash of the email, used for querying and indexing
     emailHash: {
         type: String,
         required: true,
         index: true
     },
+
     // the hashed password (one-way, cannot be decrypted)
     password: {
         type: String,
         required: true
     },
+
     // the encrypted birthday (iv:tag:ciphertext)
     birthdayEncrypted: {
         type: String,
         required: true
     },
+
     // the encrypted recovery question
     recoveryQuestionEncrypted: {
         type: String,
         required: true
     },
+
     // the encrypted recovery answer
     recoveryAnswerEncrypted: {
         type: String,
         required: true
     },
+
     // optional profile bio
     bio: {
         type: String,
@@ -83,6 +91,7 @@ const userSchema = new mongoose.Schema({
         ref: 'Group'
     }]
 }, {
+
   // automatically include virtuals when converting documents to JSON or Objects
   toJSON: { virtuals: true },
   toObject: { virtuals: true },
@@ -91,7 +100,7 @@ const userSchema = new mongoose.Schema({
 
 // --- Virtual properties (Getter/Setter) ---
 
-// email virtual field
+// email virtual field - getter decrypts the email, setter encrypts and hashes it
 userSchema.virtual('email')
   .get(function () {
     if (!this.emailEncrypted) return '';
@@ -110,7 +119,7 @@ userSchema.virtual('email')
     }
   });
 
-// birthday virtual field
+// birthday virtual field - getter decrypts the birthday, setter encrypts it
 userSchema.virtual('birthday')
   .get(function () {
     if (!this.birthdayEncrypted) return '';
@@ -131,7 +140,7 @@ userSchema.virtual('birthday')
     }
   });
 
-// recovery answer virtual field
+// recovery answer virtual field - getter decrypts the answer, setter encrypts it
 userSchema.virtual('recoveryAnswer')
   .get(function () {
     if (!this.recoveryAnswerEncrypted) return '';

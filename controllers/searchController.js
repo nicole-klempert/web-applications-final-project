@@ -4,6 +4,7 @@ import User from '../models/userModel.js';
 // search posts by multiple criteria (text, author, group, type, date range)
 export const searchPosts = async (req, res, next) => {
     try {
+        // pagination parameters
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 10;
         const skip = (page - 1) * limit;
@@ -219,6 +220,7 @@ export const getPostStatsByType = async (req, res, next) => {
             {
                 // add a field to determine post type if not already present
                 $addFields: {
+                    // determine post type based on mediaUrl and mediaType
                     postTypeDetected: {
                         $cond: [
                             {
@@ -250,6 +252,8 @@ export const getPostStatsByType = async (req, res, next) => {
 
         // calculate percentage for each post type
         const totalPosts = await Post.countDocuments({});
+
+        // structure the stats with percentage
         const statsWithPercentage = stats.map(stat => ({
             type: stat._id || "unknown",
             count: stat.count,
