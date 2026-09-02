@@ -132,7 +132,7 @@
             </div>
 
             <form id="create-group-form">
-                <div class="modal-body">
+                <div class="modal-body group-form-scrollable">
                     <label class="input-label">Name *</label>
                     <input id="create-group-name" class="group-input" maxlength="80" required>
 
@@ -155,36 +155,29 @@
                     </select>
 
                     <!-- group image picker -->
-                    <label class="input-label group-image-label">Group Image</label>
+                    <label class="input-label">Group Image</label>
+                    <button type="button" id="group-image-trigger" class="media-trigger-btn" style="width: fit-content;">
+                        <i class="bi bi-image"></i> Add Image
+                    </button>
+                    <input type="file" id="create-group-image-file" accept="image/*" style="display: none;">
+                    <input type="hidden" id="create-group-image">
 
-                    <div class="avatar-upload-container group-image-picker">
-                        <div class="avatar-preview-circle" id="group-image-trigger" title="Click to choose group image">
-                            <div class="avatar-placeholder-content" id="group-image-placeholder">
-                                <i class="bi bi-camera-fill"></i>
-                            </div>
-
-                            <img id="group-image-preview" class="avatar-live-preview" src="" alt="Group Image Preview" style="display: none;">
-
-                            <div class="avatar-hover-overlay">
-                                <i class="bi bi-pencil-fill"></i>
-                            </div>
-                        </div>
-
-                        <span class="avatar-helper-text">Add Group Image (Optional)</span>
-
-                        <input type="file" id="create-group-image-file" accept="image/*" style="display: none;">
-                        <input type="hidden" id="create-group-image">
+                    <!-- Preview Container -->
+                    <div id="create-group-media-preview-container" class="modal-media-preview-container" style="display: none; margin-top: 10px;">
+                        <img id="group-image-preview" class="modal-preview-media" src="" style="display: none;">
+                        <button type="button" id="create-group-clear-media" class="clear-media-btn">&times;</button>
                     </div>
 
                     <!-- group privacy setting -->
-                    <label class="group-check">
+                    <label class="group-check" style="margin-top: 15px;">
                         <input type="checkbox" id="create-group-public" checked> Public group
                     </label>
 
                     <p id="create-group-error" class="group-error"></p>
                 </div>
 
-                <div class="modal-footer">
+                <div class="modal-footer footer-buttons-inline">
+                    <button type="button" id="cancel-create-group-btn" class="btn btn-secondary">Cancel</button>
                     <button type="submit" class="btn btn-primary">Create</button>
                 </div>
             </form>

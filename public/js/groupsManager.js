@@ -16,7 +16,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const imageFileInput = document.getElementById("create-group-image-file");
     const imageInput = document.getElementById("create-group-image");
     const imagePreview = document.getElementById("group-image-preview");
-    const imagePlaceholder = document.getElementById("group-image-placeholder");
+    const previewContainer = document.getElementById("create-group-media-preview-container");
+    const clearMediaBtn = document.getElementById("create-group-clear-media");
+    const cancelBtn = document.getElementById("cancel-create-group-btn");
 
     let page = 1;
     let loading = false;
@@ -212,22 +214,27 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     // === group image picker ===
-    // Group image picker
+    // Reset Image Picker State
     const resetImagePicker = () => {
-        imageFileInput.value = "";
-        imageInput.value = "";
-        imagePreview.src = "";
-        imagePreview.style.display = "none";
-        imagePlaceholder.style.display = "flex";
+        if (imageFileInput) imageFileInput.value = "";
+        if (imageInput) imageInput.value = "";
+        if (imagePreview) {
+            imagePreview.src = "";
+            imagePreview.style.display = "none";
+        }
+        if (previewContainer) previewContainer.style.display = "none";
     };
 
     // Open the image file picker
-    imageTrigger.addEventListener("click", () => {
+    imageTrigger?.addEventListener("click", () => {
         imageFileInput.click();
     });
 
+    // Clear media button logic
+    clearMediaBtn?.addEventListener("click", resetImagePicker);
+
     // Validate and preview the selected group image
-    imageFileInput.addEventListener("change", () => {
+    imageFileInput?.addEventListener("change", () => {
         const file = imageFileInput.files[0];
 
         if (!file) return;
@@ -255,7 +262,7 @@ document.addEventListener("DOMContentLoaded", () => {
             imageInput.value = reader.result;
             imagePreview.src = reader.result;
             imagePreview.style.display = "block";
-            imagePlaceholder.style.display = "none";
+            if (previewContainer) previewContainer.style.display = "flex";
             error.textContent = "";
         };
 
@@ -263,7 +270,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     // === create group modal functionality ===
-    // Create Group modal
+    // Create Group modal close function
     const close = () => {
         modal.classList.remove("active");
     };
@@ -282,7 +289,9 @@ document.addEventListener("DOMContentLoaded", () => {
         modal.classList.add("active");
     };
 
+    // Close buttons event listeners
     document.getElementById("close-create-group").onclick = close;
+    cancelBtn?.addEventListener("click", close);
 
     // Close modal when clicking outside the content
     modal.addEventListener("click", e => {

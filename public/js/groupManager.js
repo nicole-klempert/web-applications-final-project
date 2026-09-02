@@ -449,12 +449,65 @@ document.addEventListener("DOMContentLoaded", () => {
         // Close modal and reload group posts after publishing
         closePostModal();
         await loadPosts();
-
     };
 
     // === edit group modal functionality ===
-    // Edit Modal handlers
     const modal = document.getElementById("edit-group-modal");
+
+    // Edit Modal Image Picker Elements
+    const editImageTrigger = document.getElementById("edit-group-image-trigger");
+    const editImageFileInput = document.getElementById("edit-group-image-file");
+    const editImageInput = document.getElementById("edit-group-image");
+    const editImagePreview = document.getElementById("edit-group-image-preview");
+    const editPreviewContainer = document.getElementById("edit-group-media-preview-container");
+    const editClearMediaBtn = document.getElementById("edit-group-clear-media");
+
+    const resetEditImagePicker = () => {
+        if (editImageFileInput) editImageFileInput.value = "";
+        if (editImageInput) editImageInput.value = "";
+        if (editImagePreview) {
+            editImagePreview.src = "";
+            editImagePreview.style.display = "none";
+        }
+        if (editPreviewContainer) editPreviewContainer.style.display = "none";
+    };
+
+    // Open the image file picker for editing
+    editImageTrigger?.addEventListener("click", () => editImageFileInput.click());
+
+    // Clear media button logic for edit modal
+    editClearMediaBtn?.addEventListener("click", resetEditImagePicker);
+
+    // Validate and preview the selected group image in edit modal
+    editImageFileInput?.addEventListener("change", () => {
+        const file = editImageFileInput.files[0];
+        if (!file) return;
+
+        const error = document.getElementById("edit-group-error");
+
+        if (!file.type.startsWith("image/")) {
+            error.textContent = "Please choose an image file";
+            resetEditImagePicker();
+            return;
+        }
+
+        if (file.size > 5 * 1024 * 1024) {
+            error.textContent = "Image cannot exceed 5MB";
+            resetEditImagePicker();
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = () => {
+            editImageInput.value = reader.result;
+            editImagePreview.src = reader.result;
+            editImagePreview.style.display = "block";
+            if (editPreviewContainer) editPreviewContainer.style.display = "flex";
+            error.textContent = "";
+        };
+        reader.readAsDataURL(file);
+    });
+
     const closeModal = () => modal.classList.remove("active");
 
     // Populate edit form with the current group data
@@ -462,7 +515,17 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("edit-group-name").value = group.name;
         document.getElementById("edit-group-description").value = group.description || "";
         document.getElementById("edit-group-category").value = group.category || "";
-        document.getElementById("edit-group-image").value = group.image || "";
+
+        // Populate existing image if available
+        if (group.image) {
+            editImageInput.value = group.image;
+            editImagePreview.src = group.image;
+            editImagePreview.style.display = "block";
+            if (editPreviewContainer) editPreviewContainer.style.display = "flex";
+        } else {
+            resetEditImagePicker();
+        }
+
         document.getElementById("edit-group-public").checked = group.isPublic !== false;
         modal.classList.add("active");
     };
