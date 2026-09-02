@@ -32,6 +32,9 @@
                 <a href="groups.html" class="nav-item active">
                     <i class="bi bi-people-fill nav-icon"></i><span>Groups</span>
                 </a>
+                <a href="map.html" class="nav-item">
+                    <i class="bi bi-geo-alt nav-icon"></i><span>Map</span>
+                </a>
                 <a href="statistics.html" class="nav-item">
                     <i class="bi bi-bar-chart nav-icon"></i><span>Statistics</span>
                 </a>
@@ -54,40 +57,55 @@
         <main class="groups-main">
             <div class="groups-top">
                 <h2>Groups</h2>
-
-                <div class="groups-top-row">
-                    <p>Find communities or create your own.</p>
-
-                    <button id="open-create-group" class="btn btn-primary create-group-btn">
-                        <i class="bi bi-plus-lg"></i> Create Group
-                    </button>
-                </div>
+                <p>Find communities or create your own.</p>
             </div>
 
-            <div class="groups-filters">
-                <input id="group-search" type="search" placeholder="Search groups">
+            <div class="groups-controls">
+                <button id="open-create-group" class="btn btn-primary create-group-btn">
+                    <i class="bi bi-plus-lg"></i> Create Group
+                </button>
 
-                <select id="group-category">
-                    <option value="">All categories</option>
-                    <option>Technology</option>
-                    <option>Sports</option>
-                    <option>Theater</option>
-                    <option>Movies/TV</option>
-                    <option>Gaming</option>
-                    <option>Travel</option>
-                    <option>Gossip</option>
-                    <option>Memes</option>
-                    <option>Books</option>
-                    <option>Other</option>
-                </select>
+                <label class="group-search-box">
+                    <i class="bi bi-search"></i>
+                    <input id="group-search" type="search" placeholder="Search groups">
+                </label>
+
+                <div id="category-filter" class="category-filter">
+                    <div class="category-selected">
+                        <i class="bi bi-funnel"></i>
+                        <span id="category-selected-text">All Categories</span>
+                        <i class="bi bi-chevron-down category-arrow"></i>
+                    </div>
+
+                    <div class="category-dropdown">
+                        <div class="category-option selected" data-value="">All Categories</div>
+                        <div class="category-option" data-value="Technology">Technology</div>
+                        <div class="category-option" data-value="Sports">Sports</div>
+                        <div class="category-option" data-value="Theater">Theater</div>
+                        <div class="category-option" data-value="Movies/TV">Movies/TV</div>
+                        <div class="category-option" data-value="Gaming">Gaming</div>
+                        <div class="category-option" data-value="Travel">Travel</div>
+                        <div class="category-option" data-value="Gossip">Gossip</div>
+                        <div class="category-option" data-value="Memes">Memes</div>
+                        <div class="category-option" data-value="Books">Books</div>
+                        <div class="category-option" data-value="Other">Other</div>
+                    </div>
+
+                    <input type="hidden" id="group-category" value="">
+                </div>
             </div>
 
             <div id="groups-grid" class="groups-grid"></div>
 
-            <div id="groups-empty" class="groups-empty" hidden>
-                <i class="bi bi-people"></i>
+            <div id="groups-empty" class="empty-state-box" hidden>
+                <div class="empty-state-icon-wrapper">
+                    <i class="bi bi-search"></i>
+                </div>
                 <h3>No groups found</h3>
-                <p>Try changing the filters or create a new group.</p>
+                <p>We couldn't find any groups matching your criteria. Try adjusting your search or resetting your filters.</p>
+                <button id="reset-group-filters-btn" type="button">
+                    <i class="bi bi-arrow-counterclockwise"></i> Reset Filters
+                </button>
             </div>
 
             <div id="groups-scroll-sentinel" class="groups-scroll-sentinel"></div>
@@ -124,8 +142,26 @@
                         <option>Other</option>
                     </select>
 
-                    <label class="input-label">Image URL or Base64</label>
-                    <input id="create-group-image" class="group-input">
+                    <label class="input-label group-image-label">Group Image</label>
+
+                    <div class="avatar-upload-container group-image-picker">
+                        <div class="avatar-preview-circle" id="group-image-trigger" title="Click to choose group image">
+                            <div class="avatar-placeholder-content" id="group-image-placeholder">
+                                <i class="bi bi-camera-fill"></i>
+                            </div>
+
+                            <img id="group-image-preview" class="avatar-live-preview" src="" alt="Group Image Preview" style="display: none;">
+
+                            <div class="avatar-hover-overlay">
+                                <i class="bi bi-pencil-fill"></i>
+                            </div>
+                        </div>
+
+                        <span class="avatar-helper-text">Add Group Image (Optional)</span>
+
+                        <input type="file" id="create-group-image-file" accept="image/*" style="display: none;">
+                        <input type="hidden" id="create-group-image">
+                    </div>
 
                     <label class="group-check">
                         <input type="checkbox" id="create-group-public" checked> Public group
