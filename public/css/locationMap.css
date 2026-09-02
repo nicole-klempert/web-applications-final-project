@@ -1,7 +1,11 @@
+/* === Location Picker Compnent === */
+
+/* button used to open the location picker */
 .location-picker-toggle {
     margin-top: 10px;
 }
 
+/* main container holding the map and search input inside the modal */
 .location-picker-panel {
     margin-top: 12px;
     padding: 12px;
@@ -10,6 +14,7 @@
     background: var(--card-bg);
 }
 
+/* search input area layout */
 .location-search-row {
     display: flex;
     gap: 8px;
@@ -19,6 +24,7 @@
         flex: 1;
     }
 
+/* actual Google map container inside the picker */
 .location-picker-map {
     height: 260px;
     margin-top: 10px;
@@ -26,6 +32,7 @@
     overflow: hidden;
 }
 
+/* row displaying of the chosen address and the clear button */
 .location-selected-row {
     display: flex;
     align-items: center;
@@ -39,6 +46,7 @@
     color: var(--text-muted);
 }
 
+/* clickable location link displayed on published posts in the feed */
 .post-location-link {
     display: inline-flex;
     align-items: center;
@@ -53,6 +61,9 @@
         text-decoration: underline;
     }
 
+/* === Community Map Page === */
+
+/* main wrapper for the map */
 .map-main {
     flex: 1;
     padding: 40px;
@@ -60,12 +71,14 @@
     min-height: 100vh;
 }
 
+/* grid layout to divide map area (left side) and posts list (right side) */
 .map-page-grid {
     display: grid;
     grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr);
     gap: 20px;
 }
 
+/* google maps container */
 .community-map {
     height: 70vh;
     min-height: 500px;
@@ -74,6 +87,7 @@
     overflow: hidden;
 }
 
+/* scrollable side panel displaying the list of posts visible on the map */
 .map-posts-panel {
     background: var(--card-bg);
     border: 1px solid var(--border-color);
@@ -83,6 +97,7 @@
     overflow: auto;
 }
 
+/* individual post cards inside the side panel */
 .map-post-item {
     padding: 12px 0;
     border-bottom: 1px solid var(--border-color);
@@ -96,31 +111,37 @@
         text-decoration: none;
     }
 
+/* text styling for the location address inside the side panel posts */
 .map-post-location {
     font-size: 0.85rem;
     color: var(--text-muted);
 }
 
+/* message displayed when no posts are found in the current map view */
 .map-empty {
     padding: 24px 0;
     color: var(--text-muted);
     text-align: center;
 }
 
+/* === Responsive === */
 @media (max-width: 900px) {
     .map-main {
         padding: 18px;
     }
 
+    /* side by side columns instad of stacked elements */
     .map-page-grid {
         grid-template-columns: 1fr;
     }
 
+    /* reduce map height on mobile devices */
     .community-map {
         height: 55vh;
         min-height: 380px;
     }
 
+    /* allow the posts panel to expand naturally instead of scrolling internally */
     .map-posts-panel {
         max-height: none;
     }

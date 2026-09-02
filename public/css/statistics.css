@@ -1,3 +1,5 @@
+/* === Main Layout === */
+
 .statistics-main {
     flex: 1;
     padding: 40px;
@@ -14,6 +16,7 @@
     color: var(--text-muted);
 }
 
+/* === Chart Cards === */
 .chart-card {
     background: var(--card-bg);
     border: 1px solid var(--border-color);
@@ -27,11 +30,15 @@
         margin: 0;
     }
 
+/* === Chart Elements Style === */
+
+/* allow horizontal scrolling on small screen */
 .chart {
     width: 100%;
     overflow-x: auto;
 }
 
+/* svg canvas */
     .chart svg {
         width: 100%;
         min-width: 520px;
@@ -50,12 +57,17 @@
     fill: var(--btn-primary);
 }
 
+
+/* === UI States and Tooltips === */
+
+/* nothing to disply */
 .chart-empty {
     text-align: center;
     padding: 50px;
     color: var(--text-muted);
 }
 
+/* hover tooltip displaying data values */
 .chart-tooltip {
     position: absolute;
     pointer-events: none;
@@ -66,6 +78,8 @@
     font-size: 0.82rem;
     z-index: 1000;
 }
+
+/*=== Responsive === */
 
 @media (max-width: 900px) {
     .statistics-main {
