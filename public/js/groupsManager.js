@@ -1,5 +1,6 @@
 // Groups page management
 document.addEventListener("DOMContentLoaded", () => {
+    // === state and DOM elements ===
     const grid = document.getElementById("groups-grid");
     const empty = document.getElementById("groups-empty");
     const sentinel = document.getElementById("groups-scroll-sentinel");
@@ -21,6 +22,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let loading = false;
     let hasMore = true;
 
+    // === group search parameters ===
     // Build search query params
     const params = () => new URLSearchParams({
         page,
@@ -29,18 +31,22 @@ document.addEventListener("DOMContentLoaded", () => {
         category: categoryInput.value
     });
 
+    // === group card rendering ===
     // Template for rendering a group card
     const card = group => {
+        // Display the group image or fallback placeholder
         const imgHTML = group.image
             ? `<img class="group-card-image" src="${group.image}" alt="${group.name}">`
             : `<div class="group-card-image group-card-placeholder"><i class="bi bi-people-fill"></i></div>`;
 
+        // Display whether the group is public or private
         const badgeHTML = group.isPublic
             ? '<span class="group-public-badge">Public</span>'
             : '<span class="group-public-badge">Private</span>';
 
         let actionButtonHTML = "";
 
+        // Display the correct membership action for the current user
         if (!group.isOwner) {
             if (group.isMember) {
                 actionButtonHTML = `<button class="btn btn-secondary membership-btn" data-id="${group._id}" data-member="true">Leave</button>`;
@@ -74,12 +80,15 @@ document.addEventListener("DOMContentLoaded", () => {
         `;
     };
 
+    // === fetch groups function ===
     const load = async (reset = false) => {
+        // Prevent duplicate requests or loading after the last page
         if (loading) return;
         if (!reset && !hasMore) return;
 
         loading = true;
 
+        // Reset pagination and existing cards when filters change
         if (reset) {
             page = 1;
             hasMore = true;
@@ -95,6 +104,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             if (!data.success) return;
 
+            // Append groups and update pagination state
             grid.insertAdjacentHTML("beforeend", data.groups.map(card).join(""));
             empty.hidden = grid.children.length > 0;
             hasMore = data.hasMore;
@@ -105,15 +115,18 @@ document.addEventListener("DOMContentLoaded", () => {
         } finally {
             loading = false;
 
+            // Continue loading if the page is not tall enough to reach the scroll trigger
             if (hasMore && sentinel.getBoundingClientRect().top <= window.innerHeight + 300) {
                 setTimeout(() => load(false), 0);
             }
         }
     };
 
+    // === group search and filtering ===
     // Search groups
     let timer;
 
+    // Debounce search input before reloading groups
     searchInput.addEventListener("input", () => {
         clearTimeout(timer);
         timer = setTimeout(() => load(true), 250);
@@ -125,6 +138,7 @@ document.addEventListener("DOMContentLoaded", () => {
         categoryFilter.classList.toggle("open");
     });
 
+    // Update selected category and reload the group list
     categoryOptions.forEach(option => {
         option.addEventListener("click", e => {
             e.stopPropagation();
@@ -140,6 +154,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
+    // Close category dropdown when clicking outside
     document.addEventListener("click", e => {
         if (!categoryFilter.contains(e.target)) {
             categoryFilter.classList.remove("open");
@@ -160,6 +175,7 @@ document.addEventListener("DOMContentLoaded", () => {
         load(true);
     });
 
+    // === infinite scroll functionality ===
     // Automatically load more groups when reaching the bottom
     const observer = new IntersectionObserver(entries => {
         if (entries[0].isIntersecting && hasMore && !loading) {
@@ -171,6 +187,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     observer.observe(sentinel);
 
+    // === group membership functionality ===
     // Handle join/leave button clicks
     document.addEventListener("click", async e => {
         const btn = e.target.closest(".membership-btn");
@@ -190,9 +207,11 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
+        // Reload groups to update membership state
         load(true);
     });
 
+    // === group image picker ===
     // Group image picker
     const resetImagePicker = () => {
         imageFileInput.value = "";
@@ -202,10 +221,12 @@ document.addEventListener("DOMContentLoaded", () => {
         imagePlaceholder.style.display = "flex";
     };
 
+    // Open the image file picker
     imageTrigger.addEventListener("click", () => {
         imageFileInput.click();
     });
 
+    // Validate and preview the selected group image
     imageFileInput.addEventListener("change", () => {
         const file = imageFileInput.files[0];
 
@@ -213,12 +234,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const error = document.getElementById("create-group-error");
 
+        // validate selected file type
         if (!file.type.startsWith("image/")) {
             error.textContent = "Please choose an image file";
             resetImagePicker();
             return;
         }
 
+        // validate image size up to 5MB
         if (file.size > 5 * 1024 * 1024) {
             error.textContent = "Image cannot exceed 5MB";
             resetImagePicker();
@@ -227,6 +250,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const reader = new FileReader();
 
+        // Convert image to Base64 and display the preview
         reader.onload = () => {
             imageInput.value = reader.result;
             imagePreview.src = reader.result;
@@ -238,11 +262,13 @@ document.addEventListener("DOMContentLoaded", () => {
         reader.readAsDataURL(file);
     });
 
+    // === create group modal functionality ===
     // Create Group modal
     const close = () => {
         modal.classList.remove("active");
     };
 
+    // Reset all create group form fields
     const resetCreateForm = () => {
         form.reset();
         document.getElementById("create-group-public").checked = true;
@@ -250,6 +276,7 @@ document.addEventListener("DOMContentLoaded", () => {
         resetImagePicker();
     };
 
+    // Open create group modal with an empty form
     document.getElementById("open-create-group").onclick = () => {
         resetCreateForm();
         modal.classList.add("active");
@@ -257,6 +284,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     document.getElementById("close-create-group").onclick = close;
 
+    // Close modal when clicking outside the content
     modal.addEventListener("click", e => {
         if (e.target === modal) close();
     });
@@ -268,6 +296,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const error = document.getElementById("create-group-error");
         error.textContent = "";
 
+        // Construct the new group data from the form
         const body = {
             name: document.getElementById("create-group-name").value.trim(),
             description: document.getElementById("create-group-description").value.trim(),
@@ -276,11 +305,13 @@ document.addEventListener("DOMContentLoaded", () => {
             isPublic: document.getElementById("create-group-public").checked
         };
 
+        // Validate that the group has a name
         if (!body.name) {
             error.textContent = "Group name is required";
             return;
         }
 
+        // Send the new group to the server
         const res = await fetch("/groups", {
             method: "POST",
             headers: {
@@ -297,11 +328,13 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
+        // Reset the form and redirect to the newly created group
         resetCreateForm();
         close();
 
         window.location.href = `group.html?id=${data.group._id}`;
     });
 
+    // Initial groups load
     load(true);
 });
