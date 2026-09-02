@@ -211,7 +211,7 @@
             </div>
 
             <form id="edit-group-form">
-                <div class="modal-body group-edit-grid">
+                <div class="modal-body group-edit-grid group-form-scrollable">
                     <label class="input-label">Name *</label>
                     <input id="edit-group-name" class="group-input" maxlength="80" required>
 
@@ -221,17 +221,28 @@
                     <label class="input-label">Category</label>
                     <input id="edit-group-category" class="group-input">
 
-                    <label class="input-label">Image URL or Base64</label>
-                    <input id="edit-group-image" class="group-input">
+                    <!-- group image picker (Edit Modal) -->
+                    <label class="input-label" style="margin-top: 10px;">Group Image</label>
+                    <button type="button" id="edit-group-image-trigger" class="media-trigger-btn" style="width: fit-content;">
+                        <i class="bi bi-image"></i> Change Image
+                    </button>
+                    <input type="file" id="edit-group-image-file" accept="image/*" style="display: none;">
+                    <input type="hidden" id="edit-group-image">
 
-                    <label class="group-check">
+                    <!-- Preview Container -->
+                    <div id="edit-group-media-preview-container" class="modal-media-preview-container" style="display: none; margin-top: 10px;">
+                        <img id="edit-group-image-preview" class="modal-preview-media" src="" style="display: none;">
+                        <button type="button" id="edit-group-clear-media" class="clear-media-btn">&times;</button>
+                    </div>
+
+                    <label class="group-check" style="margin-top: 15px;">
                         <input type="checkbox" id="edit-group-public"> Public group
                     </label>
 
                     <p id="edit-group-error" class="group-error"></p>
                 </div>
 
-                <div class="modal-footer">
+                <div class="modal-footer footer-buttons-inline">
                     <button type="button" id="cancel-edit-group" class="btn btn-secondary">Cancel</button>
                     <button type="submit" class="btn btn-primary">Save</button>
                 </div>

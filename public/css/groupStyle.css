@@ -186,6 +186,7 @@
 .group-check {
     display: flex;
     gap: 7px;
+    margin-top: 15px;
     align-items: center;
     color: var(--text-main);
 }
