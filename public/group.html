@@ -5,6 +5,7 @@
     <meta charset="utf-8">
     <title>The Watchers Network</title>
 
+    <!-- import stylesheets -->
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="css/variables.css">
@@ -20,11 +21,13 @@
 
 <body>
     <div class="app-layout">
+        <!-- left navigation panel -->
         <nav class="side-nav">
             <header>
                 <h1>The Watchers</h1>
             </header>
 
+            <!-- navigation bar on the left side -->
             <div class="nav-links mt-4">
                 <a href="feed.html" class="nav-item">
                     <i class="bi bi-house-door nav-icon"></i><span>Feed</span>
@@ -45,6 +48,7 @@
 
             <button type="button" class="btn btn-primary logout-btn" id="logout-btn-trigger">Logout</button>
 
+            <!-- Account Card of the logged-in user -->
             <div class="account-card mt-auto" role="button">
                 <div class="avatar avatar-purple" id="nav-user-avatar">US</div>
                 <div>
@@ -54,10 +58,12 @@
             </div>
         </nav>
 
+        <!-- main group area -->
         <main class="group-main">
             <div id="group-loading" class="group-loading">Loading group...</div>
 
             <div id="group-page" hidden>
+                <!-- Group Header -->
                 <section class="group-hero">
                     <div id="group-image" class="group-hero-image">
                         <i class="bi bi-people-fill"></i>
@@ -71,12 +77,14 @@
 
                         <p id="group-description"></p>
 
+                        <!-- Group Information -->
                         <div class="group-meta">
                             <span id="group-category"></span>
                             <span id="group-owner"></span>
                             <span id="group-members-count"></span>
                         </div>
 
+                        <!-- Group Actions -->
                         <div class="group-actions">
                             <button id="membership-btn" class="btn btn-primary"></button>
                             <button id="edit-group-btn" class="btn btn-secondary" hidden>Edit Group</button>
@@ -86,8 +94,10 @@
                     </div>
                 </section>
 
+                <!-- Group Content -->
                 <div class="group-grid">
                     <section>
+                        <!-- group post composer -->
                         <section id="group-composer" class="composer-placeholder" role="button" hidden>
                             <div class="placeholder-text-box">What's on your mind?</div>
                             <div class="composer-icons-group">
@@ -97,23 +107,28 @@
                             </div>
                         </section>
 
+                        <!-- Group Posts -->
                         <div class="group-panel">
                             <h3>Group Posts</h3>
                             <div id="group-posts" class="post-feed"></div>
                         </div>
                     </section>
 
+                    <!-- group management sidebar -->
                     <aside>
+                        <!-- Join Requests -->
                         <div id="join-requests-panel" class="group-panel" hidden>
                             <h3>Join Requests</h3>
                             <div id="group-join-requests"></div>
                         </div>
 
+                        <!-- Members List -->
                         <div class="group-panel">
                             <h3>Members</h3>
                             <div id="group-members"></div>
                         </div>
 
+                        <!-- Admin Management -->
                         <div id="admin-panel" class="group-panel" hidden>
                             <h3>Admin Management</h3>
                             <p>Only the owner can add or remove admins.</p>
@@ -143,6 +158,7 @@
             <div class="modal-body">
                 <textarea id="group-post-text" class="modal-textarea-custom" placeholder="What's on your mind?" rows="4"></textarea>
 
+                <!-- location picker -->
                 <div id="group-location-panel" class="location-picker-panel" hidden>
                     <div class="location-search-row">
                         <input id="group-location-search" class="modal-input-box" type="search" placeholder="Search an address or place">
@@ -169,6 +185,7 @@
                 <p id="group-post-error" class="group-error"></p>
             </div>
 
+            <!-- post modal actions -->
             <div class="modal-footer">
                 <div class="modal-action-group">
                     <button type="button" id="group-location-btn" class="media-trigger-btn location-picker-toggle">
@@ -185,6 +202,7 @@
         </div>
     </div>
 
+    <!-- edit group modal -->
     <div id="edit-group-modal" class="modal-overlay">
         <div class="modal-content">
             <div class="modal-header">
@@ -221,6 +239,7 @@
         </div>
     </div>
 
+    <!-- import scripts -->
     <script src="js/postLocation.js"></script>
     <script src="js/global.js"></script>
     <script src="js/groupManager.js"></script>

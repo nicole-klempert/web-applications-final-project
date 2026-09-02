@@ -1,3 +1,4 @@
+/* === Groups Page Layout === */
 .groups-main {
     flex: 1;
     padding: 40px;
@@ -22,6 +23,8 @@
         font-weight: 700;
     }
 
+
+/* === Groups Controls === */
 .groups-controls {
     display: grid;
     grid-template-columns: 1fr 2fr 1fr;
@@ -38,6 +41,8 @@
     white-space: nowrap;
 }
 
+
+/* === Group Search === */
 .group-search-box {
     display: flex;
     align-items: center;
@@ -72,6 +77,8 @@
         font-size: 0.9rem;
     }
 
+
+/* === Category Filter === */
 .category-filter {
     position: relative;
     width: 100%;
@@ -117,6 +124,8 @@
     transform: rotate(180deg);
 }
 
+
+/* category dropdown options */
 .category-dropdown {
     position: absolute;
     top: calc(100% + 8px);
@@ -155,6 +164,8 @@
         font-weight: 700;
     }
 
+
+/* === Groups Grid & Cards === */
 .groups-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -174,6 +185,7 @@
     object-fit: cover;
 }
 
+/* fallback display when a group has no image */
 .group-card-placeholder {
     display: flex;
     align-items: center;
@@ -234,6 +246,8 @@
     font-size: 0.72rem;
 }
 
+
+/* === Groups Empty State === */
 #groups-empty {
     width: 100%;
     margin-top: 24px;
@@ -260,11 +274,15 @@
             transform: translateY(-1px);
         }
 
+
+/* sentinel used for loading more groups while scrolling */
 .groups-scroll-sentinel {
     width: 100%;
     height: 1px;
 }
 
+
+/* === Create Group Modal === */
 .group-form-modal form {
     margin: 0;
 }
@@ -283,6 +301,8 @@
     color: var(--text-main);
 }
 
+
+/* group image picker */
 .group-image-label {
     margin-top: 4px;
 }
@@ -296,6 +316,8 @@
         height: 90px;
     }
 
+
+/* public group checkbox */
 .group-check {
     display: flex;
     align-items: center;

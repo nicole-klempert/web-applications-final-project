@@ -1,8 +1,10 @@
 // Single group page management
 document.addEventListener("DOMContentLoaded", () => {
+    // === group state and page parameters ===
     const groupId = new URLSearchParams(window.location.search).get("id");
     const currentUser = (localStorage.getItem("loggedInUser") || "").trim();
 
+    // Redirect to groups page if no group ID is provided
     if (!groupId) {
         window.location.href = "groups.html";
         return;
@@ -11,6 +13,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let group = null;
     let selectedPostLocation = null;
 
+    // === helper functions ===
     // Helper to read selected media file as Base64 Data URL
     const fileToDataURL = file => new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -22,6 +25,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Helper to check if the current user has manager privileges
     const isManager = () => group && (group.isOwner || group.isAdmin);
 
+    // Render the user's profile picture or fallback avatar
     const renderUserAvatar = user => {
         const picture = user.profilePicture && user.profilePicture.trim() !== "" && user.profilePicture !== "undefined" && user.profilePicture !== "null"
             ? user.profilePicture
@@ -34,6 +38,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return `<span class="avatar avatar-purple avatar-sm">${user.username.substring(0, 2).toUpperCase()}</span>`;
     };
 
+    // Show the shared confirmation modal before delete actions
     const showDeleteConfirmation = onConfirm => {
         const modal = document.getElementById("delete-confirm-modal");
         if (!modal) return;
@@ -51,6 +56,7 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("cancel-delete-btn").onclick = () => modal.classList.remove("active");
     };
 
+    // === group post modal elements ===
     const postModal = document.getElementById("group-post-modal-overlay");
     const postTextarea = document.getElementById("group-post-text");
     const postPublishBtn = document.getElementById("group-post-publish");
@@ -73,10 +79,12 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
+    // Enable publish button only when the post has text or media
     const updatePublishButton = () => {
         postPublishBtn.disabled = !(postTextarea.value.trim() || mediaInput.files.length);
     };
 
+    // Close post modal and reset all selected post data
     const closePostModal = () => {
         postModal.classList.remove("active");
         postTextarea.value = "";
@@ -94,6 +102,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (locationPanel) locationPanel.hidden = true;
     };
 
+    // === load group details ===
     /**
      * Load group details from the server
      */
@@ -108,12 +117,14 @@ document.addEventListener("DOMContentLoaded", () => {
                 throw new Error(data.error || "Group not found");
             }
 
+            // Save group data and render the page
             group = data.group;
             renderGroup();
             await loadPosts();
         } catch (error) {
             const loading = document.getElementById("group-loading");
 
+            // Display private group state when group content cannot be accessed
             loading.innerHTML = `
         <div class="empty-state-box">
             <div class="empty-state-icon-wrapper">
@@ -132,6 +143,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     };
 
+    // === render group page ===
     /**
      * Render the group metadata and settings panels
      */
@@ -222,12 +234,14 @@ document.addEventListener("DOMContentLoaded", () => {
         }).join("");
     };
 
+    // === load group posts ===
     /**
      * Load group posts from the feed and display them
      */
     const loadPosts = async () => {
         const container = document.getElementById("group-posts");
 
+        // Prevent private group content from being displayed
         if (group.isPrivateContentHidden) {
             container.innerHTML = `
                 <div class="private-group-notice">
@@ -238,6 +252,7 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
+        // Fetch posts that belong to the current group
         const res = await fetch(`/posts?group=${encodeURIComponent(group.name)}&limit=50`, {
             headers: { Accept: "application/json" }
         });
@@ -245,6 +260,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (!data.success) return;
 
+        // Render group posts or show empty state
         container.innerHTML = data.posts.length
             ? data.posts.map(post => window.createPostCardHTML
                 ? window.createPostCardHTML(post)
@@ -271,6 +287,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     window.reloadPostsFeed = loadPosts;
 
+    // === group navigation and membership ===
     // Navigation statistics page
     document.getElementById("group-statistics-btn").onclick = () => {
         window.location.href = `statistics.html?groupId=${encodeURIComponent(groupId)}`;
@@ -294,6 +311,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     };
 
+    // === create group post modal functionality ===
     // Open group post modal
     document.getElementById("group-composer").onclick = () => {
         postModal.classList.add("active");
@@ -302,6 +320,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     document.getElementById("group-post-close-modal-btn").onclick = closePostModal;
 
+    // Close modal when clicking outside the content
     postModal.addEventListener("click", e => {
         if (e.target === postModal) closePostModal();
     });
@@ -327,6 +346,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const file = this.files[0];
         if (!file) return;
 
+        // validate file type (image or video)
         const isImage = file.type.startsWith("image/");
         const isVideo = file.type.startsWith("video/");
 
@@ -338,6 +358,7 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
+        // validate file size (max 5MB for image, 10MB for video)
         const maxImgSize = 5 * 1024 * 1024;
         const maxVidSize = 10 * 1024 * 1024;
 
@@ -357,6 +378,7 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
+        // Generate a local object URL to render the media preview immediately
         const url = URL.createObjectURL(file);
         previewContainer.style.display = "flex";
 
@@ -379,6 +401,7 @@ document.addEventListener("DOMContentLoaded", () => {
         error.textContent = "";
         postPublishBtn.disabled = true;
 
+        // Process media file if one exists
         const file = mediaInput.files[0];
         let mediaUrl = "";
         let mediaType = "";
@@ -388,6 +411,7 @@ document.addEventListener("DOMContentLoaded", () => {
             mediaType = file.type.startsWith("video/") ? "video" : "image";
         }
 
+        // Construct the API payload with group and optional location data
         const body = {
             content: postTextarea.value.trim(),
             mediaUrl,
@@ -406,6 +430,7 @@ document.addEventListener("DOMContentLoaded", () => {
             body: JSON.stringify(body)
         });
 
+        // file size limit check
         if (res.status === 413) {
             postPublishBtn.disabled = false;
             alert("File exceeds 50mb limit!");
@@ -414,21 +439,25 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const data = await res.json();
 
+        // Display server error and allow the user to try again
         if (!res.ok) {
             error.textContent = data.error || "Could not publish";
             postPublishBtn.disabled = false;
             return;
         }
 
+        // Close modal and reload group posts after publishing
         closePostModal();
         await loadPosts();
 
     };
 
+    // === edit group modal functionality ===
     // Edit Modal handlers
     const modal = document.getElementById("edit-group-modal");
     const closeModal = () => modal.classList.remove("active");
 
+    // Populate edit form with the current group data
     document.getElementById("edit-group-btn").onclick = () => {
         document.getElementById("edit-group-name").value = group.name;
         document.getElementById("edit-group-description").value = group.description || "";
@@ -441,6 +470,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("close-edit-group").onclick = closeModal;
     document.getElementById("cancel-edit-group").onclick = closeModal;
 
+    // Submit updated group data to the server
     document.getElementById("edit-group-form").onsubmit = async e => {
         e.preventDefault();
         const error = document.getElementById("edit-group-error");
@@ -472,6 +502,7 @@ document.addEventListener("DOMContentLoaded", () => {
         await loadGroup();
     };
 
+    // === delete group functionality ===
     // Delete group handler
     document.getElementById("delete-group-btn").onclick = () => {
         showDeleteConfirmation(async () => {
@@ -486,12 +517,14 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     };
 
+    // === admin member search ===
     // Admin member search
     const adminSearchInput = document.getElementById("admin-username");
     const adminSearchResults = document.getElementById("admin-search-results");
     const adminError = document.getElementById("admin-error");
     let adminSearchTimeout = null;
 
+    // Filter search results to group members who can become admins
     const displayAdminSearchResults = users => {
         if (!adminSearchResults) return;
 
@@ -508,11 +541,13 @@ document.addEventListener("DOMContentLoaded", () => {
             return isMember && !isAdmin && !isOwner;
         });
 
+        // Display empty search result if no eligible members were found
         if (eligibleUsers.length === 0) {
             adminSearchResults.innerHTML = `<div class="text-center text-muted p-2 small">No group members found.</div>`;
             return;
         }
 
+        // Render each eligible member in the search results
         eligibleUsers.forEach(user => {
             const result = `
                 <div class="admin-search-result account-card">
@@ -533,6 +568,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     };
 
+    // Search users by username for admin management
     const searchAdminMembers = async () => {
         if (!adminSearchInput || !adminSearchResults) return;
 
@@ -544,6 +580,7 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
+        // Display loading state while searching
         adminSearchResults.innerHTML = `
             <div class="text-center text-muted p-2 small">
                 <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
@@ -568,11 +605,13 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     };
 
+    // Debounce admin search input requests
     adminSearchInput?.addEventListener("input", () => {
         clearTimeout(adminSearchTimeout);
         adminSearchTimeout = setTimeout(searchAdminMembers, 300);
     });
 
+    // === dynamic group interactions ===
     // Delegate clicks for dynamic post/member list interactions
     document.addEventListener("click", async e => {
         const removeMember = e.target.closest(".remove-member");
@@ -583,6 +622,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const acceptReq = e.target.closest(".accept-request-btn");
         const rejectReq = e.target.closest(".reject-request-btn");
 
+        // Approve private group join request
         if (acceptReq) {
             const userId = acceptReq.dataset.userid;
             const res = await fetch(`/groups/${groupId}/requests/${userId}/approve`, {
@@ -596,6 +636,7 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
+        // Reject private group join request
         if (rejectReq) {
             const userId = rejectReq.dataset.userid;
             const res = await fetch(`/groups/${groupId}/requests/${userId}/reject`, {
@@ -609,6 +650,7 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
+        // Add selected group member as an admin
         if (addAdmin) {
             const res = await fetch(`/groups/${groupId}/admins`, {
                 method: "POST",
@@ -632,6 +674,7 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
+        // Remove a member after confirmation
         if (removeMember) {
             showDeleteConfirmation(async () => {
                 const res = await fetch(`/groups/${groupId}/members/${removeMember.dataset.id}`, {
@@ -646,6 +689,7 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
+        // Remove admin privileges from the selected member
         if (removeAdmin) {
             const res = await fetch(`/groups/${groupId}/admins/${encodeURIComponent(removeAdmin.dataset.username)}`, {
                 method: "DELETE",
@@ -661,6 +705,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const postCard = e.target.closest(".post-card");
         const postId = postCard?.dataset.postId;
 
+        // Handle likes on group posts
         if (like && postId) {
             await fetch(`/posts/${postId}/like`, {
                 method: "POST",
@@ -671,6 +716,7 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
+        // Handle new comments on group posts
         if (commentBtn && postId) {
             const input = postCard.querySelector(".comment-input");
             if (!input?.value.trim()) return;
@@ -688,5 +734,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
+    // Initial group page load
     loadGroup();
 });

@@ -1,3 +1,4 @@
+/* === Group Page Layout === */
 .group-main {
     flex: 1;
     padding: 40px;
@@ -10,6 +11,8 @@
     color: var(--text-muted);
 }
 
+
+/* === Group Hero & Panels === */
 .group-hero,
 .group-panel {
     background: var(--card-bg);
@@ -42,6 +45,8 @@
     padding: 20px;
 }
 
+
+/* === Group Information === */
 .group-title-line {
     display: flex;
     gap: 10px;
@@ -81,6 +86,8 @@
     margin-top: 16px;
 }
 
+
+/* === Group Content Grid === */
 .group-grid {
     display: grid;
     grid-template-columns: minmax(0, 2fr) minmax(260px, 1fr);
@@ -98,6 +105,8 @@
         margin: 0 0 12px;
     }
 
+
+/* === Group Inputs === */
 .group-input {
     width: 100%;
     padding: 10px;
@@ -108,6 +117,8 @@
     margin-bottom: 10px;
 }
 
+
+/* === Group Members === */
 .group-member {
     display: flex;
     justify-content: space-between;
@@ -133,6 +144,8 @@
         justify-content: flex-end;
     }
 
+
+/* small action buttons for group management */
 .mini-btn {
     border: 1px solid var(--border-color);
     background: transparent;
@@ -142,6 +155,8 @@
     font-size: .72rem;
 }
 
+
+/* === Admin Management === */
 .admin-add-row {
     display: flex;
     gap: 6px;
@@ -161,6 +176,8 @@
     color: var(--text-muted);
 }
 
+
+/* === Group Edit Form === */
 .group-edit-grid {
     display: grid;
     gap: 6px;
@@ -173,6 +190,8 @@
     color: var(--text-main);
 }
 
+
+/* === Responsive Group Layout === */
 @media (max-width: 900px) {
     .group-main {
         margin-left: 0;
@@ -183,6 +202,7 @@
         grid-template-columns: 1fr;
     }
 }
+
 
 /* join requests */
 .pending-request-item {
@@ -212,6 +232,8 @@
         color: var(--btn-primary);
     }
 
+
+/* === Admin Member Search === */
 .admin-search-box {
     margin-bottom: 10px;
 }
@@ -237,6 +259,8 @@
         color: var(--btn-primary);
     }
 
+
+/* === Member Management Buttons === */
 .group-remove-member-btn {
     position: static;
     top: auto;
