@@ -426,7 +426,7 @@ export const deletePost = async (req, res, next) => {
         if (!post) return res.status(404).json({ success: false, error: "Post not found" });
 
         // check ownership on the server side - return 403 if the user is not the owner
-        if (post.author.toLowerCase() !== req.user.username.toLowerCase()) {
+        if (post.author.toLowerCase() !== req.session.user.username.toLowerCase()) {
             return res.status(403).json({ success: false, error: "403 Forbidden: You are not authorized to delete this post" });
         }
 
